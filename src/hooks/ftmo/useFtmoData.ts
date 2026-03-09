@@ -6,6 +6,7 @@ import { calcFtmoScore } from '@/lib/ftmo/scoring';
 import { calculateLotSize } from '@/lib/ftmo/risk';
 import { MACRO_EVENTS } from '@/lib/ftmo/constants';
 import { fmtCD } from '@/lib/format';
+import { computeTradableToday, type TradableInstrument } from '@/lib/ftmo/tradableToday';
 
 interface RawData {
   [key: string]: { candles: YahooCandle[]; price: number; change24h: number };
@@ -28,6 +29,7 @@ interface FtmoDataReturn {
   currencyStrength: CurrencyStrength[];
   score: FtmoScoreResult;
   trades: FtmoTrade[];
+  tradableToday: TradableInstrument[];
   // VIX/DXY
   vix: number;
   dxyPrice: number;
@@ -193,9 +195,17 @@ export function useFtmoData(): FtmoDataReturn {
 
   trades.sort((a, b) => b.confidence - a.confidence);
 
+  // Tradable Today
+  const tradableToday = computeTradableToday(
+    { asianRange, scalp, londonBOEUR, londonBOGBP, meanRevEUR, meanRevEURGBP, orbNAS, orbUS30 },
+    vix,
+    nextEvent?.hoursLeft ?? 999,
+    nextEvent?.name ?? null,
+  );
+
   return {
     raw, instruments, asianRange, scalp, londonBOEUR, londonBOGBP,
     meanRevEUR, meanRevEURGBP, orbNAS, orbUS30, currencyStrength,
-    score, trades, vix, dxyPrice, dxyChange, yield10y, loading, countdown, latency, nextEvent,
+    score, trades, tradableToday, vix, dxyPrice, dxyChange, yield10y, loading, countdown, latency, nextEvent,
   };
 }

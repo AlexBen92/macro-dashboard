@@ -10,6 +10,7 @@ import CurrencyStrength from '@/components/ftmo/CurrencyStrength';
 import GoldOilPanel from '@/components/ftmo/GoldOilPanel';
 import SessionClock from '@/components/ftmo/SessionClock';
 import ScorePanel from '@/components/ftmo/ScorePanel';
+import TradableToday from '@/components/ftmo/TradableToday';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeLight(score: number, vix: number, sessionActive: boolean, eventHours: number): { light: TrafficLightStatus; verdict: string } {
@@ -46,6 +47,19 @@ export default function FtmoPage() {
         loading={ftmo.loading}
         latency={ftmo.latency}
       />
+
+      {/* Tradable Today */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="px-6 py-4 border-b border-[#1a1a30] bg-[#0a0a14]"
+      >
+        <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+          <div className="w-[6px] h-[6px] rounded-full bg-[#4ade80]" /> TRADABLE TODAY
+        </div>
+        <TradableToday instruments={ftmo.tradableToday} />
+      </motion.div>
 
       {/* Main grid: Flow Map (60%) + Strategy Panel (40%) */}
       <div className="grid grid-cols-[60fr_40fr] max-lg:grid-cols-1 min-h-[50vh]">
