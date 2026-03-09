@@ -29,14 +29,14 @@ export default function WhaleConsensus({
   const maxNot = coins[0]?.total || 1;
 
   return (
-    <div className="mb-4 p-3 bg-[#0c0c16] border border-[#1a1a30] rounded">
-      <div className="font-mono text-[0.65rem] text-[#556680] tracking-[1px] mb-2">
+    <div className="mb-5 p-4 bg-[#0c0c16] border border-[#1a1a30] rounded">
+      <div className="font-mono text-[0.75rem] text-[#556680] tracking-[1px] mb-2.5">
         {whaleCount} wallets, {positionCount} positions
       </div>
 
       {/* Long/Short bar */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="font-mono text-[0.65rem] min-w-[80px] text-right text-[#00e5ff]">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="font-mono text-[0.75rem] min-w-[100px] text-right text-[#00e5ff]">
           Long {fU(totalLong)} ({Math.round(longPct)}%)
         </span>
         <div className="relative flex-1 h-2.5 bg-[#08080f] rounded-full overflow-hidden flex">
@@ -53,24 +53,24 @@ export default function WhaleConsensus({
             className="h-full bg-gradient-to-l from-rose-600 to-rose-400"
           />
         </div>
-        <span className="font-mono text-[0.65rem] min-w-[80px] text-[#ff006e]">
+        <span className="font-mono text-[0.75rem] min-w-[100px] text-[#ff006e]">
           {fU(totalShort)} ({Math.round(shortPct)}%) Short
         </span>
       </div>
 
-      <div className="font-mono text-[0.8rem] font-bold text-center mb-2" style={{ color: total > 0 ? biasColor : '#556680' }}>
+      <div className="font-mono text-[1rem] font-bold text-center mb-3" style={{ color: total > 0 ? biasColor : '#556680' }}>
         {biasText}
       </div>
 
       {/* Top coins */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         {coins.map(c => {
           const dir = c.l > c.s ? 'LONG' : 'SHORT';
           const col = c.l > c.s ? '#00e5ff' : '#ff006e';
           return (
-            <div key={c.coin} className="flex items-center gap-2 font-mono text-[0.65rem]">
-              <span className="text-[#00e5ff] font-bold min-w-[36px]">{c.coin}</span>
-              <div className="flex-1 h-[5px] bg-[#08080f] rounded overflow-hidden">
+            <div key={c.coin} className="flex items-center gap-2 font-mono text-[0.78rem]">
+              <span className="text-[#00e5ff] font-bold min-w-[44px]">{c.coin}</span>
+              <div className="flex-1 h-[6px] bg-[#08080f] rounded overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${(c.total / maxNot) * 100}%` }}
@@ -79,7 +79,7 @@ export default function WhaleConsensus({
                   style={{ background: col }}
                 />
               </div>
-              <span className="text-[0.6rem] min-w-[140px] text-right" style={{ color: col }}>
+              <span className="text-[0.72rem] min-w-[150px] text-right" style={{ color: col }}>
                 {c.n} whales {dir} {fU(c.total)}
               </span>
             </div>

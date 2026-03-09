@@ -32,20 +32,20 @@ export default function FtmoTradeCard({ trade, index }: { trade: FtmoTrade; inde
         style={{ background: `linear-gradient(90deg, ${accentColor}, #00e5ff)` }}
       />
 
-      <div className="p-3">
+      <div className="p-4">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-1.5">
-          <span className="font-mono text-[1rem] font-bold tracking-[1px]" style={{ color: accentColor }}>
+        <div className="flex items-center gap-2.5 mb-2">
+          <span className="font-mono text-[1.2rem] font-bold tracking-[2px]" style={{ color: accentColor }}>
             {icon} {trade.direction}
           </span>
-          <span className="font-mono text-[1.1rem] font-bold">{trade.instrument}</span>
-          <span className="ml-auto font-mono text-[0.55rem] text-[#556680] px-1.5 py-0.5 border border-[#1a1a30] rounded">
+          <span className="font-mono text-[1.5rem] font-bold">{trade.instrument}</span>
+          <span className="ml-auto font-mono text-[0.72rem] text-[#556680] px-2 py-1 border border-[#1a1a30] rounded">
             {trade.strategy}
           </span>
         </div>
 
         {/* Prices */}
-        <div className="font-mono text-[0.68rem] text-[#a0a0b8] mb-1 leading-relaxed">
+        <div className="font-mono text-[0.82rem] text-[#a0a0b8] mb-1.5 leading-relaxed">
           Entry: <span className="text-[#e8e8f0]">{fmtPrice(trade.instrument, trade.entry)}</span> |
           Stop: <span className="text-[#ff3355]">{fmtPrice(trade.instrument, trade.stop)}</span> |
           TP1: <span className="text-[#4ade80]">{fmtPrice(trade.instrument, trade.tp1)}</span>
@@ -53,19 +53,19 @@ export default function FtmoTradeCard({ trade, index }: { trade: FtmoTrade; inde
         </div>
 
         {/* Lot sizing */}
-        <div className="font-mono text-[0.65rem] font-semibold text-[#d4a017] mb-1.5">
+        <div className="font-mono text-[0.78rem] font-semibold text-[#d4a017] mb-2">
           Lot: {trade.lots.toFixed(2)} | Risque: ${trade.riskUsd} ({trade.riskPct.toFixed(2)}%) | R:R {trade.rrRatio.toFixed(1)}
         </div>
 
         {/* Reasons */}
-        <div className="flex flex-col gap-0.5 mb-2">
+        <div className="flex flex-col gap-1 mb-2.5">
           {trade.reasons.map((r, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.12 + 0.1 * i + 0.4 }}
-              className="font-mono text-[0.6rem] text-[#a0a0b8] flex items-center gap-1"
+              className="font-mono text-[0.75rem] text-[#a0a0b8] flex items-center gap-1.5"
             >
               <span className="text-[#4ade80] font-bold">✓</span> {r}
             </motion.div>
@@ -73,9 +73,9 @@ export default function FtmoTradeCard({ trade, index }: { trade: FtmoTrade; inde
         </div>
 
         {/* Confidence dots */}
-        <div className="flex gap-0.5">
+        <div className="flex gap-1">
           {[0, 1, 2, 3, 4].map(i => (
-            <div key={i} className={`w-3 h-1.5 rounded-sm ${i < trade.confidence ? 'bg-[#d4a017]' : 'bg-[#1a1a30]'}`} />
+            <div key={i} className={`w-4 h-2 rounded-sm ${i < trade.confidence ? 'bg-[#d4a017]' : 'bg-[#1a1a30]'}`} />
           ))}
         </div>
       </div>

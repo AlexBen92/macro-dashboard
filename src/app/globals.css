@@ -5,18 +5,21 @@
   --bg2: #0c0c16;
   --bg3: #10101c;
   --border: #1a1a30;
-  --cyan: #00e5ff;
+  --bull: #4ade80;
+  --bear: #ff3355;
+  --caution: #ffaa00;
+  --accent: #00e5ff;
+  --gold: #d4a017;
   --mag: #ff006e;
-  --green: #4ade80;
-  --red: #ff3355;
-  --yellow: #ffaa00;
+  --info: #4488ff;
+  --purple: #aa66ff;
   --text: #e8e8f0;
   --dim: #a0a0b8;
   --muted: #556680;
 }
 
 html {
-  font-size: 13px;
+  font-size: 16px;
 }
 
 body {
@@ -33,9 +36,9 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #2a2a3e; }
 
 /* Glow effects */
-.glow-cyan { box-shadow: 0 0 20px rgba(0, 229, 255, 0.15); }
-.glow-magenta { box-shadow: 0 0 20px rgba(255, 0, 110, 0.15); }
-.glow-green { box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); }
+.glow-bull { box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); }
+.glow-accent { box-shadow: 0 0 20px rgba(0, 229, 255, 0.15); }
+.glow-gold { box-shadow: 0 0 20px rgba(212, 160, 23, 0.15); }
 
 /* Pulse animation */
 @keyframes pulse-glow {

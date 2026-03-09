@@ -22,7 +22,7 @@ function Collapsible({ title, children }: { title: string; children: React.React
     <div className="mb-3">
       <button
         onClick={() => setOpen(!open)}
-        className="font-mono text-[0.6rem] text-[#556680] tracking-[1px] cursor-pointer px-2 py-1.5 bg-[#10101c] border border-[#1a1a30] rounded-[3px] w-full text-left flex justify-between hover:border-[#00e5ff] hover:text-[#00e5ff] transition-colors"
+        className="font-mono text-[0.72rem] text-[#556680] tracking-[2px] cursor-pointer px-3 py-2 bg-[#10101c] border border-[#1a1a30] rounded w-full text-left flex justify-between hover:border-[#00e5ff] hover:text-[#00e5ff] transition-colors"
       >
         {title} <span>{open ? '▲' : '▼'}</span>
       </button>
@@ -40,19 +40,19 @@ function Collapsible({ title, children }: { title: string; children: React.React
 
 export default function ContextPanel({ data, score, whales, positions, whaleLoading }: ContextPanelProps) {
   return (
-    <div className="p-4 overflow-y-auto bg-[#0c0c16] h-full">
-      <div className="font-mono text-[0.65rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-        <div className="w-[5px] h-[5px] rounded-full bg-[#4488ff]" /> MACRO SNAPSHOT
+    <div className="p-6 overflow-y-auto bg-[#0c0c16] h-full">
+      <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+        <div className="w-[6px] h-[6px] rounded-full bg-[#4488ff]" /> MACRO SNAPSHOT
       </div>
       <MacroBlock data={data} />
 
-      <div className="font-mono text-[0.65rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-        <div className="w-[5px] h-[5px] rounded-full bg-[#4ade80]" /> FUNDING SNAPSHOT
+      <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+        <div className="w-[6px] h-[6px] rounded-full bg-[#4ade80]" /> FUNDING SNAPSHOT
       </div>
       <FundingSnapshot data={data} />
 
-      <div className="font-mono text-[0.65rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-        <div className="w-[5px] h-[5px] rounded-full bg-[#aa66ff]" /> WHALE LEADERBOARD
+      <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+        <div className="w-[6px] h-[6px] rounded-full bg-[#aa66ff]" /> WHALE LEADERBOARD
       </div>
       <WhaleLeaderboard whales={whales} loading={whaleLoading} />
 
@@ -61,7 +61,7 @@ export default function ContextPanel({ data, score, whales, positions, whaleLoad
       </Collapsible>
 
       <Collapsible title="SCORE BREAKDOWN">
-        {score ? <ScoreBreakdown breakdown={score.bd} /> : <div className="font-mono text-[0.6rem] text-[#556680]">Loading...</div>}
+        {score ? <ScoreBreakdown breakdown={score.bd} /> : <div className="font-mono text-[0.72rem] text-[#556680]">Loading...</div>}
       </Collapsible>
     </div>
   );

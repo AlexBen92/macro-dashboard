@@ -87,7 +87,7 @@ export default function Home() {
         apiStatus={apiStatus}
       />
 
-      <div className="grid grid-cols-[65fr_35fr] min-h-[calc(100vh-76px)] max-md:grid-cols-1">
+      <div className="grid grid-cols-[65fr_35fr] min-h-[calc(100vh-88px)] max-md:grid-cols-1">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -120,10 +120,10 @@ export default function Home() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center gap-2 px-4 py-0.5 border-t border-[#1a1a30] bg-[#0c0c16] font-mono text-[0.52rem] text-[#556680] flex-wrap">
+      <div className="flex items-center gap-3 px-6 py-1 border-t border-[#1a1a30] bg-[#0c0c16] font-mono text-[0.62rem] text-[#556680] flex-wrap">
         {Object.entries(apiStatus).map(([k, v]) => (
-          <span key={k} className="flex items-center gap-0.5">
-            <span className={`w-1 h-1 rounded-full inline-block ${v === 'ok' ? 'bg-[#4ade80]' : v === 'er' ? 'bg-[#ff3355]' : 'bg-[#ffaa00]'}`} />
+          <span key={k} className="flex items-center gap-1">
+            <span className={`w-1.5 h-1.5 rounded-full inline-block ${v === 'ok' ? 'bg-[#4ade80]' : v === 'er' ? 'bg-[#ff3355]' : 'bg-[#ffaa00]'}`} />
             {k.toUpperCase()}
           </span>
         ))}

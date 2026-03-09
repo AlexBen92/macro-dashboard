@@ -29,15 +29,15 @@ export default function GoldOilPanel({ goldCandles, oilCandles, brentCandles, go
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {/* Gold */}
-      <div className="border-b border-[#1a1a30] pb-2">
-        <div className="flex items-center gap-2 font-mono text-[0.65rem] mb-1">
+      <div className="border-b border-[#1a1a30] pb-3">
+        <div className="flex items-center gap-2.5 font-mono text-[0.82rem] mb-1.5">
           <span className="text-[#d4a017] font-bold">🥇 GOLD</span>
-          <span className="text-[#e8e8f0] font-bold">${goldPrice.toFixed(1)}</span>
-          <div className="flex-1"><Sparkline data={goldCandles.slice(-24).map(c => c.c)} color="#d4a017" width={60} height={16} /></div>
+          <span className="text-[#e8e8f0] font-bold text-[1.1rem]">${goldPrice.toFixed(1)}</span>
+          <div className="flex-1"><Sparkline data={goldCandles.slice(-24).map(c => c.c)} color="#d4a017" width={80} height={20} /></div>
         </div>
-        <div className="font-mono text-[0.55rem] text-[#a0a0b8] space-y-0.5">
+        <div className="font-mono text-[0.72rem] text-[#a0a0b8] space-y-0.5">
           <div>ATR(14) H1: <span className="text-[#e8e8f0]">${goldATR.toFixed(2)}</span></div>
           {pp > 0 && (
             <div>
@@ -51,16 +51,16 @@ export default function GoldOilPanel({ goldCandles, oilCandles, brentCandles, go
 
       {/* Oil */}
       <div>
-        <div className="flex items-center gap-2 font-mono text-[0.65rem] mb-1">
+        <div className="flex items-center gap-2.5 font-mono text-[0.82rem] mb-1.5">
           <span className="text-[#ff8800] font-bold">🛢 WTI</span>
-          <span className="text-[#e8e8f0] font-bold">${oilPrice.toFixed(2)}</span>
+          <span className="text-[#e8e8f0] font-bold text-[1.1rem]">${oilPrice.toFixed(2)}</span>
           <span className="text-[#556680]">Brent ${brentPrice.toFixed(2)}</span>
         </div>
-        <div className="font-mono text-[0.55rem] text-[#a0a0b8] space-y-0.5">
+        <div className="font-mono text-[0.72rem] text-[#a0a0b8] space-y-0.5">
           <div>ATR(14) H1: <span className="text-[#e8e8f0]">${oilATR.toFixed(2)}</span></div>
           <div>Brent-WTI spread: <span className="text-[#e8e8f0]">${spread.toFixed(2)}</span></div>
         </div>
-        <div className="mt-1"><Sparkline data={oilCandles.slice(-24).map(c => c.c)} color="#ff8800" width={80} height={16} /></div>
+        <div className="mt-1.5"><Sparkline data={oilCandles.slice(-24).map(c => c.c)} color="#ff8800" width={100} height={20} /></div>
       </div>
     </div>
   );

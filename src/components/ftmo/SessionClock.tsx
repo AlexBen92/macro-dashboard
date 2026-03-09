@@ -31,10 +31,10 @@ export default function SessionClock() {
   const pctNow = (hourUTC / 24) * 100;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {/* Current time */}
-      <div className="flex items-center justify-between font-mono text-[0.65rem]">
-        <span className="text-[#e8e8f0] font-bold">
+      <div className="flex items-center justify-between font-mono text-[0.82rem]">
+        <span className="text-[#e8e8f0] font-bold text-[1rem]">
           {now.toUTCString().slice(17, 25)} UTC
         </span>
         <span className="text-[#556680]">
@@ -43,7 +43,7 @@ export default function SessionClock() {
       </div>
 
       {/* 24h timeline */}
-      <div className="relative h-4 bg-[#08080f] rounded overflow-hidden">
+      <div className="relative h-5 bg-[#08080f] rounded overflow-hidden">
         {SESSIONS.map((s, i) => (
           <div
             key={i}
@@ -69,32 +69,32 @@ export default function SessionClock() {
           />
         ))}
       </div>
-      <div className="flex justify-between font-mono text-[0.45rem] text-[#556680]">
+      <div className="flex justify-between font-mono text-[0.58rem] text-[#556680]">
         <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
       </div>
 
       {/* Active sessions */}
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {activeSessions.length > 0 ? (
           activeSessions.map((s, i) => (
-            <div key={i} className="flex items-center gap-1.5 font-mono text-[0.58rem]">
-              <div className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+            <div key={i} className="flex items-center gap-2 font-mono text-[0.75rem]">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />
               <span style={{ color: s.color }}>{s.name}</span>
               <span className="text-[#4ade80]">✓ active</span>
             </div>
           ))
         ) : (
-          <div className="font-mono text-[0.58rem] text-[#ff3355]">Hors session — prudence</div>
+          <div className="font-mono text-[0.75rem] text-[#ff3355]">Hors session — prudence</div>
         )}
       </div>
 
       {/* Active strategy windows */}
       {activeStrategies.length > 0 && (
-        <div className="border-t border-[#1a1a30] pt-1 space-y-0.5">
-          <div className="font-mono text-[0.5rem] text-[#556680] tracking-wider">FENETRES ACTIVES</div>
+        <div className="border-t border-[#1a1a30] pt-1.5 space-y-1">
+          <div className="font-mono text-[0.62rem] text-[#556680] tracking-wider">FENETRES ACTIVES</div>
           {activeStrategies.map((s, i) => (
-            <div key={i} className="flex items-center gap-1.5 font-mono text-[0.55rem]">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+            <div key={i} className="flex items-center gap-2 font-mono text-[0.72rem]">
+              <div className="w-2 h-2 rounded-full" style={{ background: s.color }} />
               <span style={{ color: s.color }}>{s.name}</span>
             </div>
           ))}
@@ -103,7 +103,7 @@ export default function SessionClock() {
 
       {/* Next event */}
       {nextEvent && (
-        <div className="border-t border-[#1a1a30] pt-1 font-mono text-[0.58rem]">
+        <div className="border-t border-[#1a1a30] pt-1.5 font-mono text-[0.75rem]">
           <span className="text-[#556680]">Prochain: </span>
           <span className={nextEvent.ms < 86400000 ? 'text-[#ff3355]' : nextEvent.ms < 259200000 ? 'text-[#ffaa00]' : 'text-[#4ade80]'}>
             {nextEvent.name} {fmtCD(nextEvent.ms)}

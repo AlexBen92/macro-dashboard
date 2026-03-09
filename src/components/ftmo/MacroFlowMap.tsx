@@ -107,15 +107,15 @@ export default function MacroFlowMap({
                 transition={{ duration: 1.5, repeat: node.pulseIntensity > 0.5 ? Infinity : 0 }}
               />
               {/* Label */}
-              <text x={node.x} y={node.y - 5} textAnchor="middle" fill="#e8e8f0" fontSize="9" fontFamily="monospace" fontWeight="700">
+              <text x={node.x} y={node.y - 6} textAnchor="middle" fill="#e8e8f0" fontSize="11" fontFamily="monospace" fontWeight="700">
                 {node.label}
               </text>
               {/* Price */}
-              <text x={node.x} y={node.y + 6} textAnchor="middle" fill={changeColor} fontSize="7.5" fontFamily="monospace" fontWeight="600">
+              <text x={node.x} y={node.y + 7} textAnchor="middle" fill={changeColor} fontSize="9.5" fontFamily="monospace" fontWeight="600">
                 {formatPrice(node.id, node.price)}
               </text>
               {/* Change */}
-              <text x={node.x} y={node.y + 15} textAnchor="middle" fill={changeColor} fontSize="6" fontFamily="monospace" opacity={0.8}>
+              <text x={node.x} y={node.y + 18} textAnchor="middle" fill={changeColor} fontSize="7.5" fontFamily="monospace" opacity={0.8}>
                 {node.change24h >= 0 ? '+' : ''}{node.change24h.toFixed(2)}%
               </text>
             </g>
@@ -125,13 +125,13 @@ export default function MacroFlowMap({
 
       {/* Correlation break alerts */}
       {alerts.length > 0 && (
-        <div className="mt-2 flex flex-col gap-1">
+        <div className="mt-3 flex flex-col gap-1.5">
           {alerts.slice(0, 3).map((a, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="font-mono text-[0.62rem] px-2 py-1 rounded bg-[#ffaa00]/5 border-l-2 border-[#ffaa00] text-[#ffaa00]"
+              className="font-mono text-[0.78rem] px-3 py-1.5 rounded bg-[#ffaa00]/5 border-l-2 border-[#ffaa00] text-[#ffaa00]"
             >
               ⚠ {a}
             </motion.div>

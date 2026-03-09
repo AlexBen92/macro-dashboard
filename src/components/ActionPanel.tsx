@@ -19,12 +19,12 @@ export default function ActionPanel({
   trades, alerts, whaleCount, positions, totalLong, totalShort, whaleByCoin,
 }: ActionPanelProps) {
   return (
-    <div className="p-4 overflow-y-auto border-r border-[#1a1a30] h-full">
-      <div className="font-mono text-[0.65rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-        <div className="w-[5px] h-[5px] rounded-full bg-[#00e5ff]" /> TOP TRADES
+    <div className="p-6 overflow-y-auto border-r border-[#1a1a30] h-full">
+      <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+        <div className="w-[6px] h-[6px] rounded-full bg-[#00e5ff]" /> TOP TRADES
       </div>
 
-      <div className="flex flex-col gap-2.5 mb-5">
+      <div className="flex flex-col gap-3 mb-6">
         <AnimatePresence mode="wait">
           {trades.length === 0 ? (
             <motion.div
@@ -35,11 +35,11 @@ export default function ActionPanel({
               <motion.div
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="text-[1.4rem] font-bold text-[#ff3355] font-mono tracking-[2px] mb-1.5"
+                className="text-[1.6rem] font-bold text-[#ff3355] font-mono tracking-[3px] mb-2"
               >
                 PAS DE SETUP — CASH
               </motion.div>
-              <div className="font-mono text-[0.65rem] text-[#556680]">
+              <div className="font-mono text-[0.85rem] text-[#556680]">
                 Aucun coin ne passe tous les filtres
               </div>
             </motion.div>
@@ -49,8 +49,8 @@ export default function ActionPanel({
         </AnimatePresence>
       </div>
 
-      <div className="font-mono text-[0.65rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-        <div className="w-[5px] h-[5px] rounded-full bg-[#ff006e]" /> WHALE CONSENSUS
+      <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+        <div className="w-[6px] h-[6px] rounded-full bg-[#ff006e]" /> WHALE CONSENSUS
       </div>
       <WhaleConsensus
         whaleCount={whaleCount}
@@ -60,8 +60,8 @@ export default function ActionPanel({
         whaleByCoin={whaleByCoin}
       />
 
-      <div className="font-mono text-[0.65rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-        <div className="w-[5px] h-[5px] rounded-full bg-[#ffaa00]" /> ACTIVE ALERTS
+      <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+        <div className="w-[6px] h-[6px] rounded-full bg-[#ffaa00]" /> ACTIVE ALERTS
       </div>
       <Alerts alerts={alerts} />
     </div>

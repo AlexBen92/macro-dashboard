@@ -41,7 +41,7 @@ export default function TrafficLight({ status }: { status: TrafficLightStatus })
           ? { scale: { type: 'spring', stiffness: 300, damping: 20 }, boxShadow: { repeat: Infinity, duration: 1.5 } }
           : { type: 'spring', stiffness: 300, damping: 20 }
       }
-      className="w-[52px] h-[52px] rounded-full flex items-center justify-center text-[1.6rem] font-bold shrink-0"
+      className="w-[60px] h-[60px] rounded-full flex items-center justify-center text-[1.8rem] font-bold shrink-0"
       style={{ background: c.bg, border: `3px solid ${c.border}`, color: c.text }}
     >
       ●

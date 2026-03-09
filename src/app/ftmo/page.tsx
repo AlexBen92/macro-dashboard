@@ -53,10 +53,10 @@ export default function FtmoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="p-4 border-r border-[#1a1a30]"
+          className="p-6 border-r border-[#1a1a30]"
         >
-          <div className="font-mono text-[0.6rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-            <div className="w-[5px] h-[5px] rounded-full bg-[#d4a017]" /> MACRO FLOW MAP
+          <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#d4a017]" /> MACRO FLOW MAP
           </div>
           <MacroFlowMap nodes={nodes} edges={edges} alerts={alerts} />
         </motion.div>
@@ -65,10 +65,10 @@ export default function FtmoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="p-4 overflow-y-auto max-h-[60vh] bg-[#0c0c16]"
+          className="p-6 overflow-y-auto max-h-[60vh] bg-[#0c0c16]"
         >
-          <div className="font-mono text-[0.6rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-            <div className="w-[5px] h-[5px] rounded-full bg-[#00e5ff]" /> STRATEGIES
+          <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#00e5ff]" /> STRATEGIES
           </div>
           <StrategyPanel
             asianRange={ftmo.asianRange}
@@ -84,13 +84,13 @@ export default function FtmoPage() {
       </div>
 
       {/* Trade Cards */}
-      <div className="px-4 py-3 border-t border-[#1a1a30]">
-        <div className="font-mono text-[0.6rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-          <div className="w-[5px] h-[5px] rounded-full bg-[#4ade80]" /> TOP TRADES
+      <div className="px-6 py-4 border-t border-[#1a1a30]">
+        <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+          <div className="w-[6px] h-[6px] rounded-full bg-[#4ade80]" /> TOP TRADES
         </div>
         <AnimatePresence>
           {ftmo.trades.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {ftmo.trades.slice(0, 3).map((t, i) => (
                 <FtmoTradeCard key={t.instrument + t.direction} trade={t} index={i} />
               ))}
@@ -99,16 +99,16 @@ export default function FtmoPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-8 border-2 border-dashed border-[#1a1a30] rounded"
+              className="text-center py-10 border-2 border-dashed border-[#1a1a30] rounded"
             >
               <motion.div
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="font-mono text-[1.1rem] font-bold text-[#ff3355] tracking-[2px] mb-1"
+                className="font-mono text-[1.4rem] font-bold text-[#ff3355] tracking-[3px] mb-2"
               >
                 PAS DE SETUP — CASH
               </motion.div>
-              <div className="font-mono text-[0.6rem] text-[#556680]">Aucune strategie ne genere de signal</div>
+              <div className="font-mono text-[0.82rem] text-[#556680]">Aucune strategie ne genere de signal</div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -120,10 +120,10 @@ export default function FtmoPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="p-4 border-r border-[#1a1a30]"
+          className="p-6 border-r border-[#1a1a30]"
         >
-          <div className="font-mono text-[0.6rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-            <div className="w-[5px] h-[5px] rounded-full bg-[#2980b9]" /> CURRENCY STRENGTH
+          <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#2980b9]" /> CURRENCY STRENGTH
           </div>
           <CurrencyStrength data={ftmo.currencyStrength} />
         </motion.div>
@@ -132,10 +132,10 @@ export default function FtmoPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="p-4 border-r border-[#1a1a30]"
+          className="p-6 border-r border-[#1a1a30]"
         >
-          <div className="font-mono text-[0.6rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-            <div className="w-[5px] h-[5px] rounded-full bg-[#d4a017]" /> GOLD / OIL
+          <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#d4a017]" /> GOLD / OIL
           </div>
           <GoldOilPanel
             goldCandles={ftmo.raw['XAUUSD_1h']?.candles ?? []}
@@ -151,10 +151,10 @@ export default function FtmoPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="p-4"
+          className="p-6"
         >
-          <div className="font-mono text-[0.6rem] text-[#556680] tracking-[2px] uppercase mb-2 flex items-center gap-1.5">
-            <div className="w-[5px] h-[5px] rounded-full bg-[#aa66ff]" /> SESSION / CALENDAR
+          <div className="font-mono text-[0.72rem] text-[#556680] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#aa66ff]" /> SESSION / CALENDAR
           </div>
           <SessionClock />
 
@@ -166,7 +166,7 @@ export default function FtmoPage() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center gap-2 px-4 py-0.5 border-t border-[#1a1a30] bg-[#0c0c16] font-mono text-[0.5rem] text-[#556680]">
+      <div className="flex items-center gap-3 px-6 py-1 border-t border-[#1a1a30] bg-[#0c0c16] font-mono text-[0.62rem] text-[#556680]">
         <span>VIX: <span className={ftmo.vix > 25 ? 'text-[#ff3355]' : 'text-[#4ade80]'}>{ftmo.vix.toFixed(1)}</span></span>
         <span>DXY: <span className="text-[#e8e8f0]">{ftmo.dxyPrice.toFixed(1)}</span></span>
         <span>10Y: <span className="text-[#e8e8f0]">{ftmo.yield10y.toFixed(2)}%</span></span>

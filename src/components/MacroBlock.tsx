@@ -4,7 +4,7 @@ import { fU, fPct, clamp, colorForFng } from '@/lib/format';
 import MiniBar from './MiniBar';
 
 export default function MacroBlock({ data }: { data: MarketData | null }) {
-  if (!data) return <div className="font-mono text-[0.65rem] text-[#556680] py-2">Loading macro...</div>;
+  if (!data) return <div className="font-mono text-[0.82rem] text-[#556680] py-3">Loading macro...</div>;
 
   interface Row { l: string; v: string; t: string; col: string; pct: number }
   const rows: Row[] = [];
@@ -45,12 +45,12 @@ export default function MacroBlock({ data }: { data: MarketData | null }) {
   }
 
   return (
-    <div className="mb-3.5">
+    <div className="mb-4">
       {rows.map((r, i) => (
-        <div key={i} className="flex items-center gap-1.5 py-1 border-b border-[#1a1a30]/50 font-mono text-[0.7rem]">
-          <span className="text-[#556680] min-w-[60px] text-[0.6rem] tracking-[1px]">{r.l}</span>
-          <span className="font-bold min-w-[60px]" style={{ color: r.col }}>{r.v}</span>
-          <span className="text-[0.58rem] text-[#a0a0b8] min-w-[80px]">{r.t}</span>
+        <div key={i} className="flex items-center gap-2 py-1.5 border-b border-[#1a1a30]/50 font-mono text-[0.85rem]">
+          <span className="text-[#556680] min-w-[70px] text-[0.72rem] tracking-[1px]">{r.l}</span>
+          <span className="font-bold min-w-[70px]" style={{ color: r.col }}>{r.v}</span>
+          <span className="text-[0.72rem] text-[#a0a0b8] min-w-[90px]">{r.t}</span>
           <div className="flex-1">
             <MiniBar value={r.pct} color={r.col} />
           </div>

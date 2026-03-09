@@ -30,7 +30,7 @@ export default function StrategyPanel({
   orbUS30: ORBState;
 }) {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
       {/* 1. Gold Asian Range */}
       <StrategyCard icon="🥇" title="GOLD ASIAN RANGE" type="manual" status={asianRange.status}>
         <Row label="Range" value={asianRange.rangeHigh > 0 ? `$${asianRange.rangeLow.toFixed(0)} — $${asianRange.rangeHigh.toFixed(0)} ($${asianRange.rangeWidth.toFixed(0)})` : 'Forming...'} />
@@ -44,7 +44,7 @@ export default function StrategyPanel({
             {asianRange.tp1 && <Row label="TP1 (1:2)" value={`$${asianRange.tp1.toFixed(0)}`} color="#4ade80" />}
           </>
         )}
-        <div className="text-[#556680] text-[0.55rem] mt-1">⏰ Fenetre: 07:00-12:00 GMT</div>
+        <div className="text-[#556680] text-[0.68rem] mt-1.5">⏰ Fenetre: 07:00-12:00 GMT</div>
       </StrategyCard>
 
       {/* 2. Gold Scalp */}
@@ -60,7 +60,7 @@ export default function StrategyPanel({
             <Row label="ATR(14) M15" value={`$${scalp.atrCurrent.toFixed(2)} (pctile ${scalp.atrPercentile}%)`} />
           </>
         )}
-        <div className="text-[#556680] text-[0.55rem] mt-1">⏰ 13:00-16:30 GMT</div>
+        <div className="text-[#556680] text-[0.68rem] mt-1.5">⏰ 13:00-16:30 GMT</div>
       </StrategyCard>
 
       {/* 3. London BO EUR */}
@@ -106,7 +106,7 @@ export default function StrategyPanel({
             {orbNAS.breakoutDirection !== 'NONE' && <Row label="Breakout" value={orbNAS.breakoutDirection} color={orbNAS.breakoutDirection === 'ABOVE' ? '#4ade80' : '#ff3355'} />}
           </>
         )}
-        <div className="text-[#556680] text-[0.55rem] mt-1">⏰ 14:30-16:30 GMT</div>
+        <div className="text-[#556680] text-[0.68rem] mt-1.5">⏰ 14:30-16:30 GMT</div>
       </StrategyCard>
 
       {/* 5b. ORB US30 */}

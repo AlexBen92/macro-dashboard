@@ -35,53 +35,53 @@ export default function TradeCard({ trade, index }: { trade: TradeCandidate; ind
         style={{ background: `linear-gradient(90deg, ${accentColor}, #4ade80)` }}
       />
 
-      <div className="p-4">
+      <div className="p-5">
         {/* Header */}
-        <div className="flex items-center gap-2.5 mb-2">
-          <span className="font-mono text-[1.1rem] font-bold tracking-[2px]" style={{ color: accentColor }}>
+        <div className="flex items-center gap-3 mb-3">
+          <span className="font-mono text-[1.2rem] font-bold tracking-[2px]" style={{ color: accentColor }}>
             {icon} {trade.dir}
           </span>
-          <span className="font-mono text-[1.3rem] font-bold">{trade.coin}</span>
-          <span className="ml-auto font-mono text-[0.7rem] text-[#a0a0b8] px-2 py-0.5 border border-[#1a1a30] rounded-full">
+          <span className="font-mono text-[1.6rem] font-bold">{trade.coin}</span>
+          <span className="ml-auto font-mono text-[0.85rem] text-[#a0a0b8] px-3 py-1 border border-[#1a1a30] rounded-full">
             Score {trade.score.toFixed(1)}
           </span>
         </div>
 
         {/* Prices */}
-        <div className="font-mono text-[0.78rem] text-[#a0a0b8] mb-1.5 leading-relaxed">
+        <div className="font-mono text-[0.9rem] text-[#a0a0b8] mb-2 leading-relaxed">
           <span className="text-[#e8e8f0]">{fP(trade.price)}</span> → Entry VWAP <span className="text-[#e8e8f0]">{fP(trade.vwap)}</span>
           <br />
           {trade.dir.includes('LONG') ? 'Stop sous' : 'Stop au-dessus'} TWAP <span className="text-[#e8e8f0]">{fP(trade.twap)}</span>
         </div>
 
         {/* Sizing */}
-        <div className="font-mono text-[0.7rem] font-semibold text-[#ffaa00] mb-2">
+        <div className="font-mono text-[0.85rem] font-semibold text-[#ffaa00] mb-2.5">
           Taille : {trade.sizing}
         </div>
 
         {/* Reasons */}
-        <div className="flex flex-col gap-1 mb-2.5">
+        <div className="flex flex-col gap-1.5 mb-3">
           {trade.reasons.map((reason, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.15 + 0.1 * i + 0.4 }}
-              className="font-mono text-[0.68rem] text-[#a0a0b8] flex items-center gap-1.5"
+              className="font-mono text-[0.82rem] text-[#a0a0b8] flex items-center gap-2"
             >
-              <span className="text-[#4ade80] font-bold text-[0.75rem]">✓</span> {reason}
+              <span className="text-[#4ade80] font-bold text-[0.9rem]">✓</span> {reason}
             </motion.div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 font-mono text-[0.65rem] text-[#556680] pt-2 border-t border-[#1a1a30] flex-wrap">
+        <div className="flex gap-4 font-mono text-[0.75rem] text-[#556680] pt-3 border-t border-[#1a1a30] flex-wrap">
           <span>VaR 95%: <b className="text-[#e8e8f0]">{fPct(trade.var95)}</b></span>
           <span>Funding: <b className="text-[#e8e8f0]">{fF(trade.funding)}</b></span>
           <span>Whales: <b className="text-[#e8e8f0]">{trade.whaleCount}</b></span>
-          <div className="flex gap-0.5 items-center ml-auto">
+          <div className="flex gap-1 items-center ml-auto">
             {[0, 1, 2, 3, 4].map(i => (
-              <div key={i} className={`w-3 h-1.5 rounded-sm ${i < conf ? 'bg-[#4ade80]' : 'bg-[#1a1a30]'}`} />
+              <div key={i} className={`w-4 h-2 rounded-sm ${i < conf ? 'bg-[#4ade80]' : 'bg-[#1a1a30]'}`} />
             ))}
           </div>
         </div>

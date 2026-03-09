@@ -16,10 +16,10 @@ const bgColors: Record<string, string> = {
 
 export default function Alerts({ alerts }: { alerts: AlertItem[] }) {
   return (
-    <div className="flex flex-col gap-1 mb-2.5">
+    <div className="flex flex-col gap-1.5 mb-3">
       <AnimatePresence>
         {alerts.length === 0 ? (
-          <div className="font-mono text-[0.65rem] text-[#556680] py-1.5">No active alerts</div>
+          <div className="font-mono text-[0.82rem] text-[#556680] py-2">No active alerts</div>
         ) : (
           alerts.map((a, i) => (
             <motion.div
@@ -28,7 +28,7 @@ export default function Alerts({ alerts }: { alerts: AlertItem[] }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ delay: i * 0.1 }}
-              className="font-mono text-[0.68rem] px-2.5 py-1.5 rounded-[3px] text-[#a0a0b8]"
+              className="font-mono text-[0.82rem] px-3 py-2 rounded text-[#a0a0b8]"
               style={{
                 borderLeft: `3px solid ${borderColors[a.t] || '#ffaa00'}`,
                 background: bgColors[a.t] || bgColors[''],
