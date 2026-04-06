@@ -2,9 +2,9 @@
 
 :root {
   --bg: #08080f;
-  --bg2: #0c0c16;
-  --bg3: #10101c;
-  --border: #1a1a30;
+  --bg2: #0e0e1a;
+  --bg3: #12121e;
+  --border: #1e1e32;
   --bull: #4ade80;
   --bear: #ff3355;
   --caution: #ffaa00;
@@ -13,9 +13,10 @@
   --mag: #ff006e;
   --info: #4488ff;
   --purple: #aa66ff;
-  --text: #e8e8f0;
-  --dim: #a0a0b8;
-  --muted: #556680;
+  --text: #eaeef4;
+  --dim: #a0a8b8;
+  --muted: #5a6070;
+  --label: #8890a0;
 }
 
 html {
@@ -31,8 +32,8 @@ body {
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #08080f; }
-::-webkit-scrollbar-thumb { background: #1a1a30; border-radius: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #2a2a3e; }
 
 /* Glow effects */
@@ -53,3 +54,31 @@ body {
 
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 .animate-flash { animation: flash 0.5s ease-out; }
+
+/* V4 — Vertical flow layout */
+.v4-container {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .v4-container {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+}
+
+/* Sticky decision bar backdrop */
+.decision-bar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(8, 8, 15, 0.85);
+  border-bottom: 1px solid var(--border);
+}

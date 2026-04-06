@@ -20,7 +20,9 @@ function SwapBadge({ value, isTriple }: { value: number; isTriple: boolean }) {
 }
 
 export default function TradableToday({ instruments }: { instruments: TradableInstrument[] }) {
-  const tradableCount = instruments.filter(i => i.tradable).length;
+  // Hide instruments with no assigned strategy
+  const visible = instruments.filter(i => i.strategyReady !== null && i.strategyStatus !== 'Pas de strategie');
+  const tradableCount = visible.filter(i => i.tradable).length;
   const isWednesday = instruments.some(i => i.isTripleSwap);
   const now = new Date();
   const dayName = now.toLocaleDateString('fr-FR', { weekday: 'long' });
@@ -47,7 +49,7 @@ export default function TradableToday({ instruments }: { instruments: TradableIn
       {/* Instrument list */}
       <div className="flex flex-col gap-2">
         <AnimatePresence>
-          {instruments.map((inst, i) => {
+          {visible.map((inst, i) => {
             const icon = inst.tradable ? STATUS_ICON.tradable : inst.sessionActive ? STATUS_ICON.blocked : STATUS_ICON.sleeping;
             const borderColor = inst.tradable
               ? inst.strategyReady ? '#4ade80' : '#00e5ff'

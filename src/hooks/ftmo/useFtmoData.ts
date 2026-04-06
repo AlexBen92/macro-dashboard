@@ -7,6 +7,7 @@ import { calculateLotSize } from '@/lib/ftmo/risk';
 import { MACRO_EVENTS } from '@/lib/ftmo/constants';
 import { fmtCD } from '@/lib/format';
 import { computeTradableToday, type TradableInstrument } from '@/lib/ftmo/tradableToday';
+import { computeFtmoSignals, type FtmoSignalSummary } from '@/lib/ftmo/signals-v3';
 
 interface RawData {
   [key: string]: { candles: YahooCandle[]; price: number; change24h: number };
@@ -30,6 +31,7 @@ interface FtmoDataReturn {
   score: FtmoScoreResult;
   trades: FtmoTrade[];
   tradableToday: TradableInstrument[];
+  ftmoSignals: FtmoSignalSummary;
   // VIX/DXY
   vix: number;
   dxyPrice: number;
@@ -203,9 +205,23 @@ export function useFtmoData(): FtmoDataReturn {
     nextEvent?.name ?? null,
   );
 
+  // V3 Evidence-Based Signals
+  const ftmoSignals = computeFtmoSignals({
+    goldH1,
+    dxyH1: dxyCandles,
+    oilH1: raw['OIL_1h']?.candles ?? [],
+    nas5m,
+    nasH1,
+    us305m,
+    vix,
+    yield10y,
+    nextEventHours: nextEvent?.hoursLeft ?? 999,
+    nextEventName: nextEvent?.name ?? null,
+  });
+
   return {
     raw, instruments, asianRange, scalp, londonBOEUR, londonBOGBP,
     meanRevEUR, meanRevEURGBP, orbNAS, orbUS30, currencyStrength,
-    score, trades, tradableToday, vix, dxyPrice, dxyChange, yield10y, loading, countdown, latency, nextEvent,
+    score, trades, tradableToday, ftmoSignals, vix, dxyPrice, dxyChange, yield10y, loading, countdown, latency, nextEvent,
   };
 }

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 export default function Nav() {
   const path = usePathname();
   const links = [
-    { href: '/', label: 'CRYPTO', color: '#00e5ff' },
+    { href: '/crypto', label: 'CRYPTO', color: '#00e5ff' },
     { href: '/ftmo', label: 'FTMO', color: '#d4a017' },
   ];
 

@@ -1,15 +1,17 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { MarketData, ScoreResult, CoinData } from '@/lib/types';
 import { fetchMarketData, fetchCoinCandles } from '@/lib/api-clients';
-import { calcScore } from '@/lib/scoring';
+import { calcScore, nextMacro } from '@/lib/scoring';
 import { calcReturns, calcSharpe, calcVaR95, calcVWAP, calcTWAP, classifySentiment } from '@/lib/quant';
 import { TOP_COINS, REFRESH_MS, WS_REFRESH_MS } from '@/lib/constants';
+import { computeCryptoSignals, type CryptoSignalSummary } from '@/lib/crypto-signals-v3';
 
 interface UseMarketDataReturn {
   data: MarketData | null;
   score: ScoreResult | null;
   coinData: Record<string, CoinData>;
+  cryptoSignals: CryptoSignalSummary | null;
   loading: boolean;
   error: string | null;
   countdown: number;
@@ -31,8 +33,10 @@ export function useMarketData(
   const [apiStatus, setApiStatus] = useState<Record<string, string>>({ fng: 'ld', cg: 'ld', bin: 'ld', hl: 'ld', cbbi: 'ld', vix: 'ld' });
   const [latency, setLatency] = useState(0);
 
+  const [cryptoSignals, setCryptoSignals] = useState<CryptoSignalSummary | null>(null);
   const priceHistRef = useRef<number[]>([]);
   const fngHistRef = useRef<number[]>([]);
+  const candleStoreRef = useRef<Record<string, { o: number; h: number; l: number; c: number; v: number }[]>>({});
 
   const fetchMain = useCallback(async () => {
     const t0 = performance.now();
@@ -114,6 +118,7 @@ export function useMarketData(
         return;
       }
       const candles = r.value;
+      candleStoreRef.current[coin] = candles;
       const ret = calcReturns(candles);
       const sharpe = calcSharpe(ret);
       const var95 = calcVaR95(ret);
@@ -138,7 +143,45 @@ export function useMarketData(
       };
     });
     setCoinData(newCoinData);
-  }, [whaleByCoin]);
+
+    // Compute crypto V3 signals using BTC candles as primary
+    const btcCandles = candleStoreRef.current['BTC'];
+    if (btcCandles && btcCandles.length >= 24) {
+      const h1Closes = btcCandles.map(c => c.c);
+      // Use 24h candles as daily proxy (aggregate every 24)
+      const dailyCloses: number[] = [];
+      for (let j = 0; j + 24 <= btcCandles.length; j += 24) {
+        dailyCloses.push(btcCandles[j + 23].c);
+      }
+      if (dailyCloses.length < 3) {
+        // Fallback: just use last few hourly closes as daily
+        dailyCloses.push(...h1Closes.filter((_, idx) => idx % 24 === 0));
+      }
+
+      const ne = nextMacro();
+      const eventHrs = ne ? (ne.t - Date.now()) / 36e5 : 999;
+      const eventName = ne?.n ?? null;
+
+      const hlF = data?.hl?.BTC?.f ?? 0;
+      const binF = data?.bFund?.BTC ?? 0;
+      const vixVal = data?.vix?.v ?? 20;
+      const btcPrice = btcCandles[btcCandles.length - 1].c;
+
+      const sig = computeCryptoSignals({
+        dailyCloses,
+        h1Closes,
+        h1Candles: btcCandles,
+        h1Volumes: btcCandles.map(c => c.v),
+        price: btcPrice,
+        hlFunding: hlF,
+        binanceFunding: binF,
+        nextEventHours: eventHrs,
+        nextEventName: eventName,
+        vix: vixVal,
+      });
+      setCryptoSignals(sig);
+    }
+  }, [whaleByCoin, data]);
 
   // Initial + interval
   useEffect(() => {
@@ -163,5 +206,5 @@ export function useMarketData(
     return () => clearInterval(cdInt);
   }, []);
 
-  return { data, score, coinData, loading, error, countdown, apiStatus: apiStatus as Record<string, 'ok' | 'er' | 'ld'>, latency };
+  return { data, score, coinData, cryptoSignals, loading, error, countdown, apiStatus: apiStatus as Record<string, 'ok' | 'er' | 'ld'>, latency };
 }
