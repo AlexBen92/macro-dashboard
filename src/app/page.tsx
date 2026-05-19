@@ -17,6 +17,7 @@ import PositionsTable from '@/components/PositionsTable';
 import ScoreBreakdown from '@/components/ScoreBreakdown';
 import Alerts from '@/components/Alerts';
 import BacktestPanel from '@/components/ui/BacktestPanel';
+import HyperliquidMonitor from '@/components/HyperliquidMonitor';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -112,6 +113,11 @@ export default function Home() {
         initial="hidden"
         animate="show"
       >
+        {/* ÉTAPE 1.5 — HYPERLIQUID PERPS MONITOR */}
+        <motion.div variants={fadeUp}>
+          <HyperliquidMonitor />
+        </motion.div>
+
         {/* ÉTAPE 2A — SIGNAL SUMMARY */}
         <motion.div variants={fadeUp}>
           <div className="font-mono text-[0.72rem] text-[#8890a0] tracking-[3px] uppercase mb-3 flex items-center gap-2">
