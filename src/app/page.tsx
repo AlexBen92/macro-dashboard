@@ -18,6 +18,7 @@ import ScoreBreakdown from '@/components/ScoreBreakdown';
 import Alerts from '@/components/Alerts';
 import BacktestPanel from '@/components/ui/BacktestPanel';
 import HyperliquidMonitor from '@/components/HyperliquidMonitor';
+import IntradayOpportunities from '@/components/IntradayOpportunities';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -116,6 +117,11 @@ export default function Home() {
         {/* ÉTAPE 1.5 — HYPERLIQUID PERPS MONITOR */}
         <motion.div variants={fadeUp}>
           <HyperliquidMonitor />
+        </motion.div>
+
+        {/* ÉTAPE 1.6 — INTRADAY OPPORTUNITIES */}
+        <motion.div variants={fadeUp}>
+          <IntradayOpportunities />
         </motion.div>
 
         {/* ÉTAPE 2A — SIGNAL SUMMARY */}
