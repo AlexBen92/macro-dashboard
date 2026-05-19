@@ -28,11 +28,11 @@ export async function getHyperliquidAssetCtxs(): Promise<HyperliquidAssetCtx[]> 
 }
 
 export async function getHyperliquidMetaAndAssetCtxs(): Promise<HyperliquidResponse> {
-  const res = await hlPost<[HyperliquidMeta[], HyperliquidAssetCtx[]]>({ type: 'metaAndAssetCtxs' });
+  const res = await hlPost<[{ universe: HyperliquidMeta[] }, HyperliquidAssetCtx[]]>({ type: 'metaAndAssetCtxs' });
   if (!res || !Array.isArray(res) || res.length < 2) {
     return { universe: [], assetCtxs: [] };
   }
-  return { universe: res[0], assetCtxs: res[1] };
+  return { universe: res[0]?.universe ?? [], assetCtxs: res[1] ?? [] };
 }
 
 export async function getHyperliquidAllMids(): Promise<Record<string, string>> {
