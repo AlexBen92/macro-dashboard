@@ -34,6 +34,18 @@ function StatCard({ label, value, sublabel, dot }: { label: string; value: strin
   );
 }
 
+function Tooltip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="group relative inline-block">
+      {children}
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 bg-[#1a1a2e] border border-[#3a3a4a] rounded p-2 text-[0.6rem] text-[#8890a0] text-center z-50">
+        Heuristic score summarizing signal coherence. Not a backtested probability.
+        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px border-4 border-transparent border-t-[#1a1a2e]" />
+      </div>
+    </div>
+  );
+}
+
 export default function HyperliquidMonitor() {
   const { rows, stats, loading, error, refresh, countdown } = useHyperliquidMonitor(30);
   const [search, setSearch] = useState('');
@@ -188,7 +200,9 @@ export default function HyperliquidMonitor() {
             className="cursor-pointer hover:text-white transition-colors flex items-center gap-1 text-right"
             onClick={() => handleSort('strengthScore')}
           >
-            Strength <SortIcon field="strengthScore" />
+            <Tooltip>
+              <span className="flex items-center gap-1">Signal Clarity <SortIcon field="strengthScore" /></span>
+            </Tooltip>
           </div>
           <div className="text-left pl-2">Interpretation</div>
         </div>
