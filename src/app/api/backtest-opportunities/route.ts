@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { runBacktest, type BtCandle, BACKTEST_FEE } from '@/lib/backtest';
+import { runBacktest, type BtCandle } from '@/lib/backtest';
 
-const FEE_THRESHOLD = 0.001; // 0.1% threshold
+const FEE_THRESHOLD = 0.001; // 0.1% threshold (per side = 0.05% round trip)
 const MIN_SCORE = 70;
 
 // Top scoring crypto markets from Hyperliquid (high OI + volume)
@@ -13,19 +13,40 @@ const HIGH_SCORE_COINS = [
   'TIAUSDT', 'INJUSDT', 'FETUSDT', 'RNDRUSDT', 'GRTUSDT'
 ];
 
-async function fetchCandles(symbol: string): Promise<BtCandle[]> {
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=1500`;
-  const res = await fetch(url, { next: { revalidate: 60 } });
-  if (!res.ok) throw new Error(`Binance ${symbol}: ${res.status}`);
-  const raw = await res.json() as [number, string, string, string, string, string, ...unknown[]][];
-  return raw.map(k => ({
-    t: k[0],
-    o: parseFloat(k[1]),
-    h: parseFloat(k[2]),
-    l: parseFloat(k[3]),
-    c: parseFloat(k[4]),
-    v: parseFloat(k[5]),
-  }));
+async function fetchCandles(symbol: string, months = 2): Promise<BtCandle[]> {
+  const targetHours = months * 30 * 24; // Approximate hours for given months
+  const batchSize = 1000; // Binance max per request
+  const batches = Math.ceil(targetHours / batchSize);
+
+  let allCandles: BtCandle[] = [];
+  let endTime = Date.now();
+
+  for (let i = 0; i < batches; i++) {
+    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=${batchSize}&endTime=${endTime}`;
+    const res = await fetch(url, { next: { revalidate: 60 } });
+    if (!res.ok) throw new Error(`Binance ${symbol}: ${res.status}`);
+
+    const raw = await res.json() as [number, string, string, string, string, string, ...unknown[]][];
+    const candles = raw.map(k => ({
+      t: k[0],
+      o: parseFloat(k[1]),
+      h: parseFloat(k[2]),
+      l: parseFloat(k[3]),
+      c: parseFloat(k[4]),
+      v: parseFloat(k[5]),
+    }));
+
+    if (candles.length === 0) break;
+
+    // Prepend to get chronological order
+    allCandles = [...candles, ...allCandles];
+    endTime = candles[0].t - 1; // Next batch ends before this batch starts
+
+    // Rate limiting
+    await new Promise(r => setTimeout(r, 100));
+  }
+
+  return allCandles;
 }
 
 async function fetchHyperliquidMarkets(): Promise<Set<string>> {
@@ -104,6 +125,11 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const minScore = parseInt(url.searchParams.get('minScore') ?? String(MIN_SCORE), 10);
     const maxCoins = parseInt(url.searchParams.get('maxCoins') ?? '10', 10);
+    const months = parseInt(url.searchParams.get('months') ?? '2', 10);
+    const feeParam = parseFloat(url.searchParams.get('fee') ?? '0.05'); // Total round-trip fee
+    const feeRate = feeParam / 2 / 100; // Per side (e.g., 0.05% total = 0.00025 per side)
+    const longThreshold = parseInt(url.searchParams.get('longThreshold') ?? '65', 10);
+    const shortThreshold = parseInt(url.searchParams.get('shortThreshold') ?? '35', 10);
 
     // Fetch Hyperliquid markets for reference
     const hlMarkets = await fetchHyperliquidMarkets();
@@ -113,7 +139,7 @@ export async function GET(request: Request) {
 
     for (const symbol of HIGH_SCORE_COINS) {
       try {
-        const candles = await fetchCandles(symbol);
+        const candles = await fetchCandles(symbol, months);
         const score = await scoreMarket(symbol, candles);
         const isOnHL = hlMarkets.has(symbol.replace('USDT', ''));
 
@@ -136,11 +162,11 @@ export async function GET(request: Request) {
     // Run backtests on top-scoring markets
     const results = await Promise.all(
       topMarkets.map(async ({ symbol, score, candles }) => {
-        const result = runBacktest(candles, symbol.replace('USDT', ''));
+        const result = runBacktest(candles, symbol.replace('USDT', ''), feeRate, longThreshold, shortThreshold);
         return {
           ...result,
           opportunityScore: score,
-          feeRate: FEE_THRESHOLD,
+          feeRate: feeParam,
         };
       })
     );
@@ -170,8 +196,11 @@ export async function GET(request: Request) {
       },
       config: {
         minScore,
-        feeThreshold: FEE_THRESHOLD,
+        fee: feeParam,
         maxCoins,
+        months,
+        longThreshold,
+        shortThreshold,
       },
       fetchedAt: new Date().toISOString(),
       durationMs: Date.now() - startTime,

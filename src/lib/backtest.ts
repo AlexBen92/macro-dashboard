@@ -155,7 +155,13 @@ function calcConfluenceAndDirection(
 
 type OpenTrade = Omit<BacktestTrade, 'exitTime' | 'exitPrice' | 'pnlGross' | 'pnlNet' | 'pnlR' | 'outcome' | 'balanceAfter' | 'feeExit'>;
 
-export function runBacktest(candles: BtCandle[], coin: string): BacktestResult {
+export function runBacktest(
+  candles: BtCandle[],
+  coin: string,
+  feeRate: number = BACKTEST_FEE,
+  longThreshold: number = 65,
+  shortThreshold: number = 35
+): BacktestResult {
   const WARMUP = 40; // Reduced warmup — enough for MACD(26+9)
   let balance = INITIAL_CAPITAL;
   const trades: BacktestTrade[] = [];
@@ -185,7 +191,7 @@ export function runBacktest(candles: BtCandle[], coin: string): BacktestResult {
       if (closed) {
         const priceDiff = direction === 'LONG' ? exitPrice - openTrade.entryPrice : openTrade.entryPrice - exitPrice;
         const pnlGross = priceDiff * qty;
-        const feeExit = qty * exitPrice * BACKTEST_FEE;
+        const feeExit = qty * exitPrice * feeRate;
         const pnlNet = pnlGross - feeExit;
         const pnlR = riskUsd > 0 ? pnlNet / riskUsd : 0;
         balance = Math.round((balance + pnlGross - feeExit) * 100) / 100;
@@ -225,8 +231,8 @@ export function runBacktest(candles: BtCandle[], coin: string): BacktestResult {
     const { score: confluenceScore } = calcConfluenceAndDirection(macd.trend, vwtsmomVal, regimeSig.direction);
 
     let entryDir: 'LONG' | 'SHORT' | null = null;
-    if (confluenceScore >= 65) entryDir = 'LONG';
-    else if (confluenceScore <= 35) entryDir = 'SHORT';
+    if (confluenceScore >= longThreshold) entryDir = 'LONG';
+    else if (confluenceScore <= shortThreshold) entryDir = 'SHORT';
     if (!entryDir) continue;
 
     // ATR-based sizing
@@ -240,8 +246,8 @@ export function runBacktest(candles: BtCandle[], coin: string): BacktestResult {
     const tpPrice = entryDir === 'LONG' ? entryPrice + tpDist : entryPrice - tpDist;
 
     const riskUsd = balance * RISK_PER_TRADE;
-    const qty = riskUsd / (stopDist + entryPrice * BACKTEST_FEE);
-    const feeEntry = qty * entryPrice * BACKTEST_FEE;
+    const qty = riskUsd / (stopDist + entryPrice * feeRate);
+    const feeEntry = qty * entryPrice * feeRate;
     balance = Math.round((balance - feeEntry) * 100) / 100;
 
     const strategyLabel = buildStrategyLabel(macd.trend, macd.cross, vwtsmomVal, regime, entryDir);
@@ -269,7 +275,7 @@ export function runBacktest(candles: BtCandle[], coin: string): BacktestResult {
     const exitPrice = last.c;
     const priceDiff = openTrade.direction === 'LONG' ? exitPrice - openTrade.entryPrice : openTrade.entryPrice - exitPrice;
     const pnlGross = priceDiff * openTrade.qty;
-    const feeExit = openTrade.qty * exitPrice * BACKTEST_FEE;
+    const feeExit = openTrade.qty * exitPrice * feeRate;
     const pnlNet = pnlGross - feeExit;
     const pnlR = openTrade.riskUsd > 0 ? pnlNet / openTrade.riskUsd : 0;
     balance = Math.round((balance + pnlGross - feeExit) * 100) / 100;
