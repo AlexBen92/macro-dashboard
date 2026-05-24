@@ -8369,7 +8369,7 @@
   "lossesList": [],
   "advancedMetrics": {
     "totalReturn": 0,
-    "cagr": null,
+    "cagr": 0,
     "avgTradeReturn": 0,
     "expectancy": 0,
     "sharpeRatio": 0,
@@ -8378,7 +8378,7 @@
     "omegaRatio": 0,
     "tailRatio": 0,
     "maxDrawdownPct": 0,
-    "maxDrawdownDuration": 0,
+    "maxDrawdownDuration": 4170,
     "avgDrawdownPct": 0,
     "recoveryFactor": null,
     "ulcerIndex": 0,
@@ -8413,17 +8413,17 @@
     "otherHourTrades": 0,
     "otherHourWR": 0
   },
-  "runDate": "2026-05-24T08:04:39.611Z",
-  "candleFrom": "",
-  "candleTo": "",
+  "runDate": "2026-05-24T08:13:55.661Z",
+  "candleFrom": "2025-11-20T21:00:00.000Z",
+  "candleTo": "2026-05-19T20:00:00.000Z",
   "totalCandles": 4320,
   "profitabilityScore": 10,
   "isProfitable": false,
   "stationarityAnalysis": {
     "series": {
       "type": "returns",
-      "mean": null,
-      "std": null,
+      "mean": 1650.1,
+      "std": 0,
       "length": 4320
     },
     "adf": {
@@ -8438,16 +8438,16 @@
       "usedLags": 1
     },
     "kpss": {
-      "statistic": 0,
-      "pValue": 0.15,
-      "isStationary": true,
+      "statistic": 122.51,
+      "pValue": 0.01,
+      "isStationary": false,
       "criticalValues": {
         "1%": 0.739,
         "5%": 0.463,
         "10%": 0.347
       }
     },
-    "conclusion": "MIXED",
+    "conclusion": "NON-STATIONARY",
     "recommendation": {
       "action": "DIFF_FRACTIONAL",
       "d": 0.5,
