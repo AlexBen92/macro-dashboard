@@ -12,6 +12,7 @@ import IntradayHeatmap from '@/components/IntradayHeatmap';
 import Top5ScoreEngine from '@/components/Top5ScoreEngine';
 import FundingAggregator from '@/components/FundingAggregator';
 import StrategySignalEngine from '@/components/StrategySignalEngine';
+import BtcEcosystemSection from '@/components/btc-ecosystem/BtcEcosystemSection';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -123,6 +124,11 @@ export default function Home() {
         {/* FUNDING AGGREGATOR */}
         <motion.div variants={fadeUp}>
           <FundingAggregator />
+        </motion.div>
+
+        {/* BTC ECOSYSTEM */}
+        <motion.div variants={fadeUp}>
+          <BtcEcosystemSection />
         </motion.div>
 
         {/* STRATEGY SIGNAL ENGINE */}
