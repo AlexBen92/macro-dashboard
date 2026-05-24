@@ -80,7 +80,7 @@ export default function FundingAggregator() {
       processed.sort((a, b) => Math.abs(b.funding) - Math.abs(a.funding));
 
       setRows(processed.slice(0, 20)); // Top 20
-      setTs(new Date().toLocaleTimeString('fr-FR'));
+      setTs(new Date().toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       setErr('');
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : 'Erreur inconnue');

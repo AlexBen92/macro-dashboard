@@ -16,11 +16,27 @@ export default function IntradayHeatmap() {
   const today = new Date().getUTCDay();
   const win   = VOL_WINDOWS.find(w => nowH >= w.start && nowH < w.end);
 
+  // Heure de Paris pour affichage
+  const parisTime = new Date().toLocaleTimeString('fr-FR', {
+    timeZone: 'Europe/Paris',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short'
+  });
+
   return (
     <section className="mb-8">
-      <h2 className="text-lg font-bold text-white tracking-widest uppercase mb-1">
-        🔥 Heatmap Volatilité Intraday
-      </h2>
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-lg font-bold text-white tracking-widest uppercase">
+          🔥 Heatmap Volatilité Intraday
+        </h2>
+        <div className="text-xs text-gray-400 font-mono">
+          {parisTime} · UTC {nowH}h
+        </div>
+      </div>
       <p className="text-xs text-gray-500 mb-4">
         BTC/ETH historique · Colonne courante en surbrillance · Ne trader qu'en vert/jaune
       </p>

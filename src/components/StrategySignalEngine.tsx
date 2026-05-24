@@ -154,7 +154,7 @@ export default function StrategySignalEngine() {
 
       const computed = computeSignals(meta, ctxs);
       setSignals(computed);
-      setTs(new Date().toLocaleTimeString('fr-FR'));
+      setTs(new Date().toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       setErr('');
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : 'Erreur inconnue');
