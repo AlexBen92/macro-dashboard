@@ -505,8 +505,9 @@ export function runBacktestV5(
     // ENTRY SIGNALS (P4-style with improvements)
     // ═════════════════════════════════════════════════════════════════════════
 
-    // Skip if last trade was too recent
-    if (trades.length > 0 && i - trades[trades.length - 1].entryBar < minBarsForSignals + tradeCooldown) {
+    // Skip if last trade was too recent - reduced cooldown
+    const lastTradeEntryBar = trades.length > 0 ? trades[trades.length - 1].entryBar : 0;
+    if (trades.length > 0 && i - lastTradeEntryBar < tradeCooldown) {
       equityCurve.push(capital);
       drawdownCurve.push((capital - peakEquity) / peakEquity * 100);
       continue;
@@ -572,21 +573,27 @@ export function runBacktestV5(
     }
 
     // Minimum threshold - lowered from 70 to 40
-    if (confluenceScore < 40) {
+    if (confluenceScore < 30) {  // Lowered from 40 - allow more signals
       equityCurve.push(capital);
       drawdownCurve.push((capital - peakEquity) / peakEquity * 100);
       continue;
     }
 
-    // Determine direction
+    // Determine direction - simplified to use trend as primary signal
     let direction: 'LONG' | 'SHORT' | null = null;
 
-    if (currentRegime === 'BULL' && trendFastAboveSlow && momentum > 0) {
+    // Primary: Trend following
+    if (trendFastAboveSlow && momentum > -0.005) {  // Allow small negative momentum
       direction = 'LONG';
-    } else if (currentRegime === 'BEAR' && !trendFastAboveSlow && momentum < 0) {
+    } else if (!trendFastAboveSlow && momentum < 0.005) {  // Allow small positive momentum
       direction = 'SHORT';
-    } else if (currentRegime === 'RANGING' && confluenceScore >= 50) {  // Lowered from 85
-      direction = trendFastAboveSlow ? 'LONG' : 'SHORT';
+    }
+
+    // Regime filter - only skip if regime strongly disagrees
+    if (currentRegime === 'BEAR' && direction === 'LONG' && confluenceScore < 50) {
+      direction = null;
+    } else if (currentRegime === 'BULL' && direction === 'SHORT' && confluenceScore < 50) {
+      direction = null;
     }
 
     if (!direction) {

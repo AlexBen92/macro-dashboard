@@ -8369,7 +8369,7 @@
   "lossesList": [],
   "advancedMetrics": {
     "totalReturn": 0,
-    "cagr": 0,
+    "cagr": null,
     "avgTradeReturn": 0,
     "expectancy": 0,
     "sharpeRatio": 0,
@@ -8380,7 +8380,7 @@
     "maxDrawdownPct": 0,
     "maxDrawdownDuration": 0,
     "avgDrawdownPct": 0,
-    "recoveryFactor": 0,
+    "recoveryFactor": null,
     "ulcerIndex": 0,
     "winRate": 0,
     "profitFactor": 0,
@@ -8413,7 +8413,7 @@
     "otherHourTrades": 0,
     "otherHourWR": 0
   },
-  "runDate": "2026-05-24T07:54:34.613Z",
+  "runDate": "2026-05-24T08:04:14.774Z",
   "candleFrom": "",
   "candleTo": "",
   "totalCandles": 4320,

@@ -85,15 +85,16 @@ async function loadCandles(symbol: string): Promise<BtCandle[]> {
 
   try {
     const content = await fs.readFile(filePath, 'utf-8');
-    const klines: BinanceKline[][] = JSON.parse(content);
+    // Data is stored as Binance kline arrays: [time, open, high, low, close, volume, ...]
+    const klines: any[][] = JSON.parse(content);
 
-    return klines.map((k: BinanceKline) => ({
-      t: k.t,
-      o: k.o,
-      h: k.h,
-      l: k.l,
-      c: k.c,
-      v: k.v,
+    return klines.map((k) => ({
+      t: Number(k[0]),
+      o: Number(k[1]),
+      h: Number(k[2]),
+      l: Number(k[3]),
+      c: Number(k[4]),
+      v: Number(k[5]),
     }));
   } catch (e) {
     console.error(`Failed to load ${symbol}:`, e);
