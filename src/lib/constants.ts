@@ -57,3 +57,39 @@ export const COLORS = {
 export const REFRESH_MS = 60000;
 export const WHALE_REFRESH_MS = 600000;
 export const WS_REFRESH_MS = 120000;
+
+// Volatility windows for intraday trading (UTC hours)
+export const VOL_WINDOWS_UTC = [
+  { name: 'Asia Open', start: 0, end: 6, score: 0.40 },
+  { name: 'EU Open', start: 6, end: 9, score: 0.70 },
+  { name: 'EU Peak', start: 9, end: 12, score: 0.85 },
+  { name: 'EU/US Overlap', start: 12, end: 17, score: 1.00 },
+  { name: 'US Afternoon', start: 17, end: 21, score: 0.75 },
+  { name: 'Crypto Night', start: 21, end: 24, score: 0.50 },
+] as const;
+
+// Score weights for trade sheet calculation
+export const SCORE_WEIGHTS = {
+  funding_rate: 0.25,
+  open_interest: 0.20,
+  volume_24h: 0.15,
+  whale_activity: 0.15,
+  volatility: 0.15,
+  edge_vs_fees: 0.10,
+} as const;
+
+// Bias color mapping
+export const BIAS_COLOR = {
+  LONG: '#00ff88',
+  SHORT: '#ff4466',
+  NEUTRAL: '#ffcc00',
+} as const;
+
+// Tier label function
+export const TIER_LABEL = (score: number): string => {
+  if (score >= 75) return 'S-TIER';
+  if (score >= 65) return 'A-TIER';
+  if (score >= 50) return 'B-TIER';
+  if (score >= 35) return 'C-TIER';
+  return 'D-TIER';
+};

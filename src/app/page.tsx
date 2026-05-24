@@ -19,6 +19,10 @@ import Alerts from '@/components/Alerts';
 import BacktestPanel from '@/components/ui/BacktestPanel';
 import HyperliquidMonitor from '@/components/HyperliquidMonitor';
 import IntradayOpportunities from '@/components/IntradayOpportunities';
+import OpportunityOverview from '@/components/OpportunityOverview';
+import MacroCalendar from '@/components/MacroCalendar';
+import TradeSheet from '@/components/TradeSheet';
+import IntradayHeatmap from '@/components/IntradayHeatmap';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -122,6 +126,29 @@ export default function Home() {
         {/* ÉTAPE 1.6 — INTRADAY OPPORTUNITIES */}
         <motion.div variants={fadeUp}>
           <IntradayOpportunities />
+        </motion.div>
+
+        {/* ÉTAPE 1.7 — MACRO STACK V6.0 NEW COMPONENTS */}
+        <motion.div variants={fadeUp}>
+          <OpportunityOverview
+            totalScore={Math.abs(score?.score ?? 0)}
+            bullishSignals={cryptoSignals?.signals.filter(s => s.direction === 'LONG').length ?? 0}
+            bearishSignals={cryptoSignals?.signals.filter(s => s.direction === 'SHORT').length ?? 0}
+            neutralSignals={cryptoSignals?.signals.filter(s => s.direction === 'NEUTRAL').length ?? 0}
+            activeOpportunities={trades.length}
+          />
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <MacroCalendar />
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <IntradayHeatmap />
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <TradeSheet />
         </motion.div>
 
         {/* ÉTAPE 2A — SIGNAL SUMMARY */}
@@ -262,7 +289,7 @@ export default function Home() {
         ))}
         <span className="flex-1" />
         <span>{latency}ms</span>
-        <span>MACRO STACK v5.0 — Decision Engine</span>
+        <span>MACRO STACK v6.0 — Full Analytics</span>
       </div>
     </div>
   );
