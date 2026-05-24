@@ -89,6 +89,51 @@ function TimeAgo({ date }: { date: Date | null }) {
   return <span>il y a {Math.floor(seconds / 3600)}h</span>;
 }
 
+function ScoreGauge({ score, signal, label }: { score: number; signal: string; label: string }) {
+  const getColor = () => {
+    if (score >= 60) return 'from-emerald-500 to-green-400';
+    if (score <= 40) return 'from-red-500 to-rose-400';
+    return 'from-amber-500 to-yellow-400';
+  };
+
+  const getBgColor = () => {
+    if (score >= 60) return 'bg-emerald-500/20 border-emerald-500/40';
+    if (score <= 40) return 'bg-red-500/20 border-red-500/40';
+    return 'bg-amber-500/20 border-amber-500/40';
+  };
+
+  const getTextColor = () => {
+    if (score >= 60) return 'text-emerald-400';
+    if (score <= 40) return 'text-red-400';
+    return 'text-amber-400';
+  };
+
+  return (
+    <div className={`flex items-center gap-4 px-4 py-3 border ${getBgColor()} bg-opacity-30`}>
+      <div className="flex items-center gap-3">
+        <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${getColor()} flex items-center justify-center`}>
+          <span className="font-mono text-2xl font-bold text-white">{score}</span>
+        </div>
+        <div>
+          <div className={`font-mono text-lg font-bold tracking-wider ${getTextColor()}`}>{label}</div>
+          <div className="text-[10px] text-[#5a6070]">Score Ecosystème BTC</div>
+        </div>
+      </div>
+      <div className="flex-1 h-2 bg-[#1e1e32] rounded-full overflow-hidden">
+        <motion.div
+          className={`h-full bg-gradient-to-r ${getColor()}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${score}%` }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+        />
+      </div>
+      <div className="text-[10px] text-[#5a6070] font-mono">
+        0 ◀───── 50 ─────▪ 100
+      </div>
+    </div>
+  );
+}
+
 export default function BtcEcosystemSection() {
   const { data, isLoading, isStale, error } = useBtcEcosystem();
 
@@ -119,6 +164,7 @@ export default function BtcEcosystemSection() {
 
   const btc = data?.btc;
   const assets = data?.assets ?? [];
+  const score = data?.score;
 
   return (
     <motion.div
@@ -156,6 +202,14 @@ export default function BtcEcosystemSection() {
           <TimeAgo date={data?.updatedAt ? new Date(data.updatedAt) : null} />
         </div>
       </div>
+
+      {score && (
+        <ScoreGauge
+          score={score.value}
+          signal={score.signal}
+          label={score.label}
+        />
+      )}
 
       <div className="grid grid-cols-12 gap-2 px-3 py-2 bg-[#0f0f1a] border-b border-[#1e1e32] text-[10px] text-[#5a6070] font-mono uppercase tracking-wider">
         <div className="col-span-3">Actif</div>

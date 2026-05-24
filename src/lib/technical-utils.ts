@@ -96,3 +96,36 @@ export function calculateRSI(closes: number[], period: number = 14): number[] {
 
   return result;
 }
+
+export interface BollingerBands {
+  middle: number;
+  upper: number;
+  lower: number;
+  stdDev: number;
+}
+
+export function calculateBollingerBands(
+  closes: number[],
+  period: number = 20,
+  stdDevMult: number = 2.0
+): BollingerBands[] {
+  const result: BollingerBands[] = [];
+
+  for (let i = period - 1; i < closes.length; i++) {
+    const slice = closes.slice(i - period + 1, i + 1);
+    const middle = slice.reduce((a, b) => a + b, 0) / period;
+
+    // Calculate standard deviation
+    const variance = slice.reduce((sum, val) => sum + Math.pow(val - middle, 2), 0) / period;
+    const stdDev = Math.sqrt(variance);
+
+    result.push({
+      middle,
+      upper: middle + stdDevMult * stdDev,
+      lower: middle - stdDevMult * stdDev,
+      stdDev,
+    });
+  }
+
+  return result;
+}

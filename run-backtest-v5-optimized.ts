@@ -299,9 +299,6 @@ ${(() => {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ${(() => {
-  const portfolioWR = portfolioWR;
-  const portfolioSharpe = portfolioSharpe;
-
   if (portfolioSharpe > 1.5 && portfolioWR > 40) {
     return `
 ### ✅ DEPLOY RECOMMENDED

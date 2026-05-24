@@ -11,9 +11,22 @@ interface BtcEcosystemAsset {
   change24h: number;
 }
 
+interface EcosystemScore {
+  value: number;
+  signal: 'bullish' | 'neutral' | 'bearish';
+  label: string;
+  components: {
+    strength: number;
+    highBetaMomentum: number;
+    macroRisk: number;
+    avgCorr: number;
+  };
+}
+
 interface BtcEcosystemData {
   btc: { price: number; change24h: number };
   assets: BtcEcosystemAsset[];
+  score: EcosystemScore;
   updatedAt: string;
   stale: boolean;
 }

@@ -144,10 +144,60 @@ export async function GET() {
 
     const stale = !btcData;
 
-    return NextResponse.json(
+    // Compute ecosystem score
+  const avgChange = assets.reduce((sum, a) => sum + a.change24h, 0) / assets.length;
+  const btcChange = btc.change24h;
+
+  // Strength = (avg ecosystem change - BTC change) weighted by avg correlation
+  const avgCorr = assets.reduce((sum, a) => sum + a.baseCorr, 0) / assets.length;
+  const strength = (avgChange - btcChange) * avgCorr;
+
+  // Momentum: avg change of high-beta assets (MSTR, MARA, RIOT, CLSK, COIN)
+  const highBetaAssets = assets.filter(a => a.beta >= 1.5);
+  const highBetaMomentum = highBetaAssets.length > 0
+    ? highBetaAssets.reduce((sum, a) => sum + a.change24h, 0) / highBetaAssets.length
+    : 0;
+
+  // Macro risk: SPX + NDQ average change
+  const macroAssets = assets.filter(a => a.category === 'macro' && a.ticker !== 'M2SL');
+  const macroRisk = macroAssets.length > 0
+    ? macroAssets.reduce((sum, a) => sum + a.change24h, 0) / macroAssets.length
+    : 0;
+
+  // Final score (0-100)
+  let score = 50;
+  score += strength * 10; // Ecosystem strength vs BTC
+  score += highBetaMomentum * 2; // High-beta momentum
+  score += btcChange * 3; // BTC momentum
+  score += macroRisk * 2; // Macro risk-on/risk-off
+  score = Math.max(0, Math.min(100, score));
+
+  // Determine signal
+  let signal: 'bullish' | 'neutral' | 'bearish' = 'neutral';
+  let signalLabel = 'NEUTRE';
+  if (score >= 60) {
+    signal = 'bullish';
+    signalLabel = 'BULLISH';
+  } else if (score <= 40) {
+    signal = 'bearish';
+    signalLabel = 'BEARISH';
+  }
+
+  return NextResponse.json(
       {
         btc,
         assets,
+        score: {
+          value: Math.round(score),
+          signal,
+          label: signalLabel,
+          components: {
+            strength: Math.round(strength * 100) / 100,
+            highBetaMomentum: Math.round(highBetaMomentum * 100) / 100,
+            macroRisk: Math.round(macroRisk * 100) / 100,
+            avgCorr: Math.round(avgCorr * 100) / 100,
+          },
+        },
         updatedAt: new Date().toISOString(),
         stale,
       },
