@@ -9,11 +9,8 @@ import DecisionBar from '@/components/DecisionBar';
 import SignalSummary from '@/components/ui/SignalSummary';
 import TradeCard from '@/components/TradeCard';
 import CollapsibleSection from '@/components/ui/CollapsibleSection';
-import WhaleConsensus from '@/components/WhaleConsensus';
 import MacroBlock from '@/components/MacroBlock';
 import FundingSnapshot from '@/components/FundingSnapshot';
-import WhaleLeaderboard from '@/components/WhaleLeaderboard';
-import PositionsTable from '@/components/PositionsTable';
 import ScoreBreakdown from '@/components/ScoreBreakdown';
 import Alerts from '@/components/Alerts';
 import BacktestPanel from '@/components/ui/BacktestPanel';
@@ -23,6 +20,9 @@ import OpportunityOverview from '@/components/OpportunityOverview';
 import MacroCalendar from '@/components/MacroCalendar';
 import TradeSheet from '@/components/TradeSheet';
 import IntradayHeatmap from '@/components/IntradayHeatmap';
+import Top5ScoreEngine from '@/components/Top5ScoreEngine';
+import FundingAggregator from '@/components/FundingAggregator';
+import StrategySignalEngine from '@/components/StrategySignalEngine';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -118,17 +118,45 @@ export default function Home() {
         initial="hidden"
         animate="show"
       >
-        {/* ÉTAPE 1.5 — HYPERLIQUID PERPS MONITOR */}
+        {/* ============================================== */}
+        {/*  MACRO STACK v6.0 — NEW COMPONENTS              */}
+        {/* ============================================== */}
+
+        {/* TOP 5 SCORE ENGINE */}
+        <motion.div variants={fadeUp}>
+          <Top5ScoreEngine />
+        </motion.div>
+
+        {/* INTRADAY HEATMAP */}
+        <motion.div variants={fadeUp}>
+          <IntradayHeatmap />
+        </motion.div>
+
+        {/* FUNDING AGGREGATOR */}
+        <motion.div variants={fadeUp}>
+          <FundingAggregator />
+        </motion.div>
+
+        {/* STRATEGY SIGNAL ENGINE */}
+        <motion.div variants={fadeUp}>
+          <StrategySignalEngine />
+        </motion.div>
+
+        {/* HYPERLIQUID PERPS MONITOR */}
         <motion.div variants={fadeUp}>
           <HyperliquidMonitor />
         </motion.div>
+
+        {/* ============================================== */}
+        {/*  LEGACY COMPONENTS (retained for context)       */}
+        {/* ============================================== */}
 
         {/* ÉTAPE 1.6 — INTRADAY OPPORTUNITIES */}
         <motion.div variants={fadeUp}>
           <IntradayOpportunities />
         </motion.div>
 
-        {/* ÉTAPE 1.7 — MACRO STACK V6.0 NEW COMPONENTS */}
+        {/* ÉTAPE 1.7 — OPPORTUNITY OVERVIEW */}
         <motion.div variants={fadeUp}>
           <OpportunityOverview
             totalScore={Math.abs(score?.score ?? 0)}
@@ -141,10 +169,6 @@ export default function Home() {
 
         <motion.div variants={fadeUp}>
           <MacroCalendar />
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
-          <IntradayHeatmap />
         </motion.div>
 
         <motion.div variants={fadeUp}>
@@ -231,18 +255,6 @@ export default function Home() {
 
         {/* ÉTAPE 3 — CONTEXT (collapsible) */}
         <motion.div variants={fadeUp}>
-          <CollapsibleSection title="WHALE CONSENSUS" dot="#ff006e" defaultOpen>
-            <WhaleConsensus
-              whaleCount={whales.length}
-              positionCount={positions.length}
-              totalLong={totalLong}
-              totalShort={totalShort}
-              whaleByCoin={whaleByCoin}
-            />
-          </CollapsibleSection>
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
           <CollapsibleSection title="MACRO SNAPSHOT" dot="#4488ff">
             <MacroBlock data={data} />
           </CollapsibleSection>
@@ -251,18 +263,6 @@ export default function Home() {
         <motion.div variants={fadeUp}>
           <CollapsibleSection title="FUNDING SNAPSHOT" dot="#4ade80">
             <FundingSnapshot data={data} />
-          </CollapsibleSection>
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
-          <CollapsibleSection title="WHALE LEADERBOARD" dot="#aa66ff">
-            <WhaleLeaderboard whales={whales} loading={whaleLoading} />
-          </CollapsibleSection>
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
-          <CollapsibleSection title="WHALE POSITIONS" dot="#00e5ff">
-            <PositionsTable positions={positions} />
           </CollapsibleSection>
         </motion.div>
 

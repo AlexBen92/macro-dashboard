@@ -36,8 +36,8 @@ export async function GET(request: NextRequest) {
 
     const rows = formatMarketTableRows(hlData, {
       includeStablecoins: false,
-      minVolume: 500000,
-      minOpenInterest: 100000,
+      minVolume: 100000,   // Réduit de 500K à 100K
+      minOpenInterest: 50000,  // Réduit de 100K à 50K
     }, prevDataMap);
 
     const stats = computeMonitorStats(rows);

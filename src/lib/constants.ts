@@ -58,25 +58,44 @@ export const REFRESH_MS = 60000;
 export const WHALE_REFRESH_MS = 600000;
 export const WS_REFRESH_MS = 120000;
 
-// Volatility windows for intraday trading (UTC hours)
-export const VOL_WINDOWS_UTC = [
-  { name: 'Asia Open', start: 0, end: 6, score: 0.40 },
-  { name: 'EU Open', start: 6, end: 9, score: 0.70 },
-  { name: 'EU Peak', start: 9, end: 12, score: 0.85 },
-  { name: 'EU/US Overlap', start: 12, end: 17, score: 1.00 },
-  { name: 'US Afternoon', start: 17, end: 21, score: 0.75 },
-  { name: 'Crypto Night', start: 21, end: 24, score: 0.50 },
+// ─── HYPERLIQUID FEES (source: https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees)
+export const HL_MAKER_FEE     = -0.00020;  // −0.02% rebate
+export const HL_TAKER_FEE     =  0.00050;  //  0.05% fee
+export const HL_ROUND_TRIP    =  0.00100;  //  0.10% round trip taker×2
+export const MIN_EDGE         =  0.00100;  //  seuil minimal = 2× taker RT
+
+// ─── INTRADAY VOL WINDOWS (UTC) — basé sur études BTC/ETH (Winrate, CryptoHash)
+export const VOL_WINDOWS = [
+  { label: 'EU Open',     start: 7,  end: 9,  score: 0.80 },
+  { label: 'EU/US Core',  start: 13, end: 17, score: 1.00 },  // peak
+  { label: 'US Extend',   start: 17, end: 20, score: 0.70 },
+  { label: 'Asia Active', start: 1,  end: 4,  score: 0.35 },
 ] as const;
 
-// Score weights for trade sheet calculation
+// ─── SCORING WEIGHTS
 export const SCORE_WEIGHTS = {
-  funding_rate: 0.25,
-  open_interest: 0.20,
-  volume_24h: 0.15,
-  whale_activity: 0.15,
-  volatility: 0.15,
-  edge_vs_fees: 0.10,
+  funding:     0.25,
+  oi_momentum: 0.20,
+  liquidation: 0.20,
+  vol_window:  0.15,
+  price_mom:   0.20,
 } as const;
+
+// ─── DISPLAY
+export const TOP_N = 5;
+
+// ─── HOURLY VOL INDEX (0–23 UTC) — normalisé 0→1
+export const HOURLY_VOL_INDEX = [
+  0.42, 0.38, 0.35, 0.32, 0.30, 0.33,   // 0h–5h Asia nuit
+  0.50, 0.65, 0.78, 0.82, 0.86, 0.88,   // 6h–11h EU open
+  0.90, 0.95, 1.00, 0.98, 0.96, 0.91,   // 12h–17h EU/US overlap PEAK
+  0.85, 0.80, 0.73, 0.66, 0.58, 0.50,   // 18h–23h US → decay
+];
+
+export const DAILY_VOL_INDEX = [0.72, 0.88, 0.92, 1.00, 0.95, 0.84, 0.63]; // dim→sam
+
+// Legacy compatibility
+export const VOL_WINDOWS_UTC = VOL_WINDOWS;
 
 // Bias color mapping
 export const BIAS_COLOR = {
