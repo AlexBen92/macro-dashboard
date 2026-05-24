@@ -36,6 +36,9 @@
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "run-backtest*.ts",
+    "run-walk-forward.ts",
+    "test-v4-modules.ts"
   ]
 }
