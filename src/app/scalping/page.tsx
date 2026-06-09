@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 // ============================================================
 // TYPES
@@ -14,38 +14,23 @@ interface MacroData {
   cpi: number;
   realRate: number;
   nextEvent: { name: string; hours: number };
-  recessionRisk: 'low' | 'moderate' | 'high';
 }
 
 interface CryptoSignal {
   symbol: string;
-  direction: 'long' | 'short' | 'neutral';
-  confidence: number;
-  vwtsmom: { direction: string; confidence: number };
-  funding: { signal: string; strength: string };
-  regime: string;
+  composite: { overall: string; confidence: number; reasons: string[] };
+  vwtsmom: { direction: string };
+  funding: { signal: string };
   macd_consensus: string;
-  composite: { overall: string; confidence: number };
 }
 
 interface QuantRegime {
   hurst: number;
-  regime: 'trend_following' | 'mean_reverting' | 'random_walk' | 'volatile_chop';
+  regime: string;
   trend_score: number;
   efficiency: number;
   vol_regime: string;
   recommended_strategies: string[];
-}
-
-interface ScalpingSignal {
-  symbol: string;
-  entry: string;
-  sl: string;
-  tp: string;
-  rr: number;
-  confidence: number;
-  action: 'LONG' | 'SHORT' | 'WAIT';
-  reasons: string[];
 }
 
 // ============================================================
@@ -53,31 +38,39 @@ interface ScalpingSignal {
 // ============================================================
 
 function MacroCompact({ data }: { data: MacroData }) {
-  const riskColor = data.recessionRisk === 'low' ? 'green' : data.recessionRisk === 'moderate' ? 'yellow' : 'red';
-
   return (
     <div className="grid grid-cols-5 gap-2 text-xs">
-      <div className={`p-2 rounded border bg-gray-900/60 ${data.vix > 30 ? 'border-red-800' : data.vix > 25 ? 'border-yellow-800' : 'border-green-800'}`}>
+      <div className={`p-2 rounded border bg-gray-900/60 ${
+        data.vix > 30 ? 'border-red-800' : data.vix > 25 ? 'border-yellow-800' : 'border-green-800'
+      }`}>
         <div className="text-gray-500">VIX</div>
         <div className="text-lg font-bold">{data.vix.toFixed(1)}</div>
-        <div className="text-[9px] text-gray-600">{data.vix > 30 ? 'HIGH' : data.vix > 25 ? 'ELEV' : 'OK'}</div>
+        <div className="text-[9px] text-gray-600">
+          {data.vix > 30 ? 'HIGH' : data.vix > 25 ? 'ELEV' : 'OK'}
+        </div>
       </div>
       <div className="p-2 rounded border border-gray-800 bg-gray-900/60">
         <div className="text-gray-500">DXY</div>
         <div className="text-lg font-bold">{data.dxy.toFixed(1)}</div>
         <div className="text-[9px] text-gray-600">USD STR</div>
       </div>
-      <div className={`p-2 rounded border bg-gray-900/60 ${data.realRate < 0 ? 'border-green-800' : data.realRate > 2 ? 'border-red-800' : 'border-gray-800'}`}>
+      <div className={`p-2 rounded border bg-gray-900/60 ${
+        data.realRate < 0 ? 'border-green-800' : data.realRate > 2 ? 'border-red-800' : 'border-gray-800'
+      }`}>
         <div className="text-gray-500">REAL RATE</div>
         <div className="text-lg font-bold">{data.realRate.toFixed(1)}%</div>
-        <div className="text-[9px] text-gray-600">{data.realRate < 0 ? 'BULL CRYPTO' : 'NEUT'}</div>
+        <div className="text-[9px] text-gray-600">
+          {data.realRate < 0 ? 'BULL CRYPTO' : 'NEUT'}
+        </div>
       </div>
       <div className="p-2 rounded border border-gray-800 bg-gray-900/60">
         <div className="text-gray-500">YIELD 10Y</div>
         <div className="text-lg font-bold">{data.yield10y.toFixed(2)}%</div>
         <div className="text-[9px] text-gray-600">US TREASURY</div>
       </div>
-      <div className={`p-2 rounded border bg-gray-900/60 ${data.nextEvent.hours < 24 ? 'border-yellow-800' : 'border-gray-800'}`}>
+      <div className={`p-2 rounded border bg-gray-900/60 ${
+        data.nextEvent.hours < 24 ? 'border-yellow-800' : 'border-gray-800'
+      }`}>
         <div className="text-gray-500">NEXT EVENT</div>
         <div className="text-sm font-bold truncate">{data.nextEvent.name}</div>
         <div className="text-[9px] text-yellow-400">{data.nextEvent.hours}h</div>
@@ -86,72 +79,56 @@ function MacroCompact({ data }: { data: MacroData }) {
   );
 }
 
-function RegimeBadge({ regime, trendScore }: { regime: string; trendScore: number }) {
-  const colors = {
-    trend_following: 'green',
-    mean_reverting: 'purple',
-    volatile_chop: 'red',
-    random_walk: 'gray',
-  };
-  const color = colors[regime as keyof typeof colors] || 'gray';
-
-  return (
-    <div className="flex items-center gap-3">
-      <div className={`px-3 py-1 rounded-full bg-${color}-900/30 border border-${color}-800 text-${color}-400 text-xs font-bold`}>
-        {regime.replace('_', ' ').toUpperCase()}
-      </div>
-      <div className="text-xs text-gray-500">
-        Trend: <span className={trendScore > 0 ? 'text-green-400' : 'text-purple-400'}>{trendScore > 0 ? '+' : ''}{trendScore}</span>
-      </div>
-    </div>
-  );
-}
-
-function ScalpingCard({ signal }: { signal: ScalpingSignal }) {
-  const actionColor = signal.action === 'LONG' ? 'green' : signal.action === 'SHORT' ? 'red' : 'gray';
+function ScalpingCard({ signal, regime }: { signal: CryptoSignal; regime: QuantRegime | null }) {
+  const action = signal.composite.overall === 'long' ? 'LONG' :
+                 signal.composite.overall === 'short' ? 'SHORT' : 'WAIT';
+  const actionColor = action === 'LONG' ? 'green' : action === 'SHORT' ? 'red' : 'gray';
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`p-3 rounded-lg border bg-gray-900/60 ${
-        signal.action === 'LONG' ? 'border-green-800/50' :
-        signal.action === 'SHORT' ? 'border-red-800/50' : 'border-gray-800'
+      className={`p-4 rounded-lg border bg-gray-900/60 ${
+        action === 'LONG' ? 'border-green-800/50' :
+        action === 'SHORT' ? 'border-red-800/50' : 'border-gray-800'
       }`}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-white">{signal.symbol}</span>
-          <span className={`px-2 py-0.5 rounded text-[10px] font-bold bg-${actionColor}-900/50 text-${actionColor}-400`}>
-            {signal.action}
+          <span className="font-bold text-lg">{signal.symbol}</span>
+          <span className={`px-3 py-1 rounded text-xs font-bold bg-${actionColor}-900/50 text-${actionColor}-400`}>
+            {action}
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          {[1,2,3,4,5].slice(0, Math.floor(signal.confidence / 20)).map(i => (
-            <div key={i} className="w-1 h-1 rounded-full bg-green-400" />
-          ))}
+        <div className="text-right">
+          <div className="text-xs text-gray-500">Confidence</div>
+          <div className="text-lg font-bold text-white">{signal.composite.confidence}%</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-xs mb-2">
-        <div className="text-center p-1 rounded bg-gray-800">
-          <div className="text-gray-600">ENTRY</div>
-          <div className="font-mono text-white">{signal.entry}</div>
+      <div className="grid grid-cols-3 gap-2 text-xs mb-3">
+        <div className="text-center p-2 rounded bg-gray-800">
+          <div className="text-gray-600">VW-TSMOM</div>
+          <div className="font-bold text-white">{signal.vwtsmom.direction.slice(0, 4).toUpperCase()}</div>
         </div>
-        <div className="text-center p-1 rounded bg-gray-800">
-          <div className="text-gray-600">SL</div>
-          <div className="font-mono text-red-400">{signal.sl}</div>
+        <div className="text-center p-2 rounded bg-gray-800">
+          <div className="text-gray-600">FUNDING</div>
+          <div className="font-bold text-white">{signal.funding.signal.slice(0, 4).toUpperCase()}</div>
         </div>
-        <div className="text-center p-1 rounded bg-gray-800">
-          <div className="text-gray-600">TP</div>
-          <div className="font-mono text-green-400">{signal.tp}</div>
+        <div className="text-center p-2 rounded bg-gray-800">
+          <div className="text-gray-600">MACD</div>
+          <div className="font-bold text-white">{signal.macd_consensus.slice(0, 4).toUpperCase()}</div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-[10px]">
-        <div className="text-gray-500">R:R {signal.rr.toFixed(1)}x</div>
-        <div className="text-gray-600">{signal.reasons.slice(0, 2).join(' · ')}</div>
-      </div>
+      {signal.composite.reasons.length > 0 && (
+        <div className="border-t border-gray-800 pt-2">
+          <div className="text-[10px] text-gray-500 mb-1">REASONS</div>
+          <div className="text-xs text-gray-400">
+            {signal.composite.reasons.slice(0, 2).join(' · ')}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -164,17 +141,22 @@ export default function ScalpingPage() {
   const [macro, setMacro] = useState<MacroData | null>(null);
   const [cryptoSignals, setCryptoSignals] = useState<CryptoSignal[]>([]);
   const [regime, setRegime] = useState<QuantRegime | null>(null);
-  const [scalpingSignals, setScalpingSignals] = useState<ScalpingSignal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setError(null);
         const [macroRes, cryptoRes, regimeRes] = await Promise.all([
           fetch('/api/macro'),
           fetch('/api/crypto-signals-advanced'),
           fetch('/api/quant-regimes?symbol=BTC'),
         ]);
+
+        if (!macroRes.ok || !cryptoRes.ok || !regimeRes.ok) {
+          throw new Error('API error');
+        }
 
         const macroData = await macroRes.json();
         const cryptoData = await cryptoRes.json();
@@ -187,7 +169,6 @@ export default function ScalpingPage() {
           cpi: macroData.cpi?.v ?? 3.2,
           realRate: (macroData.yield10y?.v ?? 4.5) - (macroData.cpi?.v ?? 3.2),
           nextEvent: macroData.nextEvent ?? { name: 'None', hours: 999 },
-          recessionRisk: 'low',
         });
 
         if (cryptoData.signals) {
@@ -202,29 +183,9 @@ export default function ScalpingPage() {
           vol_regime: regimeData.volatility?.vol_regime ?? 'normal',
           recommended_strategies: regimeData.composite?.recommended_strategies ?? [],
         });
-
-        // Generate scalping signals based on all data
-        const signals: ScalpingSignal[] = [];
-        if (cryptoData.signals) {
-          for (const sig of cryptoData.signals) {
-            if (sig.composite.overall === 'long' || sig.composite.overall === 'short') {
-              const action = sig.composite.overall === 'long' ? 'LONG' : 'SHORT';
-              signals.push({
-                symbol: sig.symbol,
-                entry: 'MARKET',
-                sl: '-0.4%',
-                tp: '+0.8%',
-                rr: 2.0,
-                confidence: sig.composite.confidence,
-                action,
-                reasons: sig.composite.reasons || [],
-              });
-            }
-          }
-        }
-        setScalpingSignals(signals);
       } catch (e) {
         console.error('Fetch error:', e);
+        setError('Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -235,67 +196,112 @@ export default function ScalpingPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    // Update clock
+    const updateClock = () => {
+      const now = new Date();
+      const clockEl = document.getElementById('clock');
+      if (clockEl) {
+        clockEl.textContent = now.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+      }
+    };
+    updateClock();
+    const interval = setInterval(updateClock, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="text-gray-500">Loading scalping dashboard...</div>
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-[#1a1a30] border-t-[#00e5ff] rounded-full animate-spin mx-auto mb-4" />
+          <div className="text-gray-500">Loading scalping dashboard...</div>
+        </div>
       </div>
     );
   }
 
-  const activeSignals = scalpingSignals.filter(s => s.action !== 'WAIT');
-  const hasActiveSignals = activeSignals.length > 0;
-  const macroSafe = macro && macro.vix < 30 && macro.nextEvent.hours > 2;
-  const regimeFavorable = regime && (regime.regime === 'trend_following' || regime.regime === 'mean_reverting');
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="text-center text-red-400">
+          <div className="text-4xl mb-2">⚠️</div>
+          <div>{error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  const activeSignals = cryptoSignals.filter(s =>
+    s.composite.overall === 'long' || s.composite.overall === 'short'
+  );
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
       {/* HEADER */}
       <div className="sticky top-0 z-50 bg-[#0a0a0f]/95 backdrop-blur border-b border-gray-800">
-        <div className="px-4 py-2">
+        <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className="text-sm font-bold text-white tracking-widest">M15 SCALPING</h1>
-              {regime && <RegimeBadge regime={regime.regime} trendScore={regime.trend_score} />}
+              <h1 className="text-lg font-bold text-white tracking-widest">M15 SCALPING</h1>
+              {regime && (
+                <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  regime.regime === 'trend_following' ? 'bg-green-900/30 text-green-400 border border-green-800' :
+                  regime.regime === 'mean_reverting' ? 'bg-purple-900/30 text-purple-400 border border-purple-800' :
+                  regime.regime === 'volatile_chop' ? 'bg-red-900/30 text-red-400 border border-red-800' :
+                  'bg-gray-800 text-gray-400 border border-gray-700'
+                }`}>
+                  {regime.regime.replace('_', ' ').toUpperCase()}
+                </div>
+              )}
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${macroSafe ? 'bg-green-400' : 'bg-red-400'}`} />
+            <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  macro && macro.vix < 30 && macro.nextEvent.hours > 2 ? 'bg-green-400' : 'bg-red-400'
+                }`} />
                 <span className="text-gray-500">MACRO</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${regimeFavorable ? 'bg-green-400' : 'bg-yellow-400'}`} />
-                <span className="text-gray-500">REGIME</span>
-              </div>
               <div className="text-gray-600">|</div>
-              <div className="text-gray-500" id="clock">--:--</div>
+              <div className="text-gray-500" id="clock">--:--:--</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-w-7xl mx-auto">
         {/* MACRO INTELLIGENCE */}
         {macro && (
           <div>
-            <div className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Macro Intelligence</div>
+            <div className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">
+              Macro Intelligence
+            </div>
             <MacroCompact data={macro} />
           </div>
         )}
 
-        {/* MAIN SIGNAL GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {activeSignals.map((signal, i) => (
-            <ScalpingCard key={i} signal={signal} />
-          ))}
+        {/* SIGNALS GRID */}
+        <div>
+          <div className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">
+            Active Signals ({activeSignals.length})
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {activeSignals.map((signal, i) => (
+              <ScalpingCard key={i} signal={signal} regime={regime} />
+            ))}
+          </div>
         </div>
 
-        {/* NO SIGNALS STATE */}
+        {/* NO SIGNALS */}
         {activeSignals.length === 0 && (
-          <div className="text-center py-12 border-2 border-dashed border-gray-800 rounded-lg">
-            <div className="text-4xl mb-2">⏸️</div>
-            <div className="text-lg font-bold text-gray-500">NO ACTIVE SIGNALS</div>
-            <div className="text-sm text-gray-600 mt-1">
+          <div className="text-center py-16 border-2 border-dashed border-gray-800 rounded-lg">
+            <div className="text-5xl mb-3">⏸️</div>
+            <div className="text-xl font-bold text-gray-500">NO ACTIVE SIGNALS</div>
+            <div className="text-sm text-gray-600 mt-2">
               {macro && macro.vix > 30 ? 'VIX elevated - reduce size' :
                regime && regime.regime === 'volatile_chop' ? 'Market choppy - wait' :
                'Waiting for setup...'}
@@ -303,70 +309,55 @@ export default function ScalpingPage() {
           </div>
         )}
 
-        {/* REGIME ANALYSIS */}
+        {/* REGIME INFO */}
         {regime && (
-          <div className="p-3 rounded-lg border border-gray-800 bg-gray-900/40">
-            <div className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Regime Analysis</div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div className="p-4 rounded-lg border border-gray-800 bg-gray-900/40">
+            <div className="text-[10px] text-gray-600 uppercase tracking-wider mb-3">
+              Regime Analysis
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
               <div>
-                <div className="text-gray-600">Hurst</div>
-                <div className="font-mono">{regime.hurst.toFixed(3)}</div>
+                <div className="text-gray-600 text-xs">Hurst</div>
+                <div className="font-mono text-white">{regime.hurst.toFixed(3)}</div>
               </div>
               <div>
-                <div className="text-gray-600">Efficiency</div>
-                <div className="font-mono">{(regime.efficiency * 100).toFixed(0)}%</div>
+                <div className="text-gray-600 text-xs">Trend Score</div>
+                <div className={`font-mono ${regime.trend_score > 0 ? 'text-green-400' : 'text-purple-400'}`}>
+                  {regime.trend_score > 0 ? '+' : ''}{regime.trend_score}
+                </div>
               </div>
               <div>
-                <div className="text-gray-600">Vol Regime</div>
-                <div className="font-mono">{regime.vol_regime.toUpperCase()}</div>
+                <div className="text-gray-600 text-xs">Efficiency</div>
+                <div className="font-mono text-white">{(regime.efficiency * 100).toFixed(0)}%</div>
               </div>
               <div>
-                <div className="text-gray-600">Strategy</div>
-                <div className="text-green-400">{regime.recommended_strategies[0] || 'WAIT'}</div>
+                <div className="text-gray-600 text-xs">Vol Regime</div>
+                <div className="font-mono text-white">{regime.vol_regime.toUpperCase()}</div>
+              </div>
+              <div>
+                <div className="text-gray-600 text-xs">Strategy</div>
+                <div className="font-mono text-green-400">
+                  {regime.recommended_strategies[0] || 'WAIT'}
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ACADEMIC SIGNALS TABLE */}
-        {cryptoSignals.length > 0 && (
-          <div className="p-3 rounded-lg border border-gray-800 bg-gray-900/40">
-            <div className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Academic Signals</div>
-            <div className="space-y-2">
-              {cryptoSignals.map((sig, i) => (
-                <div key={i} className="flex items-center justify-between text-xs p-2 rounded bg-gray-800/50">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">{sig.symbol}</span>
-                    <span className={`px-2 py-0.5 rounded ${
-                      sig.composite.overall === 'long' ? 'bg-green-900/30 text-green-400' :
-                      sig.composite.overall === 'short' ? 'bg-red-900/30 text-red-400' : 'bg-gray-700 text-gray-400'
-                    }`}>
-                      {sig.composite.overall.toUpperCase()}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <span>VW: {sig.vwtsmom.direction.slice(0, 4).toUpperCase()}</span>
-                    <span>Fund: {sig.funding.signal.slice(0, 4).toUpperCase()}</span>
-                    <span>MACD: {sig.macd_consensus.slice(0, 4).toUpperCase()}</span>
-                    <span className="text-gray-500">{sig.composite.confidence}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* ACADEMIC REFERENCES */}
+        <div className="text-center">
+          <div className="text-[10px] text-gray-700">
+            Based on: Daniel (2024) VW-TSMOM · He (2024) Funding Divergence · Huang (2024) Regime Detection · Mesíček (2025) Multi-TF MACD
           </div>
-        )}
+        </div>
       </div>
 
-      {/* FOOTER STATUS */}
+      {/* FOOTER */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0f]/95 border-t border-gray-800 px-4 py-2">
-        <div className="flex items-center justify-between text-[10px] text-gray-600">
-          <div className="flex items-center gap-4">
-            <span>Scalping M15 · Auto-refresh 30s</span>
-            <span className="text-gray-700">|</span>
-            <span>Hurst · VW-TSMOM · Funding Divergence</span>
-          </div>
+        <div className="flex items-center justify-between text-[10px] text-gray-600 max-w-7xl mx-auto">
+          <div>Scalping M15 · Auto-refresh 30s</div>
           <div>
-            Based on: Daniel (2024) · He (2024) · Huang (2024) · Mesíček (2025)
+            <a href="/" className="hover:text-gray-500">← Back to Dashboard</a>
           </div>
         </div>
       </div>
