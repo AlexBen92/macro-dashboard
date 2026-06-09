@@ -15,6 +15,9 @@ import StrategySignalEngine from '@/components/StrategySignalEngine';
 import BtcEcosystemSection from '@/components/btc-ecosystem/BtcEcosystemSection';
 import M15ScalpingSignals from '@/components/M15ScalpingSignals';
 import TradingChecklist from '@/components/TradingChecklist';
+import { useTelegramAlerts } from '@/components/TelegramAlerts';
+import MacroAdvancedPanel from '@/components/MacroAdvancedPanel';
+import CryptoAdvancedSignals from '@/components/CryptoAdvancedSignals';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -65,6 +68,9 @@ const fadeUp = {
 };
 
 export default function Home() {
+  // Enable Telegram alerts
+  useTelegramAlerts();
+
   const { whales, positions, whaleByCoin, totalLong, totalShort } = useWhaleDiscovery();
   const { data, score, coinData, cryptoSignals, loading, countdown, apiStatus, latency } = useMarketData(whaleByCoin, totalLong, totalShort);
   const { trades, alerts } = useTradeSelection(coinData, data);
@@ -112,6 +118,16 @@ export default function Home() {
         {/* ============================================== */}
         {/*  MACRO STACK v6.0 — CORE COMPONENTS             */}
         {/* ============================================== */}
+
+        {/* MACRO ADVANCED PANEL */}
+        <motion.div variants={fadeUp}>
+          <MacroAdvancedPanel />
+        </motion.div>
+
+        {/* CRYPTO ADVANCED SIGNALS */}
+        <motion.div variants={fadeUp}>
+          <CryptoAdvancedSignals />
+        </motion.div>
 
         {/* TOP 5 SCORE ENGINE */}
         <motion.div variants={fadeUp}>
