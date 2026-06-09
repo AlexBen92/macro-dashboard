@@ -8,7 +8,8 @@ interface MacroData {
   dxy?: number;
   yield10y?: number;
   cpi?: number;
-  nextEvent?: { name: string; hours: number; impact: string };
+  nextEvent?: { name: string; hoursLeft: number; impact: string };
+  upcomingEvents?: Array<{ name: string; impact: string; hoursLeft: number }>;
 }
 
 export default function MacroAdvancedPanel() {
@@ -52,7 +53,8 @@ export default function MacroAdvancedPanel() {
 
   // Calculs locaux pour l'affichage
   const recessionRisk = 'low';
-  const realRate = (data?.yield10y ?? 4) - (data?.cpi ?? 3);
+  // CORRIGÉ: CPI est maintenant en pourcentage d'inflation, pas en valeur absolue
+  const realRate = (data?.yield10y ?? 4) - (data?.cpi ?? 2.8);
   // Simple DXY trend calculation (would use history in production)
   const dxyTrend = 'neutral' as 'bullish' | 'bearish' | 'neutral';
 
@@ -135,7 +137,7 @@ export default function MacroAdvancedPanel() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
           className={`p-3 rounded-lg border bg-gray-900/60 ${
-            (data?.nextEvent?.hours ?? 999) < 24
+            (data?.nextEvent?.hoursLeft ?? 999) < 24
               ? 'border-yellow-800/50 bg-yellow-950/20'
               : 'border-gray-800'
           }`}
@@ -145,14 +147,48 @@ export default function MacroAdvancedPanel() {
             {data?.nextEvent?.name ?? 'None'}
           </div>
           <div className={`text-[10px] mt-1 ${
-            (data?.nextEvent?.hours ?? 999) < 24 ? 'text-yellow-400' : 'text-gray-400'
+            (data?.nextEvent?.hoursLeft ?? 999) < 24 ? 'text-yellow-400' : 'text-gray-400'
           }`}>
             {data?.nextEvent
-              ? `${Math.floor(data.nextEvent.hours)}h left`
+              ? `${Math.floor(data.nextEvent.hoursLeft)}h left`
               : 'No upcoming events'}
           </div>
         </motion.div>
       </div>
+
+      {/* US High Impact Economic Calendar */}
+      {data?.upcomingEvents && data.upcomingEvents.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-3 p-3 rounded-lg border border-gray-800 bg-gray-900/60"
+        >
+          <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">
+            📅 US High Impact Events
+          </div>
+          <div className="space-y-1.5">
+            {data.upcomingEvents.map((event, idx) => (
+              <div key={idx} className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <span className={
+                    event.impact === 'high' ? 'text-red-400' : 'text-yellow-400'
+                  }>
+                    {event.impact === 'high' ? '🔴' : '🟡'}
+                  </span>
+                  <span className="text-gray-300">{event.name}</span>
+                </div>
+                <span className={event.hoursLeft < 24 ? 'text-yellow-400' : 'text-gray-500'}>
+                  {event.hoursLeft < 48
+                    ? `${event.hoursLeft}h`
+                    : `${Math.floor(event.hoursLeft / 24)}d`
+                  }
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Macro Regime Banner */}
       <motion.div
