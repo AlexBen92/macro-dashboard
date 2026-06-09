@@ -18,6 +18,7 @@ import TradingChecklist from '@/components/TradingChecklist';
 import { useTelegramAlerts } from '@/components/TelegramAlerts';
 import MacroAdvancedPanel from '@/components/MacroAdvancedPanel';
 import CryptoAdvancedSignals from '@/components/CryptoAdvancedSignals';
+import QuantRegimesPanel from '@/components/QuantRegimesPanel';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -127,6 +128,11 @@ export default function Home() {
         {/* CRYPTO ADVANCED SIGNALS */}
         <motion.div variants={fadeUp}>
           <CryptoAdvancedSignals />
+        </motion.div>
+
+        {/* QUANT REGIMES PANEL */}
+        <motion.div variants={fadeUp}>
+          <QuantRegimesPanel />
         </motion.div>
 
         {/* TOP 5 SCORE ENGINE */}

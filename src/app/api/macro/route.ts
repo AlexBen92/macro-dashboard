@@ -66,8 +66,30 @@ export async function GET() {
       }
     } catch { /* skip */ }
 
+    // CPI (placeholder - would need FRED API)
+    let cpi: { v: number | null; src: string } = { v: 3.2, src: 'Placeholder' };
+    try {
+      const fredKey = process.env.FRED_API_KEY;
+      if (fredKey) {
+        const fredRes = await fetch(
+          `https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&api_key=${fredKey}&file_type=json&sort_order=desc&limit=1`
+        );
+        const fredData = await fredRes.json();
+        if (fredData.observations?.[0]?.value) {
+          cpi = { v: parseFloat(fredData.observations[0].value), src: 'FRED' };
+        }
+      }
+    } catch { /* skip */ }
+
+    // Next macro event (CPI/FOMC/release dates)
+    const nextEvent = {
+      name: 'CPI Release',
+      hours: 120, // Placeholder - would need real calendar
+      impact: 'high',
+    };
+
     return NextResponse.json(
-      { vix, dxy, yield10y, timestamp: Date.now() },
+      { vix, dxy, yield10y, cpi, nextEvent, timestamp: Date.now() },
       { headers: { 'Cache-Control': 's-maxage=300, stale-while-revalidate=120' } }
     );
   } catch (e) {
