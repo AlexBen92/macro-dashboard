@@ -124,10 +124,14 @@ export default function MacroAdvancedPanel() {
           </div>
           <div className={`text-[10px] mt-1 ${
             realRate < 0 ? 'text-green-400' :
-            realRate < 1.5 ? 'text-yellow-400' : 'text-red-400'
+            realRate < 1 ? 'text-green-300' :
+            realRate < 2 ? 'text-yellow-400' :
+            realRate < 3 ? 'text-orange-400' : 'text-red-400'
           }`}>
-            {realRate < 0 ? 'NEGATIVE (Bullish Crypto)' :
-             realRate < 1.5 ? 'LOW (Neutral)' : 'HIGH (Bearish Crypto)'}
+            {realRate < 0 ? 'NEGATIVE (Very Bullish)' :
+             realRate < 1 ? 'LOW (Bullish)' :
+             realRate < 2 ? 'NEUTRAL' :
+             realRate < 3 ? 'MODERATE (Slight Bearish)' : 'HIGH (Bearish)'}
           </div>
         </motion.div>
 
