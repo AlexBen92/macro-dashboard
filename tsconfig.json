@@ -39,6 +39,11 @@
     "node_modules",
     "run-backtest*.ts",
     "run-walk-forward.ts",
-    "test-v4-modules.ts"
+    "test-v4-modules.ts",
+    "validate-v6-results.ts",
+    "analyze-*.ts",
+    "generate-final-report.ts",
+    "debug-*.ts",
+    "backtest-full-metrics.ts"
   ]
 }

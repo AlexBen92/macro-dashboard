@@ -13,6 +13,8 @@ import Top5ScoreEngine from '@/components/Top5ScoreEngine';
 import FundingAggregator from '@/components/FundingAggregator';
 import StrategySignalEngine from '@/components/StrategySignalEngine';
 import BtcEcosystemSection from '@/components/btc-ecosystem/BtcEcosystemSection';
+import M15ScalpingSignals from '@/components/M15ScalpingSignals';
+import TradingChecklist from '@/components/TradingChecklist';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -114,6 +116,16 @@ export default function Home() {
         {/* TOP 5 SCORE ENGINE */}
         <motion.div variants={fadeUp}>
           <Top5ScoreEngine />
+        </motion.div>
+
+        {/* TRADING CHECKLIST */}
+        <motion.div variants={fadeUp}>
+          <TradingChecklist />
+        </motion.div>
+
+        {/* M15 SCALPING SIGNALS */}
+        <motion.div variants={fadeUp}>
+          <M15ScalpingSignals />
         </motion.div>
 
         {/* INTRADAY HEATMAP */}
