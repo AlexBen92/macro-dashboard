@@ -109,15 +109,15 @@ function ScalpingCard({ signal, regime }: { signal: CryptoSignal; regime: QuantR
       <div className="grid grid-cols-3 gap-2 text-xs mb-3">
         <div className="text-center p-2 rounded bg-gray-800">
           <div className="text-gray-600">VW-TSMOM</div>
-          <div className="font-bold text-white">{signal.vwtsmom.direction.slice(0, 4).toUpperCase()}</div>
+          <div className="font-bold text-white">{signal.vwtsmom?.direction?.slice(0, 4)?.toUpperCase?.() ?? '----'}</div>
         </div>
         <div className="text-center p-2 rounded bg-gray-800">
           <div className="text-gray-600">FUNDING</div>
-          <div className="font-bold text-white">{signal.funding.signal.slice(0, 4).toUpperCase()}</div>
+          <div className="font-bold text-white">{signal.funding?.signal?.slice(0, 4)?.toUpperCase?.() ?? '----'}</div>
         </div>
         <div className="text-center p-2 rounded bg-gray-800">
           <div className="text-gray-600">MACD</div>
-          <div className="font-bold text-white">{signal.macd_consensus.slice(0, 4).toUpperCase()}</div>
+          <div className="font-bold text-white">{signal.macd_consensus?.slice(0, 4)?.toUpperCase?.() ?? '----'}</div>
         </div>
       </div>
 
@@ -255,7 +255,7 @@ export default function ScalpingPage() {
                   regime.regime === 'volatile_chop' ? 'bg-red-900/30 text-red-400 border border-red-800' :
                   'bg-gray-800 text-gray-400 border border-gray-700'
                 }`}>
-                  {regime.regime.replace('_', ' ').toUpperCase()}
+                  {regime.regime?.replace('_', ' ')?.toUpperCase?.() ?? 'RANDOM WALK'}
                 </div>
               )}
             </div>
@@ -332,7 +332,7 @@ export default function ScalpingPage() {
               </div>
               <div>
                 <div className="text-gray-600 text-xs">Vol Regime</div>
-                <div className="font-mono text-white">{regime.vol_regime.toUpperCase()}</div>
+                <div className="font-mono text-white">{regime.vol_regime?.toUpperCase?.() ?? 'NORMAL'}</div>
               </div>
               <div>
                 <div className="text-gray-600 text-xs">Strategy</div>

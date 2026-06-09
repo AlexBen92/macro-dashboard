@@ -102,7 +102,7 @@ export default function VirtualAccountPanel({ accountType, instruments, livePric
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <div className="font-mono text-[0.6rem] text-[#5a6070] tracking-[2px] uppercase mb-1">
-              COMPTE VIRTUEL — {accountType.toUpperCase()} DEMO
+              COMPTE VIRTUEL — {accountType?.toUpperCase?.() ?? 'FTMO'} DEMO
             </div>
             <div className="flex items-baseline gap-3">
               <span className="font-mono text-[2rem] font-bold text-[#eaeef4]">${fmt(account.balance)}</span>

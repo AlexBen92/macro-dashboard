@@ -129,7 +129,7 @@ export default function CryptoAdvancedSignals() {
                           ? 'bg-red-500/20 text-red-400'
                           : 'bg-gray-500/20 text-gray-400'
                       }`}>
-                        {signal.status.toUpperCase()}
+                        {signal.status?.toUpperCase?.() ?? 'UNKNOWN'}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">

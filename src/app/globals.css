@@ -52,6 +52,27 @@ body {
   100% { background-color: transparent; }
 }
 
+/* MACRO STACK v8.0 — Additional animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; }
+  50%       { opacity: 0.6; box-shadow: 0 0 3px currentColor; }
+}
+
+@keyframes scanLine {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* Scrollbar dark v8.0 */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0f172a; }
+::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+/* Selection */
+::selection { background: #3b82f633; color: #60a5fa; }
+
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 .animate-flash { animation: flash 0.5s ease-out; }
 

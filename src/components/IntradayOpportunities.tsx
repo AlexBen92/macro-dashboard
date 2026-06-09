@@ -197,7 +197,7 @@ function OpportunityCard({ opportunity, index }: { opportunity: TradeOpportunity
               className="font-mono text-[0.6rem] px-2 py-0.5 rounded"
               style={{ background: confidenceColor + '20', color: confidenceColor }}
             >
-              {opportunity.confidenceLabel.toUpperCase()}
+              {opportunity.confidenceLabel?.toUpperCase?.() ?? 'UNKNOWN'}
             </span>
           </div>
         </div>

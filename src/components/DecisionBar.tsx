@@ -15,7 +15,7 @@ interface DecisionBarProps {
   countdown: number;
   loading: boolean;
   latency: number;
-  apiStatus: Record<string, 'ok' | 'er' | 'ld'>;
+  apiStatus?: Record<string, 'ok' | 'er' | 'ld'>;
 }
 
 export default function DecisionBar({
@@ -92,10 +92,10 @@ export default function DecisionBar({
         )}
         <span className="font-mono text-[0.68rem] text-[#5a6070]">{countdown}s</span>
         <div className="flex gap-1.5">
-          {Object.entries(apiStatus).map(([k, v]) => (
+          {apiStatus && Object.entries(apiStatus).map(([k, v]) => (
             <span key={k} className="flex items-center gap-1 font-mono text-[0.6rem] text-[#5a6070]">
               <span className={`w-1.5 h-1.5 rounded-full inline-block ${v === 'ok' ? 'bg-[#4ade80]' : v === 'er' ? 'bg-[#ff3355]' : 'bg-[#ffaa00]'}`} />
-              {k.toUpperCase()}
+              {k?.toUpperCase?.() ?? k}
             </span>
           ))}
         </div>

@@ -208,7 +208,7 @@ export default function QuantRegimesPanel() {
               data.variance_ratio.regime === 'trending' ? 'text-green-400' :
               data.variance_ratio.regime === 'mean_reverting' ? 'text-purple-400' : 'text-gray-400'
             }`}>
-              {data.variance_ratio.regime.toUpperCase()}
+              {data.variance_ratio.regime?.toUpperCase?.() ?? 'UNKNOWN'}
             </div>
             <div className="text-[9px] text-gray-600 mt-1">
               VR = 1 → Random Walk
@@ -232,7 +232,7 @@ export default function QuantRegimesPanel() {
               data.efficiency.trend_strength === 'strong' ? 'text-green-400' :
               data.efficiency.trend_strength === 'weak' ? 'text-yellow-400' : 'text-red-400'
             }`}>
-              {data.efficiency.trend_strength.toUpperCase()}
+              {data.efficiency.trend_strength?.toUpperCase?.() ?? 'NONE'}
             </div>
             <div className="text-[9px] text-gray-600 mt-1">
               Choppiness: {data.efficiency.choppiness_index.toFixed(0)}
@@ -268,7 +268,7 @@ export default function QuantRegimesPanel() {
               vol.vol_regime === 'elevated' ? 'text-yellow-400' :
               vol.vol_regime === 'extreme' ? 'text-red-400' : 'text-gray-400'
             }`}>
-              {vol.vol_regime.toUpperCase()}
+              {vol.vol_regime?.toUpperCase?.() ?? 'NORMAL'}
             </div>
           </div>
         </motion.div>
