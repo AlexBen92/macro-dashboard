@@ -395,7 +395,7 @@ export default function Home() {
 
       {/* FOOTER */}
       <div className="flex items-center gap-3 px-6 py-1.5 border-t border-[#1e1e32] bg-[#0e0e1a] font-mono text-[0.65rem] text-[#5a6070]">
-        <span>Macro Dashboard v2.0</span>
+        <span>Macro Dashboard v2.1 — Live</span>
         <span className="flex-1" />
         <span>Auto-refresh 60s</span>
       </div>
