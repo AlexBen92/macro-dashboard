@@ -5,7 +5,6 @@ import { useWhaleDiscovery } from '@/hooks/useWhaleDiscovery';
 import { useMarketData } from '@/hooks/useMarketData';
 import { useTradeSelection } from '@/hooks/useTradeSelection';
 import { useSessionGuide } from '@/hooks/useSessionGuide';
-import SignalSummary from '@/components/ui/SignalSummary';
 import TopTokensM15Monitor from '@/components/TopTokensM15Monitor';
 import TradeJournal from '@/components/TradeJournal';
 import type { TrafficLightStatus } from '@/lib/types';
@@ -186,40 +185,13 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Bottom Row: Signals & Journal */}
-        <div className="grid grid-cols-12 gap-3">
-          {/* Left: Signals compact */}
-          <motion.div
-            initial={fadeUp.hidden}
-            animate={fadeUp.show}
-            className="col-span-12 lg:col-span-6"
-          >
-            <div className="bg-[#0e0e1a] border border-[#1e1e32] rounded p-3">
-              <div className="font-mono text-[0.6rem] text-[#5a6070] tracking-wider mb-2">SIGNALS</div>
-              {cryptoSignals ? (
-                <SignalSummary
-                  signals={cryptoSignals.signals}
-                  netBias={cryptoSignals.netBias}
-                  biasLabel={cryptoSignals.biasLabel}
-                  activeCount={cryptoSignals.activeCount}
-                  strongCount={cryptoSignals.strongCount}
-                  title=""
-                />
-              ) : (
-                <div className="py-4 text-center font-mono text-[0.65rem] text-[#5a6070]">Loading...</div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Right: Journal minimal */}
-          <motion.div
-            initial={fadeUp.hidden}
-            animate={fadeUp.show}
-            className="col-span-12 lg:col-span-6"
-          >
-            <TradeJournal />
-          </motion.div>
-        </div>
+        {/* Bottom Row: Trade Journal */}
+        <motion.div
+          initial={fadeUp.hidden}
+          animate={fadeUp.show}
+        >
+          <TradeJournal />
+        </motion.div>
       </div>
 
       {/* Status bar */}
