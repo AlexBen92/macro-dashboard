@@ -145,57 +145,39 @@ export default function Top5ScoreEngine() {
   }, [refresh]);
 
   return (
-    <section className="mb-8">
+    <section className="mb-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-widest uppercase">
+          <h2 className="text-sm font-bold text-white tracking-widest uppercase">
             🎯 Top {TOP_N} — Score Engine
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Seuil: ≥{(MIN_EDGE * 100).toFixed(2)}% net (2× HL taker) · M15/M30 · {ts}
+          <p className="text-[10px] text-gray-500 mt-0.5">
+            Seuil: ≥{(MIN_EDGE * 100).toFixed(2)}% net · {ts}
           </p>
         </div>
         <button onClick={refresh}
-          className="text-xs px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition">
+          className="text-[10px] px-2 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition">
           ↻
         </button>
-      </div>
-
-      {/* Fee bar */}
-      <div className="mb-4 px-3 py-2 rounded-lg bg-gray-900 border border-gray-800 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-400">
-        <span>Maker <span className="text-green-400 font-mono">−{(HL_MAKER_FEE*100).toFixed(3)}%</span> (rebate)</span>
-        <span>Taker <span className="text-yellow-400 font-mono">+{(HL_TAKER_FEE*100).toFixed(3)}%</span></span>
-        <span>RT min <span className="text-red-400 font-mono">{(HL_ROUND_TRIP*100).toFixed(2)}%</span></span>
-        <span className="ml-auto">Maker ALO = capture rebate</span>
-      </div>
-
-      {/* Session status */}
-      <div className={`mb-4 px-3 py-2 rounded-lg text-xs border flex items-center gap-2 ${
-        win ? 'border-green-700/40 bg-green-950/20 text-green-300'
-            : 'border-gray-700 bg-gray-900/40 text-gray-500'
-      }`}>
-        <span>{win ? '● FENÊTRE ACTIVE' : '○ OFF-HOURS'}</span>
-        <span>{win ? `${win.label} · ${win.start}h–${win.end}h UTC · Score ${(win.score*100).toFixed(0)}/100` : 'Attendre EU Open (7h UTC) ou EU/US Core (13h UTC)'}</span>
-        {win && win.score >= 0.7 && <span className="ml-auto text-green-400">✅ Trading OK</span>}
-        {win && win.score < 0.7  && <span className="ml-auto text-yellow-400">⚠️ Vol faible</span>}
       </div>
 
       {err && <div className="mb-3 p-2 bg-red-950/40 text-red-400 text-xs rounded border border-red-800/30">{err}</div>}
 
       {loading ? (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {Array.from({ length: TOP_N }).map((_, i) => (
-            <div key={i} className="h-24 bg-gray-900/60 rounded-xl animate-pulse border border-gray-800" />
+            <div key={i} className="h-16 bg-gray-900/60 rounded-lg animate-pulse border border-gray-800" />
           ))}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {tokens.map(t => {
             const bc = BIAS_COLORS[t.bias];
+            const isTradeable = t.edgeValid && t.score >= 60;
             return (
               <div key={t.symbol}
-                className="relative rounded-xl border p-4 transition-all hover:brightness-110"
+                className={`relative rounded-lg border p-3 transition-all hover:brightness-110 ${!isTradeable ? 'opacity-50' : ''}`}
                 style={{ borderColor: bc.border + '44', background: bc.bg }}>
 
                 {/* Rank */}
@@ -257,8 +239,8 @@ export default function Top5ScoreEngine() {
         </div>
       )}
 
-      <p className="mt-3 text-[11px] text-gray-600 text-center">
-        Mis à jour toutes les 30s · Source: Hyperliquid API · Seuil edge = {(MIN_EDGE*100).toFixed(2)}% (2× taker RT)
+      <p className="mt-2 text-[10px] text-gray-600 text-center">
+        MÀJ 30s · Hyperliquid API · Seuil edge = {(MIN_EDGE*100).toFixed(2)}%
       </p>
     </section>
   );

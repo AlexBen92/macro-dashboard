@@ -7,19 +7,18 @@ import { useTradeSelection } from '@/hooks/useTradeSelection';
 import { useSessionGuide } from '@/hooks/useSessionGuide';
 import DecisionBar from '@/components/DecisionBar';
 import SignalSummary from '@/components/ui/SignalSummary';
-import HyperliquidMonitor from '@/components/HyperliquidMonitor';
 import IntradayHeatmap from '@/components/IntradayHeatmap';
 import Top5ScoreEngine from '@/components/Top5ScoreEngine';
 import FundingAggregator from '@/components/FundingAggregator';
 import StrategySignalEngine from '@/components/StrategySignalEngine';
 import SessionCountdown from '@/components/SessionCountdown';
 import TopTokenScanner from '@/components/TopTokenScanner';
+import TopTokensM15Monitor from '@/components/TopTokensM15Monitor';
+import USHighImpactNews from '@/components/USHighImpactNews';
 import MacroContext from '@/components/MacroContext';
 import OrderFlowProxy from '@/components/OrderFlowProxy';
 import TradeJournal from '@/components/TradeJournal';
 import BtcEcosystemSection from '@/components/btc-ecosystem/BtcEcosystemSection';
-import M15ScalpingSignals from '@/components/M15ScalpingSignals';
-import TradingChecklist from '@/components/TradingChecklist';
 import { useTelegramAlerts } from '@/components/TelegramAlerts';
 import MacroAdvancedPanel from '@/components/MacroAdvancedPanel';
 import CryptoAdvancedSignals from '@/components/CryptoAdvancedSignals';
@@ -140,15 +139,26 @@ export default function Home() {
         animate="show"
       >
         {/* ============================================== */}
-        {/*  MACRO STACK v8.0 — SESSION CLOCK                */}
+        {/*  MACRO STACK v9.0 — M15 TRADING MODE            */}
         {/* ============================================== */}
 
+        {/* SESSION CLOCK */}
         <motion.div variants={fadeUp}>
           <SessionCountdown />
         </motion.div>
 
+        {/* US HIGH IMPACT NEWS */}
+        <motion.div variants={fadeUp} className="mb-6">
+          <USHighImpactNews />
+        </motion.div>
+
+        {/* TOP TOKENS M15 MONITOR (merged scanner + monitor) */}
+        <motion.div variants={fadeUp} className="mb-6">
+          <TopTokensM15Monitor equity={1000} />
+        </motion.div>
+
         {/* ============================================== */}
-        {/*  MACRO STACK v7.0 — CORE COMPONENTS             */}
+        {/*  CORE COMPONENTS                                */}
         {/* ============================================== */}
 
         {/* MACRO ADVANCED PANEL */}
@@ -169,21 +179,6 @@ export default function Home() {
         {/* TOP 5 SCORE ENGINE */}
         <motion.div variants={fadeUp}>
           <Top5ScoreEngine />
-        </motion.div>
-
-        {/* TOP TOKENS M15 SCANNER v8.0 */}
-        <motion.div variants={fadeUp}>
-          <TopTokenScanner equity={1000} />
-        </motion.div>
-
-        {/* TRADING CHECKLIST */}
-        <motion.div variants={fadeUp}>
-          <TradingChecklist />
-        </motion.div>
-
-        {/* M15 SCALPING SIGNALS */}
-        <motion.div variants={fadeUp}>
-          <M15ScalpingSignals />
         </motion.div>
 
         {/* INTRADAY HEATMAP */}
@@ -216,12 +211,7 @@ export default function Home() {
           <StrategySignalEngine />
         </motion.div>
 
-        {/* HYPERLIQUID PERPS MONITOR */}
-        <motion.div variants={fadeUp}>
-          <HyperliquidMonitor />
-        </motion.div>
-
-        {/* TRADE JOURNAL v8.0 */}
+        {/* TRADE JOURNAL v9.0 */}
         <motion.div variants={fadeUp}>
           <TradeJournal />
         </motion.div>
@@ -259,7 +249,7 @@ export default function Home() {
         ))}
         <span className="flex-1" />
         <span>{latency}ms</span>
-        <span>MACRO STACK v8.0 — M15 Scalping Mode</span>
+        <span>MACRO STACK v9.0 — M15 Trading Mode</span>
       </div>
     </div>
   );

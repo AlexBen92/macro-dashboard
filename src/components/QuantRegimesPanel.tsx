@@ -43,6 +43,7 @@ export default function QuantRegimesPanel() {
   const [data, setData] = useState<RegimeData | null>(null);
   const [loading, setLoading] = useState(true);
   const [symbol, setSymbol] = useState('BTC');
+  const [showAcademic, setShowAcademic] = useState(false);
 
   useEffect(() => {
     const fetchRegimes = async () => {
@@ -77,14 +78,14 @@ export default function QuantRegimesPanel() {
   const vol = data?.volatility;
 
   return (
-    <section className="mb-8">
+    <section className="mb-6">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-widest uppercase">
+          <h2 className="text-sm font-bold text-white tracking-widest uppercase">
             📊 Quant Regime Detection
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Hurst · Stationarity · Variance Ratio · Efficiency · Vol Regime
+          <p className="text-[10px] text-gray-500 mt-0.5">
+            Hurst · Stationarity · Variance Ratio · Efficiency · Vol
           </p>
         </div>
         <div className="flex gap-2">
@@ -92,7 +93,7 @@ export default function QuantRegimesPanel() {
             <button
               key={s}
               onClick={() => setSymbol(s)}
-              className={`px-3 py-1 rounded text-xs font-semibold ${
+              className={`px-2 py-1 rounded text-[10px] font-semibold ${
                 symbol === s
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-800 text-gray-400'
@@ -301,22 +302,29 @@ export default function QuantRegimesPanel() {
         </motion.div>
       )}
 
-      {/* Academic References */}
+      {/* Academic References (collapsible) */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="mt-3 p-3 rounded-lg border border-gray-800 bg-gray-900/20"
+        className="mt-3"
       >
-        <div className="text-[10px] uppercase tracking-wider text-gray-600 mb-2">
-          📚 References
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[9px] text-gray-500">
-          <div>Hurst (1951) — Long-term memory</div>
-          <div>Lo (1991) — Modified R/S</div>
-          <div>Lo-MacKinlay (1988) — Variance Ratio</div>
-          <div>Kaufman — Efficiency Ratio</div>
-        </div>
+        <button
+          onClick={() => setShowAcademic(!showAcademic)}
+          className="text-[10px] uppercase tracking-wider text-gray-600 hover:text-gray-400 transition-colors mb-2 flex items-center gap-1"
+        >
+          📚 Academic References {showAcademic ? '▼' : '▶'}
+        </button>
+        {showAcademic && (
+          <div className="p-2 rounded-lg border border-gray-800 bg-gray-900/20">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-[9px] text-gray-500">
+              <div>Hurst (1951) — Long-term memory</div>
+              <div>Lo (1991) — Modified R/S</div>
+              <div>Lo-MacKinlay (1988) — Variance Ratio</div>
+              <div>Kaufman — Efficiency Ratio</div>
+            </div>
+          </div>
+        )}
       </motion.div>
     </section>
   );
