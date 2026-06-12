@@ -5,16 +5,9 @@ import { useWhaleDiscovery } from '@/hooks/useWhaleDiscovery';
 import { useMarketData } from '@/hooks/useMarketData';
 import { useTradeSelection } from '@/hooks/useTradeSelection';
 import { useSessionGuide } from '@/hooks/useSessionGuide';
-import TradingTerminalHeader from '@/components/TradingTerminalHeader';
 import SignalSummary from '@/components/ui/SignalSummary';
-import Top5ScoreEngine from '@/components/Top5ScoreEngine';
-import FundingAggregator from '@/components/FundingAggregator';
-import SessionCountdown from '@/components/SessionCountdown';
 import TopTokensM15Monitor from '@/components/TopTokensM15Monitor';
-import USHighImpactNews from '@/components/USHighImpactNews';
-import MacroContext from '@/components/MacroContext';
 import TradeJournal from '@/components/TradeJournal';
-import QuantRegimesPanel from '@/components/QuantRegimesPanel';
 import type { TrafficLightStatus } from '@/lib/types';
 import Link from 'next/link';
 
@@ -193,25 +186,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Middle Row: Score & Regime */}
-        <div className="grid grid-cols-12 gap-3 mb-3">
-          <motion.div
-            initial={fadeUp.hidden}
-            animate={fadeUp.show}
-            className="col-span-12 lg:col-span-6"
-          >
-            <Top5ScoreEngine />
-          </motion.div>
-          <motion.div
-            initial={fadeUp.hidden}
-            animate={fadeUp.show}
-            className="col-span-12 lg:col-span-6"
-          >
-            <QuantRegimesPanel />
-          </motion.div>
-        </div>
-
-        {/* Bottom Row: Context & Journal */}
+        {/* Bottom Row: Signals & Journal */}
         <div className="grid grid-cols-12 gap-3">
           {/* Left: Signals compact */}
           <motion.div
