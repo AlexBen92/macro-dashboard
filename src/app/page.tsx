@@ -1,27 +1,19 @@
 'use client';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useWhaleDiscovery } from '@/hooks/useWhaleDiscovery';
 import { useMarketData } from '@/hooks/useMarketData';
 import { useTradeSelection } from '@/hooks/useTradeSelection';
 import { useSessionGuide } from '@/hooks/useSessionGuide';
-import DecisionBar from '@/components/DecisionBar';
+import TradingTerminalHeader from '@/components/TradingTerminalHeader';
 import SignalSummary from '@/components/ui/SignalSummary';
-import IntradayHeatmap from '@/components/IntradayHeatmap';
 import Top5ScoreEngine from '@/components/Top5ScoreEngine';
 import FundingAggregator from '@/components/FundingAggregator';
-import StrategySignalEngine from '@/components/StrategySignalEngine';
 import SessionCountdown from '@/components/SessionCountdown';
-import TopTokenScanner from '@/components/TopTokenScanner';
 import TopTokensM15Monitor from '@/components/TopTokensM15Monitor';
 import USHighImpactNews from '@/components/USHighImpactNews';
 import MacroContext from '@/components/MacroContext';
-import OrderFlowProxy from '@/components/OrderFlowProxy';
 import TradeJournal from '@/components/TradeJournal';
-import BtcEcosystemSection from '@/components/btc-ecosystem/BtcEcosystemSection';
-import { useTelegramAlerts } from '@/components/TelegramAlerts';
-import MacroAdvancedPanel from '@/components/MacroAdvancedPanel';
-import CryptoAdvancedSignals from '@/components/CryptoAdvancedSignals';
 import QuantRegimesPanel from '@/components/QuantRegimesPanel';
 import type { TrafficLightStatus } from '@/lib/types';
 import Link from 'next/link';
@@ -47,42 +39,34 @@ function computeDecision(
     return {
       light: 'stop',
       verdict: 'NO TRADE',
-      sizing: hasClearBias ? 'TAILLE ÷4' : 'CASH',
+      sizing: hasClearBias ? '÷4' : 'CASH',
     };
   }
   if (!hasClearBias || vixElevated || eventClose) {
     return {
       light: 'caution',
       verdict: 'PRUDENT',
-      sizing: (vixElevated || fgExtreme) ? 'TAILLE ÷2' : 'TAILLE ÷2',
+      sizing: (vixElevated || fgExtreme) ? '÷2' : '÷2',
     };
   }
   return {
     light: 'go',
     verdict: 'TRADE',
-    sizing: avgVar < 3 ? 'TAILLE PLEINE' : 'TAILLE ÷2',
+    sizing: avgVar < 3 ? 'FULL' : '÷2',
   };
 }
 
-const stagger = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
-} as const;
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 200, damping: 20 } },
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 },
 };
 
 export default function Home() {
-  // Enable Telegram alerts
-  useTelegramAlerts();
-
   const { whales, positions, whaleByCoin, totalLong, totalShort } = useWhaleDiscovery();
   const { data, score, coinData, cryptoSignals, loading, countdown, apiStatus = {}, latency } = useMarketData(whaleByCoin, totalLong, totalShort);
   const { trades, alerts } = useTradeSelection(coinData, data);
   const { session, nextEvent } = useSessionGuide();
 
-  // Compute avg VaR
   let avgVar = 2;
   const varVals = Object.values(coinData).filter(c => c.var95 != null);
   if (varVals.length > 0) {
@@ -96,160 +80,183 @@ export default function Home() {
     eventHours, data?.fng?.v, avgVar,
   );
 
+  const verdictColor = light === 'go' ? '#22c55e' : light === 'caution' ? '#f97316' : '#ef4444';
+
   return (
-    <div className="min-h-screen">
-      {/* NAV BAR */}
-      <nav className="flex items-center gap-3 px-6 py-2.5 bg-[#06060a] border-b border-[#1a1a30]">
-        <span className="font-mono text-[0.85rem] font-bold text-[#556680] tracking-[3px] mr-4">
+    <div className="min-h-screen bg-[#06060a]">
+      {/* NAV BAR - Ultra compact */}
+      <nav className="flex items-center gap-4 px-4 py-1.5 bg-[#08080f] border-b border-[#1a1a30]">
+        <span className="font-mono text-[0.7rem] font-bold text-[#556680] tracking-[2px]">
           MACRO STACK
         </span>
-        <Link href="/crypto" className="relative">
-          <span className="font-mono text-[0.9rem] font-semibold px-4 py-1.5 rounded transition-colors text-[#556680] hover:text-[#e8e8f0]">
-            CRYPTO
-          </span>
+        <div className="flex-1" />
+        <Link href="/crypto" className="font-mono text-[0.65rem] text-[#556680] hover:text-[#e8e8f0] px-2 py-1">
+          CRYPTO
         </Link>
-        <Link href="/scalping" className="relative">
-          <span className="font-mono text-[0.9rem] font-semibold px-4 py-1.5 rounded transition-colors text-[#00e5ff] hover:text-[#00e5ff]">
-            SCALPING
-          </span>
+        <Link href="/scalping" className="font-mono text-[0.65rem] text-[#00e5ff] px-2 py-1">
+          SCALPING
         </Link>
       </nav>
 
-      {/* STICKY DECISION BAR */}
-      <div className="decision-bar-sticky">
-        <DecisionBar
-          light={light}
-          verdict={verdict}
-          score={score}
-          sizing={sizing}
-          session={session}
-          nextEvent={nextEvent}
-          countdown={countdown}
-          loading={loading}
-          latency={latency}
-          apiStatus={apiStatus}
-        />
+      {/* DECISION HEADER - Single line */}
+      <div className="flex items-center gap-3 px-4 py-2 bg-[#0a0a12] border-b border-[#1e1e32]">
+        {/* Decision Engine */}
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full" style={{ background: verdictColor }} />
+          <span className="font-mono text-[0.75rem] font-bold" style={{ color: verdictColor }}>
+            {verdict}
+          </span>
+        </div>
+
+        <div className="w-px h-3 bg-[#1e1e32]" />
+
+        {/* Score */}
+        <span className="font-mono text-[0.65rem] text-[#8890a0]">
+          {(score?.score ?? 0) >= 0 ? '+' : ''}{(score?.score ?? 0).toFixed(1)}
+        </span>
+
+        <div className="w-px h-3 bg-[#1e1e32]" />
+
+        {/* Sizing */}
+        <span className="font-mono text-[0.65rem] text-[#a0a8b8]">
+          {sizing}
+        </span>
+
+        <div className="w-px h-3 bg-[#1e1e32]" />
+
+        {/* Regime */}
+        <span className="font-mono text-[0.6rem] text-[#5a6070]">REGIME</span>
+        <span className="font-mono text-[0.65rem] text-[#8890a0]">RANGE</span>
+
+        <div className="w-px h-3 bg-[#1e1e32]" />
+
+        {/* Session */}
+        <span className="font-mono text-[0.6rem] text-[#5a6070]">SESSION</span>
+        <span className={`font-mono text-[0.65rem] ${session.active ? 'text-[#22c55e]' : 'text-[#64748b]'}`}>
+          {session.active || 'OFF'}
+        </span>
+
+        <div className="w-px h-3 bg-[#1e1e32]" />
+
+        {/* News */}
+        <span className="font-mono text-[0.6rem] text-[#5a6070]">NEWS</span>
+        <span className={`font-mono text-[0.65rem] ${eventHours < 2 ? 'text-[#ef4444]' : eventHours < 24 ? 'text-[#f97316]' : 'text-[#64748b]'}`}>
+          {eventHours < 2 ? 'HIGH' : eventHours < 24 ? 'MED' : 'LOW'}
+        </span>
+
+        <div className="flex-1" />
+
+        {/* Status */}
+        <span className="font-mono text-[0.55rem] text-[#5a6070]">{latency}ms</span>
       </div>
 
-      {/* VERTICAL FLOW */}
-      <motion.div
-        className="v4-container"
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-      >
-        {/* ============================================== */}
-        {/*  MACRO STACK v9.0 — M15 TRADING MODE            */}
-        {/* ============================================== */}
-
-        {/* SESSION CLOCK */}
-        <motion.div variants={fadeUp}>
-          <SessionCountdown />
-        </motion.div>
-
-        {/* US HIGH IMPACT NEWS */}
-        <motion.div variants={fadeUp} className="mb-6">
-          <USHighImpactNews />
-        </motion.div>
-
-        {/* TOP TOKENS M15 MONITOR (merged scanner + monitor) */}
-        <motion.div variants={fadeUp} className="mb-6">
-          <TopTokensM15Monitor equity={1000} />
-        </motion.div>
-
-        {/* ============================================== */}
-        {/*  CORE COMPONENTS                                */}
-        {/* ============================================== */}
-
-        {/* MACRO ADVANCED PANEL */}
-        <motion.div variants={fadeUp}>
-          <MacroAdvancedPanel />
-        </motion.div>
-
-        {/* CRYPTO ADVANCED SIGNALS */}
-        <motion.div variants={fadeUp}>
-          <CryptoAdvancedSignals />
-        </motion.div>
-
-        {/* QUANT REGIMES PANEL */}
-        <motion.div variants={fadeUp}>
-          <QuantRegimesPanel />
-        </motion.div>
-
-        {/* TOP 5 SCORE ENGINE */}
-        <motion.div variants={fadeUp}>
-          <Top5ScoreEngine />
-        </motion.div>
-
-        {/* INTRADAY HEATMAP */}
-        <motion.div variants={fadeUp}>
-          <IntradayHeatmap />
-        </motion.div>
-
-        {/* MACRO CONTEXT v8.0 */}
-        <motion.div variants={fadeUp}>
-          <MacroContext />
-        </motion.div>
-
-        {/* FUNDING AGGREGATOR */}
-        <motion.div variants={fadeUp}>
-          <FundingAggregator />
-        </motion.div>
-
-        {/* ORDER FLOW PROXY v8.0 */}
-        <motion.div variants={fadeUp}>
-          <OrderFlowProxy symbol="BTC" />
-        </motion.div>
-
-        {/* BTC ECOSYSTEM */}
-        <motion.div variants={fadeUp}>
-          <BtcEcosystemSection />
-        </motion.div>
-
-        {/* STRATEGY SIGNAL ENGINE */}
-        <motion.div variants={fadeUp}>
-          <StrategySignalEngine />
-        </motion.div>
-
-        {/* TRADE JOURNAL v9.0 */}
-        <motion.div variants={fadeUp}>
-          <TradeJournal />
-        </motion.div>
-
-        {/* EVIDENCE-BASED SIGNALS */}
-        <motion.div variants={fadeUp}>
-          <div className="font-mono text-[0.72rem] text-[#8890a0] tracking-[3px] uppercase mb-3 flex items-center gap-2">
-            <div className="w-[6px] h-[6px] rounded-full bg-[#aa66ff]" /> EVIDENCE-BASED SIGNALS
-          </div>
-          {cryptoSignals ? (
-            <SignalSummary
-              signals={cryptoSignals.signals}
-              netBias={cryptoSignals.netBias}
-              biasLabel={cryptoSignals.biasLabel}
-              activeCount={cryptoSignals.activeCount}
-              strongCount={cryptoSignals.strongCount}
-              title="CRYPTO SIGNAL ENGINE V3"
-            />
-          ) : (
-            <div className="py-10 text-center border-2 border-dashed border-[#1e1e32] rounded-xl font-mono text-[0.85rem] text-[#5a6070]">
-              Chargement des signaux...
+      {/* MAIN CONTENT - Compact layout */}
+      <div className="max-w-[96rem] mx-auto p-3">
+        {/* Top Row: Decision & Monitor */}
+        <div className="grid grid-cols-12 gap-3 mb-3">
+          {/* Decision Card */}
+          <motion.div
+            initial={fadeUp.hidden}
+            animate={fadeUp.show}
+            className="col-span-12 lg:col-span-3 bg-[#0e0e1a] border border-[#1e1e32] rounded p-3"
+          >
+            <div className="font-mono text-[0.6rem] text-[#5a6070] tracking-wider mb-2">DECISION ENGINE</div>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-mono text-[0.7rem] text-[#8890a0]">Verdict</div>
+                <div className="font-mono text-[0.9rem] font-bold mt-0.5" style={{ color: verdictColor }}>
+                  {verdict}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-mono text-[0.7rem] text-[#8890a0]">Size</div>
+                <div className="font-mono text-[0.9rem] font-bold mt-0.5 text-[#e8e8f0]">
+                  {sizing}
+                </div>
+              </div>
             </div>
-          )}
-        </motion.div>
+            <div className="mt-2 pt-2 border-t border-[#1e1e32] flex items-center justify-between">
+              <span className="font-mono text-[0.6rem] text-[#5a6070]">Score</span>
+              <span className="font-mono text-[0.7rem] text-[#8890a0]">
+                {(score?.score ?? 0) >= 0 ? '+' : ''}{(score?.score ?? 0).toFixed(1)}
+              </span>
+            </div>
+          </motion.div>
 
-      </motion.div>
+          {/* M15 Monitor - Extended */}
+          <motion.div
+            initial={fadeUp.hidden}
+            animate={fadeUp.show}
+            className="col-span-12 lg:col-span-9"
+          >
+            <TopTokensM15Monitor equity={1000} />
+          </motion.div>
+        </div>
+
+        {/* Middle Row: Score & Regime */}
+        <div className="grid grid-cols-12 gap-3 mb-3">
+          <motion.div
+            initial={fadeUp.hidden}
+            animate={fadeUp.show}
+            className="col-span-12 lg:col-span-6"
+          >
+            <Top5ScoreEngine />
+          </motion.div>
+          <motion.div
+            initial={fadeUp.hidden}
+            animate={fadeUp.show}
+            className="col-span-12 lg:col-span-6"
+          >
+            <QuantRegimesPanel />
+          </motion.div>
+        </div>
+
+        {/* Bottom Row: Context & Journal */}
+        <div className="grid grid-cols-12 gap-3">
+          {/* Left: Signals compact */}
+          <motion.div
+            initial={fadeUp.hidden}
+            animate={fadeUp.show}
+            className="col-span-12 lg:col-span-6"
+          >
+            <div className="bg-[#0e0e1a] border border-[#1e1e32] rounded p-3">
+              <div className="font-mono text-[0.6rem] text-[#5a6070] tracking-wider mb-2">SIGNALS</div>
+              {cryptoSignals ? (
+                <SignalSummary
+                  signals={cryptoSignals.signals}
+                  netBias={cryptoSignals.netBias}
+                  biasLabel={cryptoSignals.biasLabel}
+                  activeCount={cryptoSignals.activeCount}
+                  strongCount={cryptoSignals.strongCount}
+                  title=""
+                />
+              ) : (
+                <div className="py-4 text-center font-mono text-[0.65rem] text-[#5a6070]">Loading...</div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Right: Journal minimal */}
+          <motion.div
+            initial={fadeUp.hidden}
+            animate={fadeUp.show}
+            className="col-span-12 lg:col-span-6"
+          >
+            <TradeJournal />
+          </motion.div>
+        </div>
+      </div>
 
       {/* Status bar */}
-      <div className="flex items-center gap-3 px-6 py-1.5 border-t border-[#1e1e32] bg-[#0e0e1a] font-mono text-[0.65rem] text-[#5a6070] flex-wrap">
+      <div className="flex items-center gap-2 px-4 py-1 border-t border-[#1a1a30] bg-[#08080f] font-mono text-[0.55rem] text-[#5a6070]">
         {apiStatus && Object.entries(apiStatus).map(([k, v]) => (
           <span key={k} className="flex items-center gap-1">
-            <span className={`w-1.5 h-1.5 rounded-full inline-block ${v === 'ok' ? 'bg-[#4ade80]' : v === 'er' ? 'bg-[#ff3355]' : 'bg-[#ffaa00]'}`} />
-            {k?.toUpperCase?.() ?? k}
+            <span className={`w-1 h-1 rounded-full ${v === 'ok' ? 'bg-[#4ade80]' : v === 'er' ? 'bg-[#ff3355]' : 'bg-[#ffaa00]'} inline-block`} />
+            {k}
           </span>
         ))}
         <span className="flex-1" />
-        <span>{latency}ms</span>
-        <span>MACRO STACK v9.0 — M15 Trading Mode</span>
+        <span>M15 SCALPING MODE</span>
       </div>
     </div>
   );

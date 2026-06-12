@@ -1,56 +1,52 @@
 /**
- * TOP TOKENS M15 MONITOR
- * Fusion de TopTokenScanner + HyperliquidMonitor.
- * Affichage unifié avec Score, Funding, OI, Vol, Setup, Action.
- * Switch M5/M15/M30, score colorisé, refresh auto.
+ * TOP TOKENS M15 MONITOR v2.0
+ * 3-Layer scoring system for M15 scalping
+ * - Layer 1: Hard Filters (news, spread, liquidity, session, chop)
+ * - Layer 2: Setup Score (VWAP, funding, OI, volatility, order flow, trend)
+ * - Layer 3: Confirmation Score (M5 momentum, reclaim, CVD, structure break)
+ *
+ * Score approximates P(TP1 before SL) × expected value
  */
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { computeM15Score, getSessionInfo as getM15SessionInfo, type M15TokenData, type M15ScoreResult } from '@/lib/m15-scoring';
+import { VOL_WINDOWS } from '@/lib/constants';
+import {
+  fetchHLMeta,
+  fetchHLTrades,
+  fetchBinanceKlines,
+  fetchBinanceOrderBook,
+  computeMetricsFromKlines,
+  computeCVD,
+  computeOrderBookImbalance,
+  mapHLToBinance,
+} from '@/lib/multi-source-data';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
-const FEES = { taker: 0.0005, maker: -0.0002, minEdgeRT: 0.001 };
 
 type Timeframe = 'M5' | 'M15' | 'M30';
 
 interface SessionInfo {
   name: string;
   score: number;
-  color: string;
   active: boolean;
   end?: number;
   nextH?: number;
 }
 
-interface TokenData {
-  symbol: string;
-  price: number;
-  funding: number;
-  vol24h: number;
-  oi: number;
-  change24h: number;
-  score: number;
-  direction: string;
-  fundingEdge: number;
-  setup: 'READY' | 'WATCH' | 'AVOID';
-  bias: 'LONG' | 'SHORT' | 'NEUTRAL';
-  strengthScore: number;
+interface TokenScoreData extends M15TokenData {
+  markPx: number;
 }
 
-interface TokenScore {
+interface ScoreCard {
   symbol: string;
+  score: M15ScoreResult;
   price: number;
   funding: number;
   vol24h: number;
   oi: number;
   change24h: number;
-  atrProxy: number;
-  slDist: number;
-  entryZone: number;
-  score: number;
-  reasons: string[];
-  direction: string;
-  fundingEdge: number;
 }
 
 function getSessionInfo(): SessionInfo {
@@ -59,94 +55,21 @@ function getSessionInfo(): SessionInfo {
   const utcM = now.getUTCMinutes();
   const utcT = utcH + utcM / 60;
 
-  if (utcT >= 7 && utcT < 9)   return { name: 'EU Open',    score: 80,  color: '#22c55e', active: true, end: 9 };
-  if (utcT >= 13 && utcT < 17) return { name: 'EU/US Core', score: 100, color: '#16a34a', active: true, end: 17 };
-  if (utcT >= 17 && utcT < 20) return { name: 'US Extend',  score: 70,  color: '#84cc16', active: true, end: 20 };
-  if (utcT >= 1  && utcT < 4)  return { name: 'Asia',       score: 35,  color: '#eab308', active: false, end: 4 };
+  if (utcT >= 7 && utcT < 9)   return { name: 'EU Open',    score: 80,  active: true, end: 9 };
+  if (utcT >= 13 && utcT < 17) return { name: 'EU/US Core', score: 100, active: true, end: 17 };
+  if (utcT >= 17 && utcT < 20) return { name: 'US Extend',  score: 70,  active: true, end: 20 };
+  if (utcT >= 1  && utcT < 4)  return { name: 'Asia',       score: 35,  active: false, end: 4 };
 
   let nextName = '', nextH = 0;
   if (utcT < 1)  { nextName = 'Asia';    nextH = 1; }
   else if (utcT >= 4 && utcT < 7)   { nextName = 'EU Open';    nextH = 7; }
   else if (utcT >= 9 && utcT < 13)  { nextName = 'EU/US Core'; nextH = 13; }
   else if (utcT >= 20)               { nextName = 'EU Open';    nextH = 31; };
-  return { name: `Off (→ ${nextName} ${nextH % 24}h UTC)`, score: 0, color: '#6b7280', active: false, nextH };
-}
-
-function computeSetupScore(token: Partial<TokenScore>, sessionScore: number): { score: number; reasons: string[]; direction: string; fundingEdge: number } {
-  let score = 0;
-  const reasons: string[] = [];
-
-  const vol24h = token.vol24h ?? 0;
-  const funding = token.funding ?? 0;
-  const change24h = token.change24h ?? 0;
-  const oi = token.oi ?? 0;
-
-  if (sessionScore >= 70) { score++; reasons.push('✅ Session'); }
-  else reasons.push('⬜ Session off');
-
-  if (vol24h > 10_000_000) { score++; reasons.push('✅ Vol'); }
-  else if (vol24h > 2_000_000) { score += 0.5; reasons.push('🟡 Vol moyen'); }
-  else reasons.push('⬜ Vol faible');
-
-  const fundingEdge = Math.abs(funding / 16) - FEES.taker * 100;
-  if (fundingEdge >= 0.10) { score++; reasons.push(`✅ Funding edge ${fundingEdge.toFixed(3)}%`); }
-  else reasons.push(`⬜ Funding edge ${fundingEdge.toFixed(3)}%`);
-
-  const hasTrend = Math.abs(change24h) > 0.5;
-  if (hasTrend) { score++; reasons.push(`✅ Trend ${change24h > 0 ? '📈' : '📉'} ${change24h.toFixed(1)}%`); }
-  else reasons.push('⬜ Trend faible');
-
-  if (oi > 5_000_000) { score++; reasons.push('✅ OI'); }
-  else reasons.push('⬜ OI faible');
-
-  const volProxy = Math.abs(funding) * 100;
-  if (volProxy > 0.01) { score++; reasons.push('✅ Volatilité'); }
-  else reasons.push('⬜ Volatilité faible');
-
-  let direction = 'WAIT';
-  if (funding < -0.01 && change24h > 0) direction = 'LONG 📈';
-  else if (funding > 0.01 && change24h < 0) direction = 'SHORT 📉';
-  else if (Math.abs(change24h) > 1.5) direction = change24h > 0 ? 'LONG 📈' : 'SHORT 📉';
-
-  return { score: Math.min(6, Math.round(score)), reasons, direction, fundingEdge };
-}
-
-function classifyBias(funding: number): 'LONG' | 'SHORT' | 'NEUTRAL' {
-  if (funding < -0.0002) return 'LONG';
-  if (funding > 0.0002) return 'SHORT';
-  return 'NEUTRAL';
-}
-
-function computeStrengthScore(token: Partial<TokenData>, sessionScore: number): number {
-  let strength = 0;
-  const vol24h = token.vol24h ?? 0;
-  const funding = token.funding ?? 0;
-  const oi = token.oi ?? 0;
-  const fundingEdge = Math.abs(funding / 16) - FEES.taker * 100;
-
-  // Session (40%)
-  strength += sessionScore * 40;
-
-  // Funding edge (30%)
-  const fundingRatio = fundingEdge / 0.10;
-  if (fundingRatio >= 1) strength += 30;
-  else if (fundingRatio >= 0.5) strength += 15;
-
-  // Liquidity (20%)
-  const oiScore = Math.min(oi / 2e9, 1);
-  const volScore = Math.min(vol24h / 5e8, 1);
-  strength += (oiScore * 10 + volScore * 10);
-
-  // Bias alignment (10%)
-  const bias = classifyBias(funding);
-  if (bias === 'LONG' && funding < -0.0003) strength += 10;
-  else if (bias === 'SHORT' && funding > 0.0003) strength += 10;
-
-  return Math.round(strength);
+  return { name: `Off (→ ${nextName} ${nextH % 24}h UTC)`, score: 0, active: false, nextH };
 }
 
 export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number }) {
-  const [tokens, setTokens] = useState<TokenData[]>([]);
+  const [tokens, setTokens] = useState<ScoreCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLast] = useState<Date | null>(null);
   const [session, setSession] = useState<SessionInfo>(getSessionInfo());
@@ -154,72 +77,113 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
   const [timeframe, setTimeframe] = useState<Timeframe>('M15');
   const [equityInput, setEquity] = useState(equity);
   const [refreshCountdown, setRefreshCountdown] = useState(30);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   const fetchTokens = useCallback(async () => {
     try {
-      const res = await fetch(HL_API, {
+      setLoading(true);
+
+      // Fetch Hyperliquid metadata
+      const hlRes = await fetch(HL_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'metaAndAssetCtxs' }),
       });
-      const data = await res.json();
-      const meta = data[0]?.universe || [];
-      const ctxs = data[1] || [];
+      const hlData = await hlRes.json();
+      const meta = hlData[0]?.universe || [];
+      const ctxs = hlData[1] || [];
 
       const sess = getSessionInfo();
       setSession(sess);
 
-      const tokenList = meta.map((m: { name: string }, i: number) => {
-        const c = ctxs[i] || {};
-        const price = parseFloat(c.markPx || 0);
-        const funding = parseFloat(c.funding || 0) * 100;
-        const vol24h = parseFloat(c.dayNtlVlm || 0);
-        const oi = parseFloat(c.openInterest || 0) * price;
-        const prevPx = parseFloat(c.prevDayPx || price);
+      // Process top tokens only
+      const topSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'DOGE', 'AVAX', 'SUI', 'ARB', 'OP', 'LINK', 'WIF', 'PEPE', 'INJ', 'TIA', 'SEI'];
+      const tokenScores: ScoreCard[] = [];
+
+      for (const symbol of topSymbols) {
+        const idx = meta.findIndex((m: { name: string }) => m.name === symbol);
+        if (idx === -1) continue;
+
+        const ctx = ctxs[idx] || {};
+        const price = parseFloat(ctx.markPx || 0);
+        const funding = parseFloat(ctx.funding || 0) * 100;
+        const vol24h = parseFloat(ctx.dayNtlVlm || 0);
+        const oi = parseFloat(ctx.openInterest || 0) * price;
+        const prevPx = parseFloat(ctx.prevDayPx || price);
         const change24h = prevPx > 0 ? ((price - prevPx) / prevPx) * 100 : 0;
-        const atrProxy = Math.max(0.004, Math.abs(funding) / 100 + 0.005);
 
-        const token: Partial<TokenScore> = { symbol: m.name, price, funding, vol24h, oi, change24h, atrProxy };
-        const setup = computeSetupScore(token, sess.score);
-        const bias = classifyBias(funding);
-        const strengthScore = computeStrengthScore({ price, funding, vol24h, oi, change24h }, sess.score);
+        if (price === 0 || vol24h < 100_000) continue;
 
-        // Score calculation (0-100 based on all factors)
-        const finalScore = Math.round(
-          (setup.score / 6) * 40 +  // Setup score
-          (strengthScore / 100) * 30 +  // Strength
-          (sess.score / 100) * 20 +  // Session
-          (vol24h > 10_000_000 ? 10 : vol24h > 2_000_000 ? 5 : 0)  // Volume
-        );
+        // Fetch additional data
+        const binanceSymbol = mapHLToBinance(symbol);
 
-        let setupStatus: 'READY' | 'WATCH' | 'AVOID';
-        if (finalScore >= 80) setupStatus = 'READY';
-        else if (finalScore >= 60) setupStatus = 'WATCH';
-        else setupStatus = 'AVOID';
+        // Fetch M5 klines for momentum
+        const klines5m = await fetchBinanceKlines(binanceSymbol, '5m', 20).catch(() => []);
+        const metrics5m = computeMetricsFromKlines(klines5m);
 
-        return {
-          symbol: m.name,
+        // Fetch M15 klines for VWAP and ATR
+        const klines15m = await fetchBinanceKlines(binanceSymbol, '15m', 50).catch(() => []);
+        const metrics15m = computeMetricsFromKlines(klines15m);
+
+        // Fetch order book for microstructure
+        const orderBook = await fetchBinanceOrderBook(binanceSymbol, 20).catch(() => null);
+        const obMetrics = orderBook ? computeOrderBookImbalance(orderBook) : {
+          imbalance5: 50, imbalance10: 50, depth5: 0, depth10: 0, spread: 0
+        };
+
+        // Build token data for scoring
+        const tokenData: TokenScoreData = {
+          symbol,
+          price,
+          funding,
+          fundingRate: funding / 100,
+          oi,
+          oiChange: 0, // Would need historical OI data
+          vol24h,
+          change24h,
+          markPx: price,
+          // Microstructure
+          spread: obMetrics.spread,
+          bidAskImbalance: obMetrics.imbalance5,
+          obDepth5: obMetrics.depth5,
+          obDepth10: obMetrics.depth10,
+          slippageEst: obMetrics.spread * 2,
+          // Momentum
+          cvd5m: 50, // Placeholder - would need trade-by-trade data
+          cvd15m: 50,
+          deltaVolume: metrics5m.volume,
+          vwapDist: metrics15m.vwap > 0 ? ((price - metrics15m.vwap) / price) : 0,
+          // Volatility
+          atr5m: metrics5m.atr,
+          atr15m: metrics15m.atr,
+          atr1h: 0, // Would need 1h klines
+          realizedVol: metrics15m.atr / price,
+          squeezeProb: metrics15m.atr > 0 ? Math.min(1, metrics15m.atr / price * 50) : 0,
+        };
+
+        // Compute score
+        const score = computeM15Score(tokenData, sess.score);
+
+        tokenScores.push({
+          symbol,
+          score,
           price,
           funding,
           vol24h,
           oi,
           change24h,
-          score: finalScore,
-          direction: setup.direction,
-          fundingEdge: setup.fundingEdge,
-          setup: setupStatus,
-          bias,
-          strengthScore,
-        } as TokenData;
-      }).filter((t: TokenData) => t.price > 0 && t.vol24h > 100_000);
+        });
+      }
 
-      tokenList.sort((a: TokenData, b: TokenData) => b.score - a.score);
-      setTokens(tokenList.slice(0, 15));
+      // Sort by final score
+      tokenScores.sort((a, b) => b.score.finalScore - a.score.finalScore);
+      setTokens(tokenScores.slice(0, 10));
       setLoading(false);
       setLast(new Date());
       setRefreshCountdown(30);
     } catch (err) {
       console.error('TopTokensM15Monitor fetch error:', err);
+      setLoading(false);
     }
   }, []);
 
@@ -257,8 +221,8 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
     return '#6b7280';
   };
 
-  const getSetupColor = (setup: string): string => {
-    switch (setup) {
+  const getActionColor = (action: string): string => {
+    switch (action) {
       case 'READY': return '#22c55e';
       case 'WATCH': return '#f97316';
       case 'AVOID': return '#ef4444';
@@ -266,21 +230,15 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
     }
   };
 
-  const getBiasColor = (bias: string): string => {
-    switch (bias) {
+  const getDirectionColor = (dir: string): string => {
+    switch (dir) {
       case 'LONG': return '#4ade80';
       case 'SHORT': return '#f87171';
       default: return '#64748b';
     }
   };
 
-  const getAction = (token: TokenData): string => {
-    if (token.setup === 'READY') return token.direction === 'LONG 📈' ? 'LONG' : token.direction === 'SHORT 📉' ? 'SHORT' : 'WAIT';
-    if (token.setup === 'WATCH') return 'MONITOR';
-    return 'AVOID';
-  };
-
-  const calcSize = (token: TokenData): string => {
+  const calcSize = (token: ScoreCard): string => {
     const slDist = Math.max(0.004, 0.75 * (Math.abs(token.funding) / 100 + 0.005));
     const riskUSDT = equityInput * 0.0015;
     return (riskUSDT / slDist).toFixed(0);
@@ -292,7 +250,7 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="font-mono text-[0.72rem] text-[#8890a0] tracking-[3px] uppercase flex items-center gap-2">
-            <div className="w-[6px] h-[6px] rounded-full bg-[#00e5ff]" /> Top Tokens M15 Monitor
+            <div className="w-[6px] h-[6px] rounded-full bg-[#00e5ff]" /> Top Tokens M15 Monitor v2
           </div>
         </div>
 
@@ -316,9 +274,9 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
 
           {/* Session badge */}
           <div className="px-3 py-1 rounded border text-[0.65rem] font-semibold flex items-center gap-2" style={{
-            background: session.color + '22',
-            borderColor: session.color,
-            color: session.color,
+            background: session.active ? '#22c55e22' : '#6b728022',
+            borderColor: session.active ? '#22c55e' : '#6b7280',
+            color: session.active ? '#22c55e' : '#6b7280',
           }}>
             <span>{session.active ? '🟢' : '🔴'}</span>
             <span>{session.name}</span>
@@ -338,19 +296,36 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
         </div>
       </div>
 
+      {/* Layer legend */}
+      <div className="mb-3 px-3 py-2 bg-[#0d0d1a] border border-[#1e1e32] rounded flex flex-wrap gap-4 font-mono text-[0.6rem] text-[#5a6070]">
+        <div className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded bg-[#3b82f6]" />
+          <span>L1: Filters</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded bg-[#8b5cf6]" />
+          <span>L2: Setup</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded bg-[#ec4899]" />
+          <span>L3: Confirm</span>
+        </div>
+        <span className="ml-auto">Score = L1×30% + L2×40% + L3×30%</span>
+      </div>
+
       {/* Table */}
       <div className="bg-[#0e0e1a] border border-[#1e1e32] rounded-lg overflow-hidden">
         {/* Header */}
         <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 bg-[#1a1a2e] border-b border-[#1e1e32] font-mono text-[0.6rem] text-[#5a6070] uppercase tracking-wider">
           <span>#</span>
           <span>Token</span>
-          <span className="text-right">Price</span>
-          <span className="text-right">Funding</span>
-          <span className="text-right">OI</span>
-          <span className="text-right">24h Vol</span>
           <span className="text-right">Score</span>
-          <span className="text-center">Setup</span>
-          <span className="text-right">Action</span>
+          <span className="text-right">L1</span>
+          <span className="text-right">L2</span>
+          <span className="text-right">L3</span>
+          <span className="text-center">Action</span>
+          <span className="text-center">Direction</span>
+          <span className="text-right">Size</span>
         </div>
 
         {/* Body */}
@@ -361,52 +336,107 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
         ) : (
           <div className="max-h-[500px] overflow-y-auto">
             {tokens.map((token, idx) => {
-              const scoreColor = getScoreColor(token.score);
-              const setupColor = getSetupColor(token.setup);
-              const biasColor = getBiasColor(token.bias);
-              const action = getAction(token);
-              const actionColor = action === 'LONG' ? '#4ade80' : action === 'SHORT' ? '#f87171' : '#64748b';
+              const scoreColor = getScoreColor(token.score.finalScore);
+              const actionColor = getActionColor(token.score.action);
+              const directionColor = getDirectionColor(token.score.direction);
+              const isExpanded = expandedRow === token.symbol;
 
               return (
-                <div
-                  key={token.symbol}
-                  className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem]"
-                >
-                  <span className="font-semibold text-white">{idx + 1}</span>
-                  <span className="font-semibold text-white">{token.symbol}</span>
-                  <span className="text-right tabular-nums text-white">${token.price < 1 ? token.price.toFixed(5) : token.price < 100 ? token.price.toFixed(3) : token.price.toFixed(1)}</span>
-                  <span className={`text-right tabular-nums ${token.funding > 0 ? 'text-[#f87171]' : 'text-[#4ade80]'}`}>
-                    {token.funding > 0 ? '+' : ''}{token.funding.toFixed(4)}%
-                  </span>
-                  <span className="text-right tabular-nums text-white">{fmtVol(token.oi)}</span>
-                  <span className="text-right tabular-nums text-white">{fmtVol(token.vol24h)}</span>
-                  <span className="text-right">
-                    <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold" style={{
-                      background: scoreColor + '33',
-                      border: `1px solid ${scoreColor}`,
-                      color: scoreColor,
-                    }}>
-                      {token.score}
+                <div key={token.symbol}>
+                  {/* Main row */}
+                  <div
+                    className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem] cursor-pointer"
+                    onClick={() => setExpandedRow(isExpanded ? null : token.symbol)}
+                  >
+                    <span className="font-semibold text-white">{idx + 1}</span>
+                    <span className="font-semibold text-white">{token.symbol}</span>
+
+                    {/* Final Score */}
+                    <span className="text-right">
+                      <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold" style={{
+                        background: scoreColor + '33',
+                        border: `1px solid ${scoreColor}`,
+                        color: scoreColor,
+                      }}>
+                        {token.score.finalScore}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-center">
-                    <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold" style={{
-                      background: setupColor + '22',
-                      border: `1px solid ${setupColor}`,
-                      color: setupColor,
-                    }}>
-                      {token.setup}
+
+                    {/* Layer scores */}
+                    <span className="text-right tabular-nums text-[#3b82f6]">{token.score.layer1.score}</span>
+                    <span className="text-right tabular-nums text-[#8b5cf6]">{token.score.layer2.total}</span>
+                    <span className="text-right tabular-nums text-[#ec4899]">{token.score.layer3.total}</span>
+
+                    {/* Action */}
+                    <span className="text-center">
+                      <span className="px-2 py-0.5 rounded text-[0.65rem] font-semibold" style={{
+                        background: actionColor + '22',
+                        border: `1px solid ${actionColor}`,
+                        color: actionColor,
+                      }}>
+                        {token.score.action}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-right">
-                    <span className="px-2 py-0.5 rounded text-[0.65rem] font-semibold" style={{
-                      background: actionColor + '22',
-                      border: `1px solid ${actionColor}`,
-                      color: actionColor,
-                    }}>
-                      {action}
+
+                    {/* Direction */}
+                    <span className="text-center">
+                      <span className="px-2 py-0.5 rounded text-[0.65rem] font-semibold" style={{
+                        background: directionColor + '22',
+                        border: `1px solid ${directionColor}`,
+                        color: directionColor,
+                      }}>
+                        {token.score.direction}
+                      </span>
                     </span>
-                  </span>
+
+                    {/* Size */}
+                    <span className="text-right text-white">{calcSize(token)}×</span>
+                  </div>
+
+                  {/* Expanded details */}
+                  {isExpanded && (
+                    <div className="px-3 py-2 bg-[#0d0d1a] border-b border-[#1e1e32]">
+                      <div className="grid grid-cols-3 gap-4 text-[0.65rem]">
+                        {/* Layer 1 breakdown */}
+                        <div>
+                          <div className="font-semibold text-[#3b82f6] mb-1">L1: Hard Filters</div>
+                          <div className="space-y-0.5 text-[#94a3b8]">
+                            {token.score.layer1.reasons.map((r, i) => (
+                              <div key={i}>{r}</div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Layer 2 breakdown */}
+                        <div>
+                          <div className="font-semibold text-[#8b5cf6] mb-1">L2: Setup</div>
+                          <div className="space-y-0.5 text-[#94a3b8]">
+                            {token.score.layer2.reasons.slice(0, 5).map((r, i) => (
+                              <div key={i}>{r}</div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Layer 3 breakdown */}
+                        <div>
+                          <div className="font-semibold text-[#ec4899] mb-1">L3: Confirmation</div>
+                          <div className="space-y-0.5 text-[#94a3b8]">
+                            {token.score.layer3.reasons.slice(0, 5).map((r, i) => (
+                              <div key={i}>{r}</div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Token metrics */}
+                      <div className="mt-2 pt-2 border-t border-[#1e1e32] grid grid-cols-4 gap-2 text-[0.6rem] text-[#64748b]">
+                        <div>Price: ${token.price < 1 ? token.price.toFixed(5) : token.price.toFixed(2)}</div>
+                        <div>Funding: {token.funding > 0 ? '+' : ''}{token.funding.toFixed(4)}%</div>
+                        <div>OI: {fmtVol(token.oi)}</div>
+                        <div>Vol24h: {fmtVol(token.vol24h)}</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -428,7 +458,7 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           <span className="w-2 h-2 rounded" style={{ background: '#ef4444' }} />
           <span>Score &lt;60: AVOID</span>
         </div>
-        <span className="ml-auto">Source: Hyperliquid API · Refresh: 30s</span>
+        <span className="ml-auto">Click row for details · Multi-source data (HL + Binance)</span>
       </div>
     </div>
   );
