@@ -1,15 +1,14 @@
 /**
- * TOP TOKENS M15 MONITOR v2.1 - OPTIMIZED
+ * TOP TOKENS M15 MONITOR v2.2 - REAL L2 DATA
  * 3-Layer scoring system for M15 scalping
  * - Layer 1: Hard Filters (news, spread, liquidity, session, chop)
  * - Layer 2: Setup Score (VWAP, funding, OI, volatility, order flow, trend)
  * - Layer 3: Confirmation Score (M5 momentum, reclaim, CVD, structure break)
  *
- * v2.1 Optimizations:
- * - Parallelized Binance API fetchs with Promise.all (3-5x faster)
- * - Batch token processing instead of sequential loops
- * - Reduced redundant API calls
- * - Optimized scoring calculations (m15-scoring.ts v2.1)
+ * v2.2 - REAL L2 DATA:
+ * - Real CVD from Binance WebSocket (trade-by-trade)
+ * - OI history from Hyperliquid API
+ * - Optimized parallel processing
  */
 'use client';
 
@@ -26,6 +25,9 @@ import {
   computeOrderBookImbalance,
   mapHLToBinance,
 } from '@/lib/multi-source-data';
+import { fetchBatchInitialCVD, type CVDInitData } from '@/lib/binance-history';
+import { fetchBatchOIMetrics, type OIMetrics } from '@/lib/hyperliquid-oi';
+import { initializeBinanceWS, getCachedCVD } from '@/lib/binance-websocket';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
 
@@ -103,7 +105,19 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
       // Process top tokens only
       const topSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'DOGE', 'AVAX', 'SUI', 'ARB', 'OP', 'LINK', 'WIF', 'PEPE', 'INJ', 'TIA', 'SEI'];
 
-      // OPTIMIZATION: Prepare token data in parallel
+      // Fetch real L2 data in parallel (CVD + OI history)
+      const [cvdData, oiData] = await Promise.all([
+        fetchBatchInitialCVD(topSymbols),
+        fetchBatchOIMetrics(topSymbols, new Map()),
+      ]);
+
+      // Initialize WebSocket for real-time CVD updates (first time only)
+      if (typeof window !== 'undefined' && !(window as any).__binanceWSInitialized) {
+        initializeBinanceWS(topSymbols);
+        (window as any).__binanceWSInitialized = true;
+      }
+
+      // Prepare token data in parallel
       const tokenPromises = topSymbols.map(async (symbol) => {
         const idx = meta.findIndex((m: { name: string }) => m.name === symbol);
         if (idx === -1) return null;
@@ -120,7 +134,7 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
 
         const binanceSymbol = mapHLToBinance(symbol);
 
-        // OPTIMIZATION: Parallel fetch all Binance data for this token
+        // Parallel fetch all Binance data for this token
         const [klines5m, klines15m, orderBook] = await Promise.all([
           fetchBinanceKlines(binanceSymbol, '5m', 20).catch(() => []),
           fetchBinanceKlines(binanceSymbol, '15m', 50).catch(() => []),
@@ -133,13 +147,18 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           imbalance5: 50, imbalance10: 50, depth5: 0, depth10: 0, spread: 0
         };
 
+        // Get real L2 data
+        const cvd = cvdData.get(symbol) || { cvd5m: 50, cvd15m: 50, buyVol5m: 0, sellVol5m: 0, buyVol15m: 0, sellVol15m: 0 };
+        const oiMetrics = oiData.get(symbol);
+        const oiChange = oiMetrics?.change15m || 0;
+
         const tokenData: TokenScoreData = {
           symbol,
           price,
           funding,
           fundingRate: funding / 100,
           oi,
-          oiChange: 0,
+          oiChange,
           vol24h,
           change24h,
           markPx: price,
@@ -148,8 +167,13 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           obDepth5: obMetrics.depth5,
           obDepth10: obMetrics.depth10,
           slippageEst: obMetrics.spread * 2,
-          cvd5m: 50,
-          cvd15m: 50,
+          // REAL L2 DATA - from WebSocket/History
+          cvd5m: cvd.cvd5m,
+          cvd15m: cvd.cvd15m,
+          cvdBuyVol5m: cvd.buyVol5m,
+          cvdSellVol5m: cvd.sellVol5m,
+          cvdBuyVol15m: cvd.buyVol15m,
+          cvdSellVol15m: cvd.sellVol15m,
           deltaVolume: metrics5m.volume,
           vwapDist: metrics15m.vwap > 0 ? ((price - metrics15m.vwap) / price) : 0,
           atr5m: metrics5m.atr,

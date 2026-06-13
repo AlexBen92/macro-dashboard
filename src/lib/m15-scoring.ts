@@ -1,14 +1,14 @@
 /**
- * M15 SCORING ENGINE v2.1 - OPTIMIZED
+ * M15 SCORING ENGINE v2.2 - REAL L2 DATA
  * 3-Layer scoring system for scalping:
  * - Layer 1: Hard Filters (news, spread, liquidity, session, chop)
  * - Layer 2: Setup Score (VWAP, funding, OI, volatility, order flow, trend)
  * - Layer 3: Confirmation Score (M5 momentum, reclaim, CVD, structure break)
  *
- * v2.1 Optimizations:
- * - Reduced allocations by inlining helper returns
- * - Precomputed weights for faster calculations
- * - Batch processing support for parallel token scoring
+ * v2.2 - REAL L2 DATA:
+ * - CVD from Binance WebSocket (trade-by-trade)
+ * - OI history from Hyperliquid API
+ * - Full order book depth (500 levels)
  */
 
 import { VOL_WINDOWS, HL_TAKER_FEE, HL_MAKER_FEE, HL_ROUND_TRIP } from './constants';
@@ -31,9 +31,13 @@ export interface M15TokenData {
   obDepth5?: number;
   obDepth10?: number;
   slippageEst?: number;
-  // Momentum
-  cvd5m?: number;
-  cvd15m?: number;
+  // Momentum - REAL L2 DATA
+  cvd5m?: number; // From Binance WebSocket (0-100)
+  cvd15m?: number; // From Binance WebSocket (0-100)
+  cvdBuyVol5m?: number;
+  cvdSellVol5m?: number;
+  cvdBuyVol15m?: number;
+  cvdSellVol15m?: number;
   deltaVolume?: number;
   vwapDist?: number;
   // Volatility
@@ -236,17 +240,35 @@ function computeVolatilityScoreInline(token: M15TokenData, reasons: string[]): n
 function computeOrderFlowScoreInline(token: M15TokenData, reasons: string[]): number {
   let score = 0;
 
+  // Use real CVD data with buy/sell volume breakdown
   if (token.cvd15m !== undefined) {
     const cvdPct = token.cvd15m;
     const cvdAbs = Math.abs(cvdPct);
-    if (cvdAbs > 65) {
-      score += 60;
-      reasons.push(`✅ CVD ${cvdPct > 50 ? 'bull' : 'bear'} ${cvdAbs.toFixed(0)}%`);
-    } else if (cvdAbs - 50 > 10 || 50 - cvdAbs > 10) {
-      score += 30;
-      reasons.push('⚠️ CVD modéré');
+
+    // Show real volumes if available
+    if (token.cvdBuyVol15m && token.cvdSellVol15m) {
+      const buyVol = formatVolume(token.cvdBuyVol15m);
+      const sellVol = formatVolume(token.cvdSellVol15m);
+      if (cvdAbs > 65) {
+        score += 60;
+        reasons.push(`✅ CVD ${cvdPct > 50 ? 'bull' : 'bear'} ${cvdAbs.toFixed(0)}% (B:${buyVol} S:${sellVol})`);
+      } else if (cvdAbs - 50 > 10 || 50 - cvdAbs > 10) {
+        score += 30;
+        reasons.push(`⚠️ CVD modéré (B:${buyVol} S:${sellVol})`);
+      } else {
+        reasons.push(`⬜ CVD neutre (B:${buyVol} S:${sellVol})`);
+      }
     } else {
-      reasons.push('⬜ CVD neutre');
+      // Fallback to percentage only
+      if (cvdAbs > 65) {
+        score += 60;
+        reasons.push(`✅ CVD ${cvdPct > 50 ? 'bull' : 'bear'} ${cvdAbs.toFixed(0)}%`);
+      } else if (cvdAbs - 50 > 10 || 50 - cvdAbs > 10) {
+        score += 30;
+        reasons.push('⚠️ CVD modéré');
+      } else {
+        reasons.push('⬜ CVD neutre');
+      }
     }
   }
 
@@ -262,6 +284,12 @@ function computeOrderFlowScoreInline(token: M15TokenData, reasons: string[]): nu
   }
 
   return Math.min(100, score);
+}
+
+function formatVolume(vol: number): string {
+  if (vol >= 1_000_000) return `${(vol / 1_000_000).toFixed(1)}M`;
+  if (vol >= 1_000) return `${(vol / 1_000).toFixed(0)}K`;
+  return vol.toFixed(0);
 }
 
 function computeTrendScoreInline(token: M15TokenData, reasons: string[]): number {
