@@ -107,11 +107,13 @@ class BinanceWebSocketClient {
     const trades5m = buffer.filter(t => t.time >= fiveMinAgo);
     const trades15m = buffer.filter(t => t.time >= fifteenMinAgo);
 
-    // Calculate buy/sell volumes
-    const buyVol5m = trades5m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
-    const sellVol5m = trades5m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
-    const buyVol15m = trades15m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
-    const sellVol15m = trades15m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
+    // Calculate buy/sell volumes in USD (price * qty)
+    // isBuyerMaker=false → buyer is aggressive taker = BUY
+    // isBuyerMaker=true → seller is aggressive taker = SELL
+    const buyVol5m = trades5m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
+    const sellVol5m = trades5m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
+    const buyVol15m = trades15m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
+    const sellVol15m = trades15m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
 
     const total5m = buyVol5m + sellVol5m;
     const total15m = buyVol15m + sellVol15m;

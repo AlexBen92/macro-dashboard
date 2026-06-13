@@ -53,10 +53,12 @@ export function calculateInitialCVD(trades: TradeHistory[], now: number = Date.n
   const trades5m = trades.filter(t => t.time >= fiveMinAgo);
   const trades15m = trades.filter(t => t.time >= fifteenMinAgo);
 
-  const buyVol5m = trades5m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
-  const sellVol5m = trades5m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
-  const buyVol15m = trades15m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
-  const sellVol15m = trades15m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty), 0);
+  // isBuyerMaker=true means buyer was passive (maker), so seller was aggressive (taker) = SELL
+  // isBuyerMaker=false means seller was passive (maker), so buyer was aggressive (taker) = BUY
+  const buyVol5m = trades5m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
+  const sellVol5m = trades5m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
+  const buyVol15m = trades15m.filter(t => !t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
+  const sellVol15m = trades15m.filter(t => t.isBuyerMaker).reduce((sum, t) => sum + parseFloat(t.qty) * parseFloat(t.price), 0);
 
   const total5m = buyVol5m + sellVol5m;
   const total15m = buyVol15m + sellVol15m;
