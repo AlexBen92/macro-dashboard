@@ -1,0 +1,785 @@
+{
+  "BTC": {
+    "-0.25": {
+      "symbol": "BTC",
+      "threshold": -0.25,
+      "totalTrades": 74,
+      "winRate": 41.891891891891895,
+      "avgPnl": -0.14951936205540628,
+      "totalPnl": -11.064432792100066,
+      "totalFundingCollected": 4.019569999999999,
+      "sharpe": -4.584224478996934,
+      "maxDrawdown": 541.5921138927588,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 24,
+        "08h": 23,
+        "16h": 27
+      }
+    },
+    "-0.5": {
+      "symbol": "BTC",
+      "threshold": -0.5,
+      "totalTrades": 38,
+      "winRate": 34.21052631578947,
+      "avgPnl": -0.21363429365578498,
+      "totalPnl": -8.11810315891983,
+      "totalFundingCollected": 2.7308199999999996,
+      "sharpe": -6.097905413723695,
+      "maxDrawdown": 2793.4563523857273,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 13,
+        "08h": 13,
+        "16h": 12
+      }
+    },
+    "-1": {
+      "symbol": "BTC",
+      "threshold": -1,
+      "totalTrades": 2,
+      "winRate": 100,
+      "avgPnl": 0.5420557820699271,
+      "totalPnl": 1.0841115641398542,
+      "totalFundingCollected": 0.23065,
+      "sharpe": 19.43986116452477,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 2,
+        "08h": 0,
+        "16h": 0
+      }
+    },
+    "-2": {
+      "symbol": "BTC",
+      "threshold": -2,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    },
+    "-3": {
+      "symbol": "BTC",
+      "threshold": -3,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    }
+  },
+  "ETH": {
+    "-0.25": {
+      "symbol": "ETH",
+      "threshold": -0.25,
+      "totalTrades": 77,
+      "winRate": 41.55844155844156,
+      "avgPnl": -0.11202772469284812,
+      "totalPnl": -8.626134801349306,
+      "totalFundingCollected": 4.970729999999999,
+      "sharpe": -2.5991769728288983,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 28,
+        "08h": 23,
+        "16h": 26
+      }
+    },
+    "-0.5": {
+      "symbol": "ETH",
+      "threshold": -0.5,
+      "totalTrades": 42,
+      "winRate": 38.095238095238095,
+      "avgPnl": -0.1265407571867898,
+      "totalPnl": -5.3147118018451724,
+      "totalFundingCollected": 3.66028,
+      "sharpe": -3.914193693790043,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 15,
+        "08h": 12,
+        "16h": 15
+      }
+    },
+    "-1": {
+      "symbol": "ETH",
+      "threshold": -1,
+      "totalTrades": 11,
+      "winRate": 36.36363636363637,
+      "avgPnl": -0.16873595697011182,
+      "totalPnl": -1.85609552667123,
+      "totalFundingCollected": 1.5344000000000002,
+      "sharpe": -4.4865474009306165,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 4,
+        "08h": 2,
+        "16h": 5
+      }
+    },
+    "-2": {
+      "symbol": "ETH",
+      "threshold": -2,
+      "totalTrades": 1,
+      "winRate": 100,
+      "avgPnl": 0.9189091624082842,
+      "totalPnl": 0.9189091624082842,
+      "totalFundingCollected": 0.22976,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 1,
+        "08h": 0,
+        "16h": 0
+      }
+    },
+    "-3": {
+      "symbol": "ETH",
+      "threshold": -3,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    }
+  },
+  "SOL": {
+    "-0.25": {
+      "symbol": "SOL",
+      "threshold": -0.25,
+      "totalTrades": 113,
+      "winRate": 39.823008849557525,
+      "avgPnl": -0.14516240784947754,
+      "totalPnl": -16.40335208699096,
+      "totalFundingCollected": 12.354530000000002,
+      "sharpe": -2.706467286092773,
+      "maxDrawdown": 1467.8502770993146,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 38,
+        "08h": 36,
+        "16h": 39
+      }
+    },
+    "-0.5": {
+      "symbol": "SOL",
+      "threshold": -0.5,
+      "totalTrades": 87,
+      "winRate": 41.37931034482759,
+      "avgPnl": -0.13672380085447433,
+      "totalPnl": -11.894970674339266,
+      "totalFundingCollected": 11.350350000000004,
+      "sharpe": -2.708673644134688,
+      "maxDrawdown": 1828.2369673045146,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 32,
+        "08h": 29,
+        "16h": 26
+      }
+    },
+    "-1": {
+      "symbol": "SOL",
+      "threshold": -1,
+      "totalTrades": 46,
+      "winRate": 39.130434782608695,
+      "avgPnl": -0.09908323507053163,
+      "totalPnl": -4.557828813244455,
+      "totalFundingCollected": 8.390469999999999,
+      "sharpe": -2.046263379490354,
+      "maxDrawdown": 1075.1977339371108,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 16,
+        "08h": 14,
+        "16h": 16
+      }
+    },
+    "-2": {
+      "symbol": "SOL",
+      "threshold": -2,
+      "totalTrades": 16,
+      "winRate": 50,
+      "avgPnl": -0.033130528338803554,
+      "totalPnl": -0.5300884534208569,
+      "totalFundingCollected": 4.247120000000001,
+      "sharpe": -0.7647882508885232,
+      "maxDrawdown": 1287.834554426114,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 4,
+        "08h": 5,
+        "16h": 7
+      }
+    },
+    "-3": {
+      "symbol": "SOL",
+      "threshold": -3,
+      "totalTrades": 3,
+      "winRate": 0,
+      "avgPnl": -0.4342723488384348,
+      "totalPnl": -1.3028170465153044,
+      "totalFundingCollected": 1.0879299999999998,
+      "sharpe": -36.42697120447619,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 2,
+        "08h": 1,
+        "16h": 0
+      }
+    }
+  },
+  "XRP": {
+    "-0.25": {
+      "symbol": "XRP",
+      "threshold": -0.25,
+      "totalTrades": 103,
+      "winRate": 40.77669902912621,
+      "avgPnl": -0.14963172617769663,
+      "totalPnl": -15.412067796302754,
+      "totalFundingCollected": 7.142649999999999,
+      "sharpe": -3.712943398556745,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 41,
+        "08h": 36,
+        "16h": 26
+      }
+    },
+    "-0.5": {
+      "symbol": "XRP",
+      "threshold": -0.5,
+      "totalTrades": 59,
+      "winRate": 44.06779661016949,
+      "avgPnl": -0.15825682839460456,
+      "totalPnl": -9.337152875281669,
+      "totalFundingCollected": 5.547109999999998,
+      "sharpe": -4.036475864489438,
+      "maxDrawdown": 2124.7030129365853,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 22,
+        "08h": 23,
+        "16h": 14
+      }
+    },
+    "-1": {
+      "symbol": "XRP",
+      "threshold": -1,
+      "totalTrades": 20,
+      "winRate": 55.00000000000001,
+      "avgPnl": 0.042993458717528944,
+      "totalPnl": 0.8598691743505789,
+      "totalFundingCollected": 2.7923999999999993,
+      "sharpe": 1.0780895923748919,
+      "maxDrawdown": 178.08317019828107,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 7,
+        "08h": 5,
+        "16h": 8
+      }
+    },
+    "-2": {
+      "symbol": "XRP",
+      "threshold": -2,
+      "totalTrades": 1,
+      "winRate": 0,
+      "avgPnl": -0.5409938071558508,
+      "totalPnl": -0.5409938071558508,
+      "totalFundingCollected": 0.28988,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 1,
+        "08h": 0,
+        "16h": 0
+      }
+    },
+    "-3": {
+      "symbol": "XRP",
+      "threshold": -3,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    }
+  },
+  "DOGE": {
+    "-0.25": {
+      "symbol": "DOGE",
+      "threshold": -0.25,
+      "totalTrades": 67,
+      "winRate": 44.776119402985074,
+      "avgPnl": -0.08109906627231887,
+      "totalPnl": -5.433637440245365,
+      "totalFundingCollected": 3.904989999999999,
+      "sharpe": -1.613094248284665,
+      "maxDrawdown": 897.1044295720992,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 22,
+        "08h": 19,
+        "16h": 26
+      }
+    },
+    "-0.5": {
+      "symbol": "DOGE",
+      "threshold": -0.5,
+      "totalTrades": 36,
+      "winRate": 41.66666666666667,
+      "avgPnl": -0.1698377794151521,
+      "totalPnl": -6.114160058945476,
+      "totalFundingCollected": 2.76263,
+      "sharpe": -3.3456986045669126,
+      "maxDrawdown": 5041.38399374753,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 14,
+        "08h": 11,
+        "16h": 11
+      }
+    },
+    "-1": {
+      "symbol": "DOGE",
+      "threshold": -1,
+      "totalTrades": 5,
+      "winRate": 40,
+      "avgPnl": -0.20447027601273127,
+      "totalPnl": -1.0223513800636563,
+      "totalFundingCollected": 0.5877,
+      "sharpe": -7.4872532820740885,
+      "maxDrawdown": 22006.25372107819,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 2,
+        "08h": 2,
+        "16h": 1
+      }
+    },
+    "-2": {
+      "symbol": "DOGE",
+      "threshold": -2,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    },
+    "-3": {
+      "symbol": "DOGE",
+      "threshold": -3,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    }
+  },
+  "BNB": {
+    "-0.25": {
+      "symbol": "BNB",
+      "threshold": -0.25,
+      "totalTrades": 6,
+      "winRate": 33.33333333333333,
+      "avgPnl": -0.034990655678326064,
+      "totalPnl": -0.20994393406995637,
+      "totalFundingCollected": 0.37345999999999996,
+      "sharpe": -2.0383201558119866,
+      "maxDrawdown": 155.75746881867133,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 2,
+        "08h": 2,
+        "16h": 2
+      }
+    },
+    "-0.5": {
+      "symbol": "BNB",
+      "threshold": -0.5,
+      "totalTrades": 4,
+      "winRate": 25,
+      "avgPnl": 0.03952124302526801,
+      "totalPnl": 0.15808497210107203,
+      "totalFundingCollected": 0.30172999999999994,
+      "sharpe": 3.196271240352529,
+      "maxDrawdown": 58.01537233417301,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 1,
+        "08h": 1,
+        "16h": 2
+      }
+    },
+    "-1": {
+      "symbol": "BNB",
+      "threshold": -1,
+      "totalTrades": 1,
+      "winRate": 0,
+      "avgPnl": -0.09664451042690933,
+      "totalPnl": -0.09664451042690933,
+      "totalFundingCollected": 0.12727999999999998,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 1
+      }
+    },
+    "-2": {
+      "symbol": "BNB",
+      "threshold": -2,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    },
+    "-3": {
+      "symbol": "BNB",
+      "threshold": -3,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    }
+  },
+  "ADA": {
+    "-0.25": {
+      "symbol": "ADA",
+      "threshold": -0.25,
+      "totalTrades": 79,
+      "winRate": 43.037974683544306,
+      "avgPnl": -0.10494421679378894,
+      "totalPnl": -8.290593126709327,
+      "totalFundingCollected": 8.298449999999997,
+      "sharpe": -1.8132198914894941,
+      "maxDrawdown": 385.91030588613205,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 27,
+        "08h": 27,
+        "16h": 25
+      }
+    },
+    "-0.5": {
+      "symbol": "ADA",
+      "threshold": -0.5,
+      "totalTrades": 63,
+      "winRate": 39.682539682539684,
+      "avgPnl": -0.15677558020661314,
+      "totalPnl": -9.876861553016628,
+      "totalFundingCollected": 7.6592,
+      "sharpe": -2.689696572918545,
+      "maxDrawdown": 548.3649048662116,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 24,
+        "08h": 18,
+        "16h": 21
+      }
+    },
+    "-1": {
+      "symbol": "ADA",
+      "threshold": -1,
+      "totalTrades": 34,
+      "winRate": 47.05882352941176,
+      "avgPnl": -0.01523590831656216,
+      "totalPnl": -0.5180208827631134,
+      "totalFundingCollected": 5.616120000000001,
+      "sharpe": -0.30291549580641935,
+      "maxDrawdown": 145.31111946740825,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 11,
+        "08h": 10,
+        "16h": 13
+      }
+    },
+    "-2": {
+      "symbol": "ADA",
+      "threshold": -2,
+      "totalTrades": 8,
+      "winRate": 50,
+      "avgPnl": 0.1340095947383333,
+      "totalPnl": 1.0720767579066663,
+      "totalFundingCollected": 2.09967,
+      "sharpe": 2.5747481246676123,
+      "maxDrawdown": 133.0034989284423,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 3,
+        "08h": 2,
+        "16h": 3
+      }
+    },
+    "-3": {
+      "symbol": "ADA",
+      "threshold": -3,
+      "totalTrades": 1,
+      "winRate": 100,
+      "avgPnl": 0.9487002458668984,
+      "totalPnl": 0.9487002458668984,
+      "totalFundingCollected": 0.31320000000000003,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 1,
+        "08h": 0,
+        "16h": 0
+      }
+    }
+  },
+  "AVAX": {
+    "-0.25": {
+      "symbol": "AVAX",
+      "threshold": -0.25,
+      "totalTrades": 72,
+      "winRate": 47.22222222222222,
+      "avgPnl": -0.07633296801358752,
+      "totalPnl": -5.495973696978302,
+      "totalFundingCollected": 6.665069999999999,
+      "sharpe": -1.2142481424978133,
+      "maxDrawdown": 1051.4242305788453,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 26,
+        "08h": 21,
+        "16h": 25
+      }
+    },
+    "-0.5": {
+      "symbol": "AVAX",
+      "threshold": -0.5,
+      "totalTrades": 55,
+      "winRate": 47.27272727272727,
+      "avgPnl": -0.0813200207085603,
+      "totalPnl": -4.472601138970816,
+      "totalFundingCollected": 6.099780000000001,
+      "sharpe": -1.2562169318196221,
+      "maxDrawdown": 840.3184957422706,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 19,
+        "08h": 15,
+        "16h": 21
+      }
+    },
+    "-1": {
+      "symbol": "AVAX",
+      "threshold": -1,
+      "totalTrades": 22,
+      "winRate": 45.45454545454545,
+      "avgPnl": -0.03901463687316223,
+      "totalPnl": -0.8583220112095691,
+      "totalFundingCollected": 3.8221399999999996,
+      "sharpe": -0.7175007051173369,
+      "maxDrawdown": 3283.4649966831216,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 9,
+        "08h": 4,
+        "16h": 9
+      }
+    },
+    "-2": {
+      "symbol": "AVAX",
+      "threshold": -2,
+      "totalTrades": 5,
+      "winRate": 40,
+      "avgPnl": -0.18902676949242897,
+      "totalPnl": -0.9451338474621449,
+      "totalFundingCollected": 1.39434,
+      "sharpe": -5.880690855824752,
+      "maxDrawdown": 329.10338225113185,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 2,
+        "08h": 0,
+        "16h": 3
+      }
+    },
+    "-3": {
+      "symbol": "AVAX",
+      "threshold": -3,
+      "totalTrades": 2,
+      "winRate": 50,
+      "avgPnl": -0.018831726333701684,
+      "totalPnl": -0.03766345266740337,
+      "totalFundingCollected": 0.72365,
+      "sharpe": -2.2523609753089415,
+      "maxDrawdown": 133.0691042068274,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 1,
+        "08h": 0,
+        "16h": 1
+      }
+    }
+  },
+  "LINK": {
+    "-0.25": {
+      "symbol": "LINK",
+      "threshold": -0.25,
+      "totalTrades": 49,
+      "winRate": 51.02040816326531,
+      "avgPnl": -0.01215704451223549,
+      "totalPnl": -0.595695181099539,
+      "totalFundingCollected": 3.4106599999999982,
+      "sharpe": -0.26616989728808166,
+      "maxDrawdown": 12083.365688774687,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 17,
+        "08h": 18,
+        "16h": 14
+      }
+    },
+    "-0.5": {
+      "symbol": "LINK",
+      "threshold": -0.5,
+      "totalTrades": 29,
+      "winRate": 51.724137931034484,
+      "avgPnl": -0.08531143771010816,
+      "totalPnl": -2.4740316935931363,
+      "totalFundingCollected": 2.65984,
+      "sharpe": -1.8537522419421628,
+      "maxDrawdown": 248.1244494744252,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 11,
+        "08h": 9,
+        "16h": 9
+      }
+    },
+    "-1": {
+      "symbol": "LINK",
+      "threshold": -1,
+      "totalTrades": 8,
+      "winRate": 37.5,
+      "avgPnl": -0.08615103002548825,
+      "totalPnl": -0.689208240203906,
+      "totalFundingCollected": 1.27051,
+      "sharpe": -2.0600583949626707,
+      "maxDrawdown": 324.5042099655794,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 2,
+        "08h": 1,
+        "16h": 5
+      }
+    },
+    "-2": {
+      "symbol": "LINK",
+      "threshold": -2,
+      "totalTrades": 1,
+      "winRate": 100,
+      "avgPnl": 0.6809347129735814,
+      "totalPnl": 0.6809347129735814,
+      "totalFundingCollected": 0.23185,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 2,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 1
+      }
+    },
+    "-3": {
+      "symbol": "LINK",
+      "threshold": -3,
+      "totalTrades": 0,
+      "winRate": 0,
+      "avgPnl": 0,
+      "totalPnl": 0,
+      "totalFundingCollected": 0,
+      "sharpe": 0,
+      "maxDrawdown": 0,
+      "avgHoldHours": 0,
+      "sessions": {
+        "00h": 0,
+        "08h": 0,
+        "16h": 0
+      }
+    }
+  }
+}
