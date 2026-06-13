@@ -1,14 +1,19 @@
 /**
- * M15 SCORING ENGINE v2.2 - REAL L2 DATA
+ * M15 SCORING ENGINE v2.3 - CONFIDENCE SCORING
  * 3-Layer scoring system for scalping:
  * - Layer 1: Hard Filters (news, spread, liquidity, session, chop)
  * - Layer 2: Setup Score (VWAP, funding, OI, volatility, order flow, trend)
  * - Layer 3: Confirmation Score (M5 momentum, reclaim, CVD, structure break)
  *
- * v2.2 - REAL L2 DATA:
- * - CVD from Binance WebSocket (trade-by-trade)
- * - OI history from Hyperliquid API
- * - Full order book depth (500 levels)
+ * v2.3 - CONFIDENCE SCORES:
+ * - L1 Confidence: Pass rate + safety margin
+ * - L2 Confidence: Component coherence
+ * - L3 Confidence: Signal alignment
+ * - Global Confidence: Weighted + weakest link + layer alignment
+ *
+ * CONFIDANCE ≠ SCORE:
+ * - Score: How good is the setup?
+ * - Confidence: How reliable is this score?
  */
 
 import { VOL_WINDOWS, HL_TAKER_FEE, HL_MAKER_FEE, HL_ROUND_TRIP } from './constants';
@@ -91,7 +96,20 @@ export interface M15ScoreResult {
   action: 'READY' | 'WATCH' | 'AVOID';
   direction: 'LONG' | 'SHORT' | 'NEUTRAL';
   expectedValue?: number;
-  confidence: number;
+  confidence: number; // Legacy (deprecated)
+  // New confidence scores v2.3
+  confidenceScores?: {
+    l1: number;
+    l2: number;
+    l3: number;
+    global: number;
+    breakdown: {
+      l1: { passRate: number; safetyMargin: number };
+      l2: { coherence: number; componentVariance: number };
+      l3: { signalAlignment: number; confirmationStrength: number };
+      global: { layerAlignment: number; weakestLink: number };
+    };
+  };
 }
 
 // ─── CONSTANTS ───
@@ -507,6 +525,15 @@ export function computeM15Score(
       action: 'AVOID',
       direction: 'NEUTRAL',
       confidence: 0,
+      confidenceScores: {
+        l1: 0, l2: 0, l3: 0, global: 0,
+        breakdown: {
+          l1: { passRate: 0, safetyMargin: 0 },
+          l2: { coherence: 0, componentVariance: 100 },
+          l3: { signalAlignment: 0, confirmationStrength: 0 },
+          global: { layerAlignment: 0, weakestLink: 0 },
+        },
+      },
     };
   }
 
@@ -534,12 +561,16 @@ export function computeM15Score(
   else if (finalScore >= 60) action = 'WATCH';
   else action = 'AVOID';
 
-  // Confidence: alignment of all layers
+  // Legacy confidence (deprecated - for backward compatibility)
   const confidence = Math.round(
     (layer1.score / 100) * 0.3 +
     (layer2.total / 100) * 0.4 +
     (layer3.total / 100) * 0.3
   ) * 100;
+
+  // New confidence scores v2.3
+  const { computeConfidenceScores } = require('./m15-confidence');
+  const confidenceScores = computeConfidenceScores(layer1, layer2, layer3, token);
 
   return {
     symbol: token.symbol,
@@ -550,6 +581,7 @@ export function computeM15Score(
     action,
     direction,
     confidence,
+    confidenceScores,
   };
 }
 

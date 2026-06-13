@@ -460,6 +460,38 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
                         <div>OI: {fmtVol(token.oi)}</div>
                         <div>Vol24h: {fmtVol(token.vol24h)}</div>
                       </div>
+
+                      {/* Confidence scores */}
+                      {token.score.confidenceScores && (
+                        <div className="mt-2 pt-2 border-t border-[#1e1e32]">
+                          <div className="font-semibold text-[#fbbf24] mb-1 text-[0.65rem]">Confidence Scores</div>
+                          <div className="grid grid-cols-4 gap-3 text-[0.6rem]">
+                            <div>
+                              <div className="text-[#94a3b8]">L1 Confidence</div>
+                              <div className="font-mono font-semibold text-white">{token.score.confidenceScores.l1}%</div>
+                              <div className="text-[#64748b]">Pass: {token.score.confidenceScores.breakdown.l1.passRate}% | Margin: {token.score.confidenceScores.breakdown.l1.safetyMargin}%</div>
+                            </div>
+                            <div>
+                              <div className="text-[#94a3b8]">L2 Confidence</div>
+                              <div className="font-mono font-semibold text-white">{token.score.confidenceScores.l2}%</div>
+                              <div className="text-[#64748b]">Coherence: {token.score.confidenceScores.breakdown.l2.coherence}% | Var: {token.score.confidenceScores.breakdown.l2.componentVariance}</div>
+                            </div>
+                            <div>
+                              <div className="text-[#94a3b8]">L3 Confidence</div>
+                              <div className="font-mono font-semibold text-white">{token.score.confidenceScores.l3}%</div>
+                              <div className="text-[#64748b]">Align: {token.score.confidenceScores.breakdown.l3.signalAlignment}% | Str: {token.score.confidenceScores.breakdown.l3.confirmationStrength}%</div>
+                            </div>
+                            <div>
+                              <div className="text-[#94a3b8]">Global Confidence</div>
+                              <div className="font-mono font-semibold" style={{
+                                color: token.score.confidenceScores.global >= 80 ? '#22c55e' :
+                                       token.score.confidenceScores.global >= 60 ? '#f97316' : '#ef4444'
+                              }}>{token.score.confidenceScores.global}%</div>
+                              <div className="text-[#64748b]">Layer Align: {token.score.confidenceScores.breakdown.global.layerAlignment}% | Weakest: {token.score.confidenceScores.breakdown.global.weakestLink}%</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
