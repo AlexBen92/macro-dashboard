@@ -6,3 +6,4 @@ out
 next-env.d.ts
 
 .vercel
+run-m15-backtest.ts
