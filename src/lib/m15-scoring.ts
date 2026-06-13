@@ -139,23 +139,9 @@ const CONFIRMATION_WEIGHTS = {
   retest: 0.10,
 } as const;
 
-// Precomputed multipliers for faster weighted sums (avoid repeated multiplication)
-const SETUP_MULTIPLIERS = {
-  vwap: SETUP_WEIGHTS.vwap * 100,
-  funding: SETUP_WEIGHTS.funding * 100,
-  oi: SETUP_WEIGHTS.oi * 100,
-  volatility: SETUP_WEIGHTS.volatility * 100,
-  orderFlow: SETUP_WEIGHTS.orderFlow * 100,
-  trend: SETUP_WEIGHTS.trend * 100,
-} as const;
-
-const CONFIRMATION_MULTIPLIERS = {
-  momentum5m: CONFIRMATION_WEIGHTS.momentum5m * 100,
-  reclaim: CONFIRMATION_WEIGHTS.reclaim * 100,
-  cvd: CONFIRMATION_WEIGHTS.cvd * 100,
-  structureBreak: CONFIRMATION_WEIGHTS.structureBreak * 100,
-  retest: CONFIRMATION_WEIGHTS.retest * 100,
-} as const;
+// Precomputed multipliers for faster weighted sums
+const SETUP_MULTIPLIERS = SETUP_WEIGHTS;
+const CONFIRMATION_MULTIPLIERS = CONFIRMATION_WEIGHTS;
 
 // ─── LAYER 1: HARD FILTERS ───
 
