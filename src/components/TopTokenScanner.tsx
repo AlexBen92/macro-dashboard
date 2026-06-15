@@ -13,6 +13,7 @@ import { OFIBadge } from './OFIBadge';
 import { ACFMiniChart } from './ACFMiniChart';
 import { RVRegimeBadge } from './RVRegimeBadge';
 import { OFIDetailPanel, type TokenSignalExtended } from './OFIDetailPanel';
+import { useMultiAssetL2WebSocket } from '@/hooks/api/useHyperliquidL2WebSocket';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
 
@@ -198,6 +199,10 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
     depth: DepthFeatures | null;
   }>>({});
 
+  // L2 WebSocket pour données OFI temps réel
+  const [trackedSymbols, setTrackedSymbols] = useState<string[]>(['BTC', 'ETH', 'SOL', 'DOGE', 'PEPE', 'ARB', 'OP', 'MATIC']);
+  const l2WebSocket = useMultiAssetL2WebSocket(trackedSymbols);
+
   const fetchTokens = useCallback(async () => {
     try {
       const res  = await fetch(HL_API, {
@@ -315,6 +320,40 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
     return () => { clearInterval(interval); clearInterval(clock); };
   }, [fetchTokens]);
 
+  // Mettre à jour les symbols suivis par le L2 WebSocket quand les tokens changent
+  useEffect(() => {
+    if (tokens.length > 0) {
+      const topSymbols = tokens.slice(0, 20).map(t => t.symbol);
+      setTrackedSymbols(prev => {
+        const newSymbols = [...new Set([...prev, ...topSymbols])];
+        return newSymbols.slice(0, 30); // Max 30 symbols pour WS
+      });
+    }
+  }, [tokens]);
+
+  // Mettre à jour les signaux OFI depuis le L2 WebSocket
+  useEffect(() => {
+    if (l2WebSocket.connected && Object.keys(l2WebSocket.ofiSignals).length > 0) {
+      setTokens(prev => prev.map(token => {
+        const signal = l2WebSocket.ofiSignals[token.symbol];
+        if (!signal) return token;
+
+        return {
+          ...token,
+          ofiScore: signal.ofiScore,
+          autoCorr: signal.autoCorr,
+          acfDirection: signal.acfDirection,
+          acfStrength: signal.acfStrength,
+          pContinuation: signal.pContinuation,
+          rvRegime: signal.rvRegime,
+          depthImbalance: signal.depthImbalance,
+          spreadBps: signal.spreadBps,
+          acfLags: signal.acfLags,
+        };
+      }));
+    }
+  }, [l2WebSocket.ofiSignals, l2WebSocket.connected]);
+
   // Position size calculator
   const calcSize = (slDist: number): string => {
     const riskUSDT = equityInput * 0.0015; // 0.15%
@@ -352,6 +391,18 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
+          {/* L2 WebSocket Status */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end', marginBottom: 4 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: l2WebSocket.connected ? '#22c55e' : '#ef4444', animation: l2WebSocket.connected ? 'pulse 2s infinite' : 'none' }} />
+            <span style={{ fontSize: 10, color: l2WebSocket.connected ? '#22c55e' : '#ef4444', fontFamily: 'monospace' }}>
+              L2 WS {l2WebSocket.connected ? 'CONNECTED' : 'DISCONNECTED'}
+            </span>
+            {l2WebSocket.connected && Object.keys(l2WebSocket.ofiSignals).length > 0 && (
+              <span style={{ fontSize: 9, color: '#64748b', marginLeft: 4 }}>
+                ({Object.keys(l2WebSocket.ofiSignals).length} assets)
+              </span>
+            )}
+          </div>
           {/* Session badge */}
           <div style={{ background: session.color + '22', border: `1px solid ${session.color}`, borderRadius: 6, padding: '4px 10px', marginBottom: 4 }}>
             <span style={{ color: session.color, fontWeight: 700, fontSize: 12 }}>
@@ -526,6 +577,11 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
         <span>p% = probabilité de continuation du move</span>
         <span>VOL:HIGH = spread/stops à élargir</span>
         <span>🔎 Click ligne = détail microstructure</span>
+        {l2WebSocket.connected && (
+          <span style={{ color: '#22c55e', marginLeft: 'auto' }}>
+            ⚡ Données OFI temps réel (L2 WS)
+          </span>
+        )}
       </div>
 
       {/* OFI Detail Panel */}
