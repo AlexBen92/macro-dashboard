@@ -44,6 +44,10 @@
     "analyze-*.ts",
     "generate-final-report.ts",
     "debug-*.ts",
-    "backtest-full-metrics.ts"
+    "backtest-*.ts",
+    "send-*.ts",
+    "m15-*.ts",
+    "test-*.ts",
+    "src/lib/funding-arbitrage"
   ]
 }
