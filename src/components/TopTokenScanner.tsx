@@ -1,12 +1,18 @@
 /**
- * TOP TOKENS M15 SCANNER — v8.0
+ * TOP TOKENS M15 SCANNER — v9.0 (OFI + AUTOCORRELATION)
  * Scanne tous les tokens Hyperliquid toutes les 30s.
- * Score composite 0-6 : session + volume + funding + trend + OI + volatilité
- * Affiche TOP 15 avec badge SETUP READY si score ≥ 4/6
+ * Score composite 0-100 : L1 (30%) + L2 (40%) + L3 (30%)
+ * NOUVEAU: OFI autocorrélation + ACF + realized volatility en temps réel
+ * Affiche TOP 20 avec colonnes OFI, ACF, VOL + panel de détail au clic
  */
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { getOFIEngine, type ACFResult, type RVResult, type DepthFeatures } from '@/lib/ofi-autocorr';
+import { OFIBadge } from './OFIBadge';
+import { ACFMiniChart } from './ACFMiniChart';
+import { RVRegimeBadge } from './RVRegimeBadge';
+import { OFIDetailPanel, type TokenSignalExtended } from './OFIDetailPanel';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
 
@@ -42,6 +48,20 @@ interface TokenData {
   reasons: string[];
   direction: string;
   fundingEdge: number;
+  // === OFI + AUTOCORRELATION FIELDS ===
+  ofiScore: number;           // 0..100
+  autoCorr: number;           // 0..100
+  acfDirection: 'BUY' | 'SELL' | 'NEUTRAL';
+  acfStrength: 'STRONG' | 'MODERATE' | 'WEAK';
+  pContinuation: number;      // 0..1
+  rvRegime: 'LOW' | 'NORMAL' | 'HIGH' | 'EXPLOSIVE';
+  depthImbalance: number;     // -1..+1
+  spreadBps: number;
+  acfLags: number[];          // rho_1..rho_10
+  // L1/L2/L3 breakdown for detail panel
+  l1Score?: number;
+  l2Score?: number;
+  l3Score?: number;
 }
 
 interface Alert {
@@ -98,6 +118,31 @@ function computeSetupScore(token: Partial<TokenData>, sessionScore: number): Tok
   return { score: Math.min(6, Math.round(score)), reasons, direction, fundingEdge };
 }
 
+/** Compute L1/L2/L3 scores from OFI engine data */
+function computeLayerScores(token: TokenData, sessionScore: number): { l1: number; l2: number; l3: number } {
+  // L1: Session + volume (30% of final)
+  const l1Session = sessionScore >= 70 ? 100 : sessionScore >= 35 ? 50 : 0;
+  const l1Vol = token.vol24h >= 10_000_000 ? 100 : token.vol24h >= 2_000_000 ? 60 : 20;
+  const l1 = (l1Session * 0.6 + l1Vol * 0.4);
+
+  // L2: VWAP proxy + funding + OI + OFI + depth (40% of final)
+  const l2Funding = Math.abs(token.fundingEdge) >= 0.10 ? 100 : Math.abs(token.fundingEdge) >= 0.05 ? 60 : 30;
+  const l2OI = token.oi >= 5_000_000 ? 100 : token.oi >= 2_000_000 ? 60 : 30;
+  const l2OFI = token.ofiScore; // 0..100 from OFI engine
+  const l2Depth = Math.abs(token.depthImbalance) >= 0.15 ? 100 : Math.abs(token.depthImbalance) >= 0.05 ? 60 : 40;
+  const l2Spread = token.spreadBps <= 2 ? 100 : token.spreadBps <= 5 ? 70 : 40;
+  const l2 = (l2Funding * 0.25 + l2OI * 0.20 + l2OFI * 0.30 + l2Depth * 0.15 + l2Spread * 0.10);
+
+  // L3: Trend + vol + autocorr + pContinuation (30% of final)
+  const l3Trend = Math.abs(token.change24h) >= 1 ? 100 : Math.abs(token.change24h) >= 0.5 ? 60 : 30;
+  const l3Vol = token.rvRegime === 'NORMAL' ? 100 : token.rvRegime === 'HIGH' ? 70 : token.rvRegime === 'LOW' ? 50 : 0;
+  const l3AutoCorr = token.autoCorr; // 0..100 from ACF
+  const l3PCont = token.pContinuation * 100; // 0..100
+  const l3 = (l3Trend * 0.30 + l3Vol * 0.20 + l3AutoCorr * 0.30 + l3PCont * 0.20);
+
+  return { l1, l2, l3 };
+}
+
 function getSessionInfo(): SessionInfo {
   const now = new Date();
   const utcH = now.getUTCHours();
@@ -146,6 +191,12 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
   const [equityInput, setEquity] = useState(equity);
   const [alerts, setAlerts]     = useState<Alert[]>([]);
   const [alertEnabled, setAlertEnabled] = useState(false);
+  const [selectedToken, setSelectedToken] = useState<TokenSignalExtended | null>(null);
+  const [ofiSignals, setOfiSignals] = useState<Record<string, {
+    acf: ACFResult | null;
+    rv: RVResult;
+    depth: DepthFeatures | null;
+  }>>({});
 
   const fetchTokens = useCallback(async () => {
     try {
@@ -176,13 +227,55 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
         const token: Partial<TokenData> = { symbol: m.name, price, funding, vol24h, oi, change24h, atrProxy };
         const setup = computeSetupScore(token, sess.score);
 
-        return {
-          ...token,
-          ...setup,
-          // Position sizing (risk 0.15% equity, SL = max(0.4%, 0.75*ATR))
+        // === GET OFI SIGNALS ===
+        const engine = getOFIEngine(m.name);
+        const acf = engine.computeACF();
+        const rv = engine.computeRV();
+        const depth = engine.getLastDepth();
+
+        // Compute OFI scores
+        const ofiScore = acf ? Math.max(0, Math.min(100,
+          50 +
+          (acf.direction === 'BUY' ? 15 : acf.direction === 'SELL' ? -15 : 0) +
+          (acf.persistence - 0.5) * 40 +
+          Math.min(acf.sumACF * 15, 20)
+        )) : 50;
+
+        const autoCorr = acf ? Math.max(0, Math.min(100,
+          50 + acf.sumACF * 50 + (acf.persistence - 0.5) * 60
+        )) : 50;
+
+        // Compute L1/L2/L3 for detail panel
+        const tokenWithOFI: TokenData = {
+          symbol: m.name,
+          price,
+          funding,
+          vol24h,
+          oi,
+          change24h,
+          atrProxy,
           slDist: Math.max(0.004, 0.75 * atrProxy),
           entryZone: price,
-        } as TokenData;
+          ...setup,
+          // OFI fields
+          ofiScore,
+          autoCorr,
+          acfDirection: acf?.direction ?? 'NEUTRAL',
+          acfStrength: acf?.strength ?? 'WEAK',
+          pContinuation: acf?.pContinuation ?? 0.5,
+          rvRegime: rv.regime,
+          depthImbalance: depth?.depthImbalance ?? 0,
+          spreadBps: depth?.spreadBps ?? 0,
+          acfLags: acf?.lags ?? [],
+        };
+
+        // Compute L1/L2/L3 scores
+        const layerScores = computeLayerScores(tokenWithOFI, sess.score);
+        tokenWithOFI.l1Score = layerScores.l1;
+        tokenWithOFI.l2Score = layerScores.l2;
+        tokenWithOFI.l3Score = layerScores.l3;
+
+        return tokenWithOFI;
       }).filter((t: TokenData) => t.price > 0 && t.vol24h > 100_000);
 
       // Trier par score décroissant, puis volume
@@ -334,7 +427,7 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #1e293b' }}>
-                {['#', 'Token', 'Score', 'Prix', 'Funding', '24h %', 'Volume', 'OI', 'Direction', 'SL', 'TP1', 'TP2', 'Size (USDT)'].map(h => (
+                {['#', 'Token', 'Score', 'Prix', 'Funding', '24h %', 'Volume', 'OI', 'OFI', 'ACF', 'VOL', 'Direction', 'SL', 'TP1', 'TP2', 'Size (USDT)'].map(h => (
                   <th key={h} style={{ color: '#64748b', padding: '6px 8px', textAlign: 'left', fontWeight: 600, fontSize: 11 }}>{h}</th>
                 ))}
               </tr>
@@ -349,7 +442,13 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
                 const tp2  = t.direction !== 'WAIT' ? calcTP2(t.price, t.slDist, t.direction) : '-';
 
                 return (
-                  <tr key={t.symbol} style={{ background: rowBg, borderBottom: '1px solid #0f172a' }}>
+                  <tr
+                    key={t.symbol}
+                    style={{ background: rowBg, borderBottom: '1px solid #0f172a', cursor: 'pointer' }}
+                    onClick={() => setSelectedToken(t as TokenSignalExtended)}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#1e3a5f22'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
+                  >
                     <td style={{ color: '#475569', padding: '6px 8px' }}>{i+1}</td>
                     <td style={{ color: isSetup ? '#22c55e' : '#f1f5f9', padding: '6px 8px', fontWeight: isSetup ? 700 : 400 }}>
                       {isSetup && '🎯 '}{t.symbol}
@@ -368,6 +467,23 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
                     </td>
                     <td style={{ color: '#94a3b8', padding: '6px 8px' }}>{fmtVol(t.vol24h)}</td>
                     <td style={{ color: '#94a3b8', padding: '6px 8px' }}>{fmtVol(t.oi)}</td>
+                    {/* OFI Badge */}
+                    <td style={{ padding: '6px 8px' }}>
+                      <OFIBadge
+                        direction={t.acfDirection}
+                        strength={t.acfStrength}
+                        pContinuation={t.pContinuation}
+                        ofiScore={t.ofiScore}
+                      />
+                    </td>
+                    {/* ACF MiniChart */}
+                    <td style={{ padding: '6px 8px' }}>
+                      <ACFMiniChart lags={t.acfLags} />
+                    </td>
+                    {/* RV Regime Badge */}
+                    <td style={{ padding: '6px 8px' }}>
+                      <RVRegimeBadge regime={t.rvRegime} compact />
+                    </td>
                     <td style={{ padding: '6px 8px' }}>
                       <span style={{ color: t.direction === 'LONG 📈' ? '#4ade80' : t.direction === 'SHORT 📉' ? '#f87171' : '#64748b', fontWeight: 600 }}>
                         {t.direction}
@@ -387,7 +503,7 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
         </div>
       )}
 
-      {/* Légende score */}
+      {/* Légende score + OFI */}
       <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap' }}>
         {[
           ['5-6/6', '#22c55e', '🎯 SETUP READY'],
@@ -401,6 +517,24 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
           </div>
         ))}
       </div>
+
+      {/* Légende OFI */}
+      <div style={{ display: 'flex', gap: 16, marginTop: 8, flexWrap: 'wrap', padding: '8px 12px', background: '#0d1117', borderRadius: 6, fontSize: 10, color: '#666' }}>
+        <span>🟢 OFI BUY = flux acheteur persistant</span>
+        <span>🔴 OFI SELL = pression vendeuse persistante</span>
+        <span>ACF = autocorrélation OFI lags 1–10 (vert = positif)</span>
+        <span>p% = probabilité de continuation du move</span>
+        <span>VOL:HIGH = spread/stops à élargir</span>
+        <span>🔎 Click ligne = détail microstructure</span>
+      </div>
+
+      {/* OFI Detail Panel */}
+      {selectedToken && (
+        <OFIDetailPanel
+          token={selectedToken}
+          onClose={() => setSelectedToken(null)}
+        />
+      )}
     </div>
   );
 }
