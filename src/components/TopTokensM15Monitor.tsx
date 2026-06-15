@@ -28,6 +28,10 @@ import {
 import { fetchBatchInitialCVD, type CVDInitData } from '@/lib/binance-history';
 import { fetchBatchOIMetrics, type OIMetrics } from '@/lib/hyperliquid-oi';
 import { initializeBinanceWS, getCachedCVD } from '@/lib/binance-websocket';
+import { useMultiAssetL2WebSocket } from '@/hooks/api/useHyperliquidL2WebSocket';
+import { OFIBadge } from './OFIBadge';
+import { ACFMiniChart } from './ACFMiniChart';
+import { RVRegimeBadge } from './RVRegimeBadge';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
 
@@ -53,6 +57,16 @@ interface ScoreCard {
   vol24h: number;
   oi: number;
   change24h: number;
+  // OFI Autocorrelation fields
+  ofiScore?: number;
+  autoCorr?: number;
+  acfDirection?: 'BUY' | 'SELL' | 'NEUTRAL';
+  acfStrength?: 'STRONG' | 'MODERATE' | 'WEAK';
+  pContinuation?: number;
+  rvRegime?: 'LOW' | 'NORMAL' | 'HIGH' | 'EXPLOSIVE';
+  depthImbalance?: number;
+  spreadBps?: number;
+  acfLags?: number[];
 }
 
 function getSessionInfo(): SessionInfo {
@@ -84,6 +98,10 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
   const [equityInput, setEquity] = useState(equity);
   const [refreshCountdown, setRefreshCountdown] = useState(30);
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+
+  // L2 WebSocket for OFI Engine
+  const topSymbols = ['BTC', 'ETH', 'SOL', 'BNB', 'DOGE', 'AVAX', 'SUI', 'ARB', 'OP', 'LINK'];
+  const l2WebSocket = useMultiAssetL2WebSocket(topSymbols);
 
   const fetchTokens = useCallback(async () => {
     try {
@@ -224,6 +242,29 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
     return () => { clearInterval(interval); clearInterval(clock); };
   }, [fetchTokens]);
 
+  // Update tokens with real-time OFI data from L2 WebSocket
+  useEffect(() => {
+    if (l2WebSocket.connected && Object.keys(l2WebSocket.ofiSignals).length > 0) {
+      setTokens(prev => prev.map(token => {
+        const signal = l2WebSocket.ofiSignals[token.symbol];
+        if (!signal) return token;
+
+        return {
+          ...token,
+          ofiScore: signal.ofiScore,
+          autoCorr: signal.autoCorr,
+          acfDirection: signal.acfDirection,
+          acfStrength: signal.acfStrength,
+          pContinuation: signal.pContinuation,
+          rvRegime: signal.rvRegime,
+          depthImbalance: signal.depthImbalance,
+          spreadBps: signal.spreadBps,
+          acfLags: signal.acfLags,
+        };
+      }));
+    }
+  }, [l2WebSocket.ofiSignals, l2WebSocket.connected]);
+
   function getCountdown(targetH: number): string {
     const now = new Date();
     const utcH = now.getUTCHours();
@@ -276,6 +317,22 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
         <div className="flex items-center gap-3">
           <div className="font-mono text-[0.72rem] text-[#8890a0] tracking-[3px] uppercase flex items-center gap-2">
             <div className="w-[6px] h-[6px] rounded-full bg-[#00e5ff]" /> Top Tokens M15 Monitor v2
+            {/* L2 WebSocket Status */}
+            <span className="ml-4 flex items-center gap-1.5 text-[0.6rem]">
+              <span style={{
+                width: '4px', height: '4px', borderRadius: '50%',
+                background: l2WebSocket.connected ? '#22c55e' : '#ef4444',
+                animation: l2WebSocket.connected ? 'pulse 2s infinite' : 'none'
+              }} />
+              <span style={{ color: l2WebSocket.connected ? '#22c55e' : '#ef4444' }}>
+                L2 WS {l2WebSocket.connected ? 'ON' : 'OFF'}
+              </span>
+              {l2WebSocket.connected && Object.keys(l2WebSocket.ofiSignals).length > 0 && (
+                <span style={{ color: '#64748b' }}>
+                  ({Object.keys(l2WebSocket.ofiSignals).length})
+                </span>
+              )}
+            </span>
           </div>
         </div>
 
@@ -338,10 +395,24 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
         <span className="ml-auto">Score = L1×30% + L2×40% + L3×30%</span>
       </div>
 
+      {/* OFI Legend */}
+      {l2WebSocket.connected && (
+        <div className="mb-3 px-3 py-1.5 bg-[#0a0a14] border border-[#1e1e32] rounded flex flex-wrap gap-3 font-mono text-[0.55rem] text-[#5a6070]">
+          <span>🟢 OFI BUY = flux acheteur persistant</span>
+          <span>🔴 OFI SELL = pression vendeuse</span>
+          <span>ACF = autocorrélation lags 1-10</span>
+          <span>p% = probabilité continuation</span>
+          <span>VOL = régime volatilité réalisée</span>
+          {l2WebSocket.connected && (
+            <span className="ml-auto text-[#22c55e]">⚡ OFI temps réel</span>
+          )}
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-[#0e0e1a] border border-[#1e1e32] rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 bg-[#1a1a2e] border-b border-[#1e1e32] font-mono text-[0.6rem] text-[#5a6070] uppercase tracking-wider">
+        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 bg-[#1a1a2e] border-b border-[#1e1e32] font-mono text-[0.6rem] text-[#5a6070] uppercase tracking-wider">
           <span>#</span>
           <span>Token</span>
           <span className="text-right">Score</span>
@@ -350,6 +421,9 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           <span className="text-right">L3</span>
           <span className="text-center">Action</span>
           <span className="text-center">Direction</span>
+          <span className="text-center">OFI</span>
+          <span className="text-center">ACF</span>
+          <span className="text-center">VOL</span>
           <span className="text-right">Size</span>
         </div>
 
@@ -370,7 +444,7 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
                 <div key={token.symbol}>
                   {/* Main row */}
                   <div
-                    className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem] cursor-pointer"
+                    className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem] cursor-pointer"
                     onClick={() => setExpandedRow(isExpanded ? null : token.symbol)}
                   >
                     <span className="font-semibold text-white">{idx + 1}</span>
@@ -412,6 +486,26 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
                       }}>
                         {token.score.direction}
                       </span>
+                    </span>
+
+                    {/* OFI Badge */}
+                    <span className="text-center">
+                      <OFIBadge
+                        direction={token.acfDirection || 'NEUTRAL'}
+                        strength={token.acfStrength || 'WEAK'}
+                        pContinuation={token.pContinuation || 0.5}
+                        ofiScore={token.ofiScore || 50}
+                      />
+                    </span>
+
+                    {/* ACF MiniChart */}
+                    <span className="text-center flex justify-center">
+                      <ACFMiniChart lags={token.acfLags || []} width={60} height={20} />
+                    </span>
+
+                    {/* RV Regime Badge */}
+                    <span className="text-center">
+                      <RVRegimeBadge regime={token.rvRegime || 'NORMAL'} compact />
                     </span>
 
                     {/* Size */}

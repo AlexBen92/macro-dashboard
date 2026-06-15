@@ -2,677 +2,740 @@
   "BTC": {
     "-0.25": {
       "symbol": "BTC",
-      "totalTrades": 158,
-      "winRate": 68.35443037974683,
-      "avgPnl": 0.46218530649833295,
-      "totalPnl": 73.0252784267366,
-      "sharpe": 7.240960783016963,
-      "maxDrawdown": 39.29784636591826,
-      "profitFactor": 3.573809576256591,
-      "avgHoldHours": 7.265822784810126,
+      "totalTrades": 1317,
+      "winRate": 69.93166287015946,
+      "avgPnl": 0.946052724985378,
+      "totalPnl": 1245.9514388057428,
+      "sharpe": 7.028804079030049,
+      "maxDrawdown": 34.65711975567577,
+      "profitFactor": 4.660427326954339,
+      "avgHoldHours": 6.865603644646924,
       "exitReasons": {
-        "time_limit": 123,
-        "funding_normalized": 35
+        "time_limit": 816,
+        "funding_normalized": 473,
+        "stop_loss": 28
       }
     },
     "-0.5": {
       "symbol": "BTC",
-      "totalTrades": 74,
-      "winRate": 60.810810810810814,
-      "avgPnl": 0.13736681610579854,
-      "totalPnl": 10.165144391829092,
-      "sharpe": 2.4182132476350584,
-      "maxDrawdown": 13267.89262010533,
-      "profitFactor": 1.587299147194829,
-      "avgHoldHours": 7.5675675675675675,
+      "totalTrades": 769,
+      "winRate": 69.4408322496749,
+      "avgPnl": 1.1003581896740013,
+      "totalPnl": 846.175447859307,
+      "sharpe": 7.472281768281488,
+      "maxDrawdown": 151.20561928232777,
+      "profitFactor": 4.887613476456051,
+      "avgHoldHours": 7.2561768530559165,
       "exitReasons": {
-        "time_limit": 65,
-        "funding_normalized": 9
+        "time_limit": 564,
+        "funding_normalized": 187,
+        "stop_loss": 18
       }
     },
     "-1": {
       "symbol": "BTC",
-      "totalTrades": 2,
-      "winRate": 0,
-      "avgPnl": -0.41590342950013665,
-      "totalPnl": -0.8318068590002733,
-      "sharpe": -114.45729001098333,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 8,
+      "totalTrades": 295,
+      "winRate": 72.54237288135593,
+      "avgPnl": 1.3757436451643665,
+      "totalPnl": 405.8443753234881,
+      "sharpe": 8.882431096047302,
+      "maxDrawdown": 138.42175571340277,
+      "profitFactor": 5.204298246943371,
+      "avgHoldHours": 7.416949152542373,
       "exitReasons": {
-        "time_limit": 2
+        "time_limit": 235,
+        "funding_normalized": 48,
+        "stop_loss": 12
       }
     },
     "-2": {
       "symbol": "BTC",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 84,
+      "winRate": 79.76190476190477,
+      "avgPnl": 1.783522993630492,
+      "totalPnl": 149.81593146496132,
+      "sharpe": 10.454553166747381,
+      "maxDrawdown": 87.70198484997911,
+      "profitFactor": 5.760917898617559,
+      "avgHoldHours": 6.976190476190476,
+      "exitReasons": {
+        "time_limit": 60,
+        "funding_normalized": 18,
+        "stop_loss": 6
+      }
     },
     "-3": {
       "symbol": "BTC",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 44,
+      "winRate": 81.81818181818183,
+      "avgPnl": 2.057402331439403,
+      "totalPnl": 90.52570258333374,
+      "sharpe": 10.95167079583425,
+      "maxDrawdown": 12.499168451793622,
+      "profitFactor": 5.703111797276437,
+      "avgHoldHours": 6.75,
+      "exitReasons": {
+        "stop_loss": 4,
+        "funding_normalized": 10,
+        "time_limit": 30
+      }
     }
   },
   "ETH": {
     "-0.25": {
       "symbol": "ETH",
-      "totalTrades": 183,
-      "winRate": 71.58469945355192,
-      "avgPnl": 0.6330119746836101,
-      "totalPnl": 115.84119136710065,
-      "sharpe": 7.077817212087076,
-      "maxDrawdown": 87.29478012354107,
-      "profitFactor": 3.723494674363571,
-      "avgHoldHours": 6.896174863387978,
+      "totalTrades": 1630,
+      "winRate": 73.8036809815951,
+      "avgPnl": 1.0337058432350552,
+      "totalPnl": 1684.94052447314,
+      "sharpe": 7.255803559909806,
+      "maxDrawdown": 228.4110771038555,
+      "profitFactor": 3.903383316089034,
+      "avgHoldHours": 6.590184049079754,
       "exitReasons": {
-        "time_limit": 117,
-        "funding_normalized": 64,
-        "stop_loss": 2
+        "funding_normalized": 654,
+        "time_limit": 910,
+        "stop_loss": 66
       }
     },
     "-0.5": {
       "symbol": "ETH",
-      "totalTrades": 81,
-      "winRate": 60.49382716049383,
-      "avgPnl": 0.40537344540795933,
-      "totalPnl": 32.835249078044704,
-      "sharpe": 3.9660464547665337,
-      "maxDrawdown": 87.29478012354107,
-      "profitFactor": 2.0961140588840794,
-      "avgHoldHours": 7.382716049382716,
+      "totalTrades": 1019,
+      "winRate": 72.71835132482826,
+      "avgPnl": 1.101081169732461,
+      "totalPnl": 1122.0017119573777,
+      "sharpe": 7.012020715259665,
+      "maxDrawdown": 219.37183102150595,
+      "profitFactor": 3.603272393711845,
+      "avgHoldHours": 6.691854759568204,
       "exitReasons": {
-        "time_limit": 64,
-        "stop_loss": 2,
-        "funding_normalized": 15
+        "funding_normalized": 363,
+        "time_limit": 601,
+        "stop_loss": 55
       }
     },
     "-1": {
       "symbol": "ETH",
-      "totalTrades": 21,
-      "winRate": 57.14285714285714,
-      "avgPnl": 0.06606685558996508,
-      "totalPnl": 1.3874039673892666,
-      "sharpe": 1.173157320105899,
-      "maxDrawdown": 76.97077231961454,
-      "profitFactor": 1.2141580470067155,
-      "avgHoldHours": 6.9523809523809526,
+      "totalTrades": 456,
+      "winRate": 72.14912280701753,
+      "avgPnl": 1.4635321394248364,
+      "totalPnl": 667.3706555777254,
+      "sharpe": 7.517142254913071,
+      "maxDrawdown": 508.4521563907586,
+      "profitFactor": 4.07704067451789,
+      "avgHoldHours": 6.9605263157894735,
       "exitReasons": {
-        "time_limit": 16,
-        "funding_normalized": 5
+        "funding_normalized": 127,
+        "time_limit": 304,
+        "stop_loss": 25
       }
     },
     "-2": {
       "symbol": "ETH",
-      "totalTrades": 1,
-      "winRate": 0,
-      "avgPnl": -0.5474945533769056,
-      "totalPnl": -0.5474945533769056,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 8,
+      "totalTrades": 138,
+      "winRate": 71.73913043478261,
+      "avgPnl": 1.8591256686788253,
+      "totalPnl": 256.5593422776779,
+      "sharpe": 8.23607698593877,
+      "maxDrawdown": 78.05898856485065,
+      "profitFactor": 4.260503578415266,
+      "avgHoldHours": 7.2898550724637685,
       "exitReasons": {
-        "time_limit": 1
+        "funding_normalized": 23,
+        "stop_loss": 10,
+        "time_limit": 105
       }
     },
     "-3": {
       "symbol": "ETH",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 43,
+      "winRate": 58.139534883720934,
+      "avgPnl": 1.272668451765119,
+      "totalPnl": 54.724743425900115,
+      "sharpe": 4.178699108865974,
+      "maxDrawdown": 15011.025480433005,
+      "profitFactor": 1.9867159038113928,
+      "avgHoldHours": 6.930232558139535,
+      "exitReasons": {
+        "stop_loss": 9,
+        "time_limit": 32,
+        "funding_normalized": 2
+      }
     }
   },
   "SOL": {
     "-0.25": {
       "symbol": "SOL",
-      "totalTrades": 264,
-      "winRate": 69.31818181818183,
-      "avgPnl": 0.7200163417272574,
-      "totalPnl": 190.08431421599593,
-      "sharpe": 6.109554265313005,
-      "maxDrawdown": 22.072779143616817,
-      "profitFactor": 3.291002233339149,
-      "avgHoldHours": 7.276515151515151,
+      "totalTrades": 3713,
+      "winRate": 73.47158631834097,
+      "avgPnl": 1.2793850577283516,
+      "totalPnl": 4750.35671934537,
+      "sharpe": 6.73506686339872,
+      "maxDrawdown": 39.401729003568256,
+      "profitFactor": 3.9431191191835846,
+      "avgHoldHours": 6.903851333153784,
       "exitReasons": {
-        "stop_loss": 8,
-        "time_limit": 199,
-        "funding_normalized": 55,
+        "stop_loss": 199,
+        "funding_normalized": 1093,
+        "time_limit": 2419,
         "data_end": 2
       }
     },
     "-0.5": {
       "symbol": "SOL",
-      "totalTrades": 212,
-      "winRate": 70.28301886792453,
-      "avgPnl": 0.7968979276917693,
-      "totalPnl": 168.9423606706551,
-      "sharpe": 6.5616019832008625,
-      "maxDrawdown": 136.90086561050006,
-      "profitFactor": 3.574455073234337,
-      "avgHoldHours": 7.367924528301887,
+      "totalTrades": 3023,
+      "winRate": 73.70162090638439,
+      "avgPnl": 1.3734395600115838,
+      "totalPnl": 4151.907789915018,
+      "sharpe": 6.839989762450495,
+      "maxDrawdown": 24.189557336424368,
+      "profitFactor": 4.020903125616061,
+      "avgHoldHours": 7.030433344359907,
       "exitReasons": {
-        "time_limit": 166,
-        "funding_normalized": 42,
-        "stop_loss": 4
+        "stop_loss": 171,
+        "funding_normalized": 748,
+        "time_limit": 2104
       }
     },
     "-1": {
       "symbol": "SOL",
-      "totalTrades": 102,
-      "winRate": 67.64705882352942,
-      "avgPnl": 0.8456244379882957,
-      "totalPnl": 86.25369267480616,
-      "sharpe": 6.559758509270589,
-      "maxDrawdown": 75.75020329886381,
-      "profitFactor": 3.317790040711633,
-      "avgHoldHours": 7.588235294117647,
+      "totalTrades": 1838,
+      "winRate": 72.63329706202394,
+      "avgPnl": 1.4939696954066388,
+      "totalPnl": 2745.916300157402,
+      "sharpe": 6.6208772191199055,
+      "maxDrawdown": 41.23975216717237,
+      "profitFactor": 3.7809856284686183,
+      "avgHoldHours": 7.0571273122959735,
       "exitReasons": {
-        "time_limit": 88,
-        "funding_normalized": 13,
-        "stop_loss": 1
+        "stop_loss": 130,
+        "funding_normalized": 385,
+        "time_limit": 1323
       }
     },
     "-2": {
       "symbol": "SOL",
-      "totalTrades": 32,
-      "winRate": 56.25,
-      "avgPnl": -0.029686785263313212,
-      "totalPnl": -0.9499771284260228,
-      "sharpe": -0.36014665264226453,
-      "maxDrawdown": 0,
-      "profitFactor": 0.9422052351156842,
-      "avgHoldHours": 7.8125,
+      "totalTrades": 891,
+      "winRate": 69.02356902356902,
+      "avgPnl": 1.7729606594868728,
+      "totalPnl": 1579.7079476028036,
+      "sharpe": 6.7350208263197775,
+      "maxDrawdown": 63.930420580032134,
+      "profitFactor": 3.5565817800733717,
+      "avgHoldHours": 7.0673400673400675,
       "exitReasons": {
-        "time_limit": 30,
-        "stop_loss": 2
+        "stop_loss": 93,
+        "funding_normalized": 124,
+        "time_limit": 674
       }
     },
     "-3": {
       "symbol": "SOL",
-      "totalTrades": 9,
-      "winRate": 66.66666666666666,
-      "avgPnl": 1.176434470630546,
-      "totalPnl": 10.587910235674915,
-      "sharpe": 14.441889930399185,
-      "maxDrawdown": 3.0050801341919593,
-      "profitFactor": 13.393162818126141,
-      "avgHoldHours": 8,
+      "totalTrades": 631,
+      "winRate": 68.1458003169572,
+      "avgPnl": 1.801556676827078,
+      "totalPnl": 1136.7822630778862,
+      "sharpe": 6.529605646864653,
+      "maxDrawdown": 62.97377983549735,
+      "profitFactor": 3.2508639881864876,
+      "avgHoldHours": 7.096671949286846,
       "exitReasons": {
-        "time_limit": 9
+        "stop_loss": 70,
+        "time_limit": 499,
+        "funding_normalized": 62
       }
     }
   },
   "XRP": {
     "-0.25": {
       "symbol": "XRP",
-      "totalTrades": 265,
-      "winRate": 72.45283018867924,
-      "avgPnl": 0.614630830361763,
-      "totalPnl": 162.8771700458672,
-      "sharpe": 7.941605951807043,
-      "maxDrawdown": 107.12935463422014,
-      "profitFactor": 4.3893004314726785,
-      "avgHoldHours": 7.154716981132076,
+      "totalTrades": 2836,
+      "winRate": 73.62482369534555,
+      "avgPnl": 1.11376507194467,
+      "totalPnl": 3158.637744035084,
+      "sharpe": 6.8309759035401,
+      "maxDrawdown": 191.37856051117623,
+      "profitFactor": 4.273050468279361,
+      "avgHoldHours": 6.7799717912552895,
       "exitReasons": {
-        "funding_normalized": 78,
-        "time_limit": 187
+        "stop_loss": 93,
+        "funding_normalized": 1093,
+        "time_limit": 1650
       }
     },
     "-0.5": {
       "symbol": "XRP",
-      "totalTrades": 171,
-      "winRate": 73.68421052631578,
-      "avgPnl": 0.7637764642735981,
-      "totalPnl": 130.60577539078528,
-      "sharpe": 9.586823968883841,
-      "maxDrawdown": 137.74110131686558,
-      "profitFactor": 5.302357540541594,
-      "avgHoldHours": 7.456140350877193,
+      "totalTrades": 2142,
+      "winRate": 73.80952380952381,
+      "avgPnl": 1.1398959429800075,
+      "totalPnl": 2441.657109863176,
+      "sharpe": 7.030179239878059,
+      "maxDrawdown": 263.4941580947079,
+      "profitFactor": 4.234774076691363,
+      "avgHoldHours": 6.88515406162465,
       "exitReasons": {
-        "time_limit": 131,
-        "funding_normalized": 40
+        "stop_loss": 76,
+        "funding_normalized": 734,
+        "time_limit": 1332
       }
     },
     "-1": {
       "symbol": "XRP",
-      "totalTrades": 57,
-      "winRate": 73.68421052631578,
-      "avgPnl": 0.8772935830556077,
-      "totalPnl": 50.00573423416964,
-      "sharpe": 9.568859990118915,
-      "maxDrawdown": 16.558535944842763,
-      "profitFactor": 4.2397170258382735,
-      "avgHoldHours": 7.87719298245614,
+      "totalTrades": 1165,
+      "winRate": 72.87553648068669,
+      "avgPnl": 1.1134989704312133,
+      "totalPnl": 1297.2263005523635,
+      "sharpe": 6.6784077070471906,
+      "maxDrawdown": 453.83777938682465,
+      "profitFactor": 3.6224542094703933,
+      "avgHoldHours": 7.036909871244635,
       "exitReasons": {
-        "time_limit": 52,
-        "funding_normalized": 4,
-        "stop_loss": 1
+        "funding_normalized": 306,
+        "stop_loss": 56,
+        "time_limit": 803
       }
     },
     "-2": {
       "symbol": "XRP",
-      "totalTrades": 2,
-      "winRate": 50,
-      "avgPnl": 0.5084375448662121,
-      "totalPnl": 1.0168750897324241,
-      "sharpe": 14.750356454098299,
-      "maxDrawdown": 3.670714751664287,
-      "profitFactor": 27.242650754777472,
-      "avgHoldHours": 8,
+      "totalTrades": 371,
+      "winRate": 70.08086253369272,
+      "avgPnl": 1.2955391118094823,
+      "totalPnl": 480.6450104813179,
+      "sharpe": 5.911371241435801,
+      "maxDrawdown": 344.3765893484846,
+      "profitFactor": 3.092599759604406,
+      "avgHoldHours": 7.1617250673854445,
       "exitReasons": {
-        "time_limit": 2
+        "funding_normalized": 68,
+        "stop_loss": 31,
+        "time_limit": 272
       }
     },
     "-3": {
       "symbol": "XRP",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 179,
+      "winRate": 68.71508379888269,
+      "avgPnl": 1.1338894379604687,
+      "totalPnl": 202.9662093949239,
+      "sharpe": 4.408301858603358,
+      "maxDrawdown": 249.4460663308113,
+      "profitFactor": 2.314134424863228,
+      "avgHoldHours": 6.743016759776537,
+      "exitReasons": {
+        "funding_normalized": 44,
+        "stop_loss": 22,
+        "time_limit": 113
+      }
     }
   },
   "DOGE": {
     "-0.25": {
       "symbol": "DOGE",
-      "totalTrades": 214,
-      "winRate": 77.10280373831776,
-      "avgPnl": 0.8079712016838811,
-      "totalPnl": 172.90583716035056,
-      "sharpe": 9.304554375116547,
-      "maxDrawdown": 58.31722143553133,
-      "profitFactor": 5.408472138862845,
-      "avgHoldHours": 6.420560747663552,
+      "totalTrades": 2428,
+      "winRate": 72.94069192751236,
+      "avgPnl": 0.9948661830820024,
+      "totalPnl": 2415.535092523102,
+      "sharpe": 5.648801391690018,
+      "maxDrawdown": 83.21666860356865,
+      "profitFactor": 3.5023588320606507,
+      "avgHoldHours": 6.333607907742999,
       "exitReasons": {
-        "time_limit": 98,
-        "funding_normalized": 113,
-        "stop_loss": 3
+        "stop_loss": 119,
+        "funding_normalized": 1158,
+        "time_limit": 1151
       }
     },
     "-0.5": {
       "symbol": "DOGE",
-      "totalTrades": 84,
-      "winRate": 67.85714285714286,
-      "avgPnl": 0.6409130433345399,
-      "totalPnl": 53.836695640101354,
-      "sharpe": 7.94722316339699,
-      "maxDrawdown": 325.6469009147688,
-      "profitFactor": 3.5351605571179308,
-      "avgHoldHours": 6.9523809523809526,
+      "totalTrades": 1723,
+      "winRate": 72.6639582124202,
+      "avgPnl": 1.0967648465631963,
+      "totalPnl": 1889.7258306283873,
+      "sharpe": 5.549719248402953,
+      "maxDrawdown": 83.21666860356865,
+      "profitFactor": 3.462641969896716,
+      "avgHoldHours": 6.442832269297736,
       "exitReasons": {
-        "time_limit": 54,
-        "funding_normalized": 28,
-        "stop_loss": 2
+        "stop_loss": 97,
+        "funding_normalized": 731,
+        "time_limit": 895
       }
     },
     "-1": {
       "symbol": "DOGE",
-      "totalTrades": 14,
-      "winRate": 71.42857142857143,
-      "avgPnl": 0.620961317010987,
-      "totalPnl": 8.693458438153819,
-      "sharpe": 9.443867854156876,
-      "maxDrawdown": 12.04045903570158,
-      "profitFactor": 5.233659677266515,
-      "avgHoldHours": 8,
+      "totalTrades": 985,
+      "winRate": 72.89340101522843,
+      "avgPnl": 1.2227388243155766,
+      "totalPnl": 1204.3977419508428,
+      "sharpe": 5.377250611249135,
+      "maxDrawdown": 83.21666860356865,
+      "profitFactor": 3.5640779405605127,
+      "avgHoldHours": 6.56243654822335,
       "exitReasons": {
-        "time_limit": 13,
-        "funding_normalized": 1
+        "stop_loss": 59,
+        "funding_normalized": 371,
+        "time_limit": 555
       }
     },
     "-2": {
       "symbol": "DOGE",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 442,
+      "winRate": 71.71945701357465,
+      "avgPnl": 1.3757416090763541,
+      "totalPnl": 608.0777912117485,
+      "sharpe": 4.694115268596781,
+      "maxDrawdown": 83.21666860356865,
+      "profitFactor": 3.1782767900171525,
+      "avgHoldHours": 6.377828054298643,
+      "exitReasons": {
+        "stop_loss": 37,
+        "funding_normalized": 169,
+        "time_limit": 236
+      }
     },
     "-3": {
       "symbol": "DOGE",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 265,
+      "winRate": 70.18867924528301,
+      "avgPnl": 1.4039560941050708,
+      "totalPnl": 372.04836493784376,
+      "sharpe": 4.261126456028542,
+      "maxDrawdown": 83.21666860356865,
+      "profitFactor": 2.873299111369093,
+      "avgHoldHours": 6.362264150943396,
+      "exitReasons": {
+        "stop_loss": 28,
+        "funding_normalized": 85,
+        "time_limit": 152
+      }
     }
   },
   "BNB": {
     "-0.25": {
       "symbol": "BNB",
-      "totalTrades": 10,
-      "winRate": 40,
-      "avgPnl": -0.2952957579479295,
-      "totalPnl": -2.952957579479295,
-      "sharpe": -7.529250134756108,
-      "maxDrawdown": 0,
-      "profitFactor": 0.3095648251905921,
-      "avgHoldHours": 6.7,
+      "totalTrades": 3825,
+      "winRate": 74.74509803921569,
+      "avgPnl": 0.9642087900406281,
+      "totalPnl": 3688.0986219054025,
+      "sharpe": 7.33262887322434,
+      "maxDrawdown": 56.159109756427796,
+      "profitFactor": 4.529914580821446,
+      "avgHoldHours": 7.043921568627451,
       "exitReasons": {
-        "time_limit": 3,
-        "funding_normalized": 7
+        "time_limit": 2724,
+        "funding_normalized": 1011,
+        "stop_loss": 90
       }
     },
     "-0.5": {
       "symbol": "BNB",
-      "totalTrades": 4,
-      "winRate": 0,
-      "avgPnl": -0.7883201908492581,
-      "totalPnl": -3.1532807633970323,
-      "sharpe": -32.40333397826547,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 7.25,
+      "totalTrades": 3590,
+      "winRate": 74.98607242339833,
+      "avgPnl": 0.9967336255504257,
+      "totalPnl": 3578.273715726028,
+      "sharpe": 7.431410316917303,
+      "maxDrawdown": 56.159109756427796,
+      "profitFactor": 4.633330994676426,
+      "avgHoldHours": 7.084679665738162,
       "exitReasons": {
-        "time_limit": 2,
-        "funding_normalized": 2
+        "time_limit": 2602,
+        "funding_normalized": 902,
+        "stop_loss": 86
       }
     },
     "-1": {
       "symbol": "BNB",
-      "totalTrades": 1,
-      "winRate": 0,
-      "avgPnl": -1.0255103462151607,
-      "totalPnl": -1.0255103462151607,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 8,
+      "totalTrades": 3010,
+      "winRate": 74.88372093023256,
+      "avgPnl": 1.0293843992980851,
+      "totalPnl": 3098.4470418872365,
+      "sharpe": 7.3644065347436785,
+      "maxDrawdown": 68.02391922310372,
+      "profitFactor": 4.571964574520079,
+      "avgHoldHours": 7.2196013289036545,
       "exitReasons": {
-        "funding_normalized": 1
+        "time_limit": 2298,
+        "funding_normalized": 627,
+        "stop_loss": 85
       }
     },
     "-2": {
       "symbol": "BNB",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 2098,
+      "winRate": 73.40324118207818,
+      "avgPnl": 1.022976917053512,
+      "totalPnl": 2146.205571978268,
+      "sharpe": 7.140237759998632,
+      "maxDrawdown": 78.67455508659509,
+      "profitFactor": 4.118511474894937,
+      "avgHoldHours": 7.347950428979981,
+      "exitReasons": {
+        "time_limit": 1703,
+        "funding_normalized": 327,
+        "stop_loss": 68
+      }
     },
     "-3": {
       "symbol": "BNB",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 1633,
+      "winRate": 74.1579914268218,
+      "avgPnl": 1.1189221415067832,
+      "totalPnl": 1827.1998570805767,
+      "sharpe": 7.261845708623402,
+      "maxDrawdown": 110.75141389265116,
+      "profitFactor": 4.29243479927698,
+      "avgHoldHours": 7.358236374770361,
+      "exitReasons": {
+        "time_limit": 1345,
+        "funding_normalized": 232,
+        "stop_loss": 56
+      }
     }
   },
   "ADA": {
     "-0.25": {
       "symbol": "ADA",
-      "totalTrades": 217,
-      "winRate": 73.27188940092167,
-      "avgPnl": 0.9880041128350253,
-      "totalPnl": 214.39689248520048,
-      "sharpe": 8.127571613691305,
-      "maxDrawdown": 42.536329757578514,
-      "profitFactor": 5.11958518624147,
-      "avgHoldHours": 5.9953917050691246,
+      "totalTrades": 3002,
+      "winRate": 75.1165889407062,
+      "avgPnl": 1.2952276450901428,
+      "totalPnl": 3888.2733905606083,
+      "sharpe": 7.575996269939776,
+      "maxDrawdown": 10.300501887889695,
+      "profitFactor": 4.728561994020928,
+      "avgHoldHours": 6.574283810792805,
       "exitReasons": {
-        "funding_normalized": 139,
-        "time_limit": 75,
-        "stop_loss": 3
+        "time_limit": 1650,
+        "funding_normalized": 1241,
+        "stop_loss": 111
       }
     },
     "-0.5": {
       "symbol": "ADA",
-      "totalTrades": 160,
-      "winRate": 69.375,
-      "avgPnl": 0.6461744260493085,
-      "totalPnl": 103.38790816788936,
-      "sharpe": 6.418038660474861,
-      "maxDrawdown": 42.536329757578514,
-      "profitFactor": 3.133825864441782,
-      "avgHoldHours": 5.975,
+      "totalTrades": 2497,
+      "winRate": 76.2915498598318,
+      "avgPnl": 1.3403921298504626,
+      "totalPnl": 3346.959148236605,
+      "sharpe": 7.766083822237991,
+      "maxDrawdown": 10.482670436171611,
+      "profitFactor": 5.038643017706663,
+      "avgHoldHours": 6.676812174609531,
       "exitReasons": {
-        "funding_normalized": 100,
-        "time_limit": 57,
-        "stop_loss": 3
+        "time_limit": 1448,
+        "funding_normalized": 958,
+        "stop_loss": 91
       }
     },
     "-1": {
       "symbol": "ADA",
-      "totalTrades": 94,
-      "winRate": 71.27659574468085,
-      "avgPnl": 0.7292483592911331,
-      "totalPnl": 68.54934577336651,
-      "sharpe": 7.133829400792445,
-      "maxDrawdown": 71.57021542688624,
-      "profitFactor": 3.6382100487946585,
-      "avgHoldHours": 6.595744680851064,
+      "totalTrades": 1645,
+      "winRate": 77.02127659574468,
+      "avgPnl": 1.521586642679123,
+      "totalPnl": 2503.0100272071572,
+      "sharpe": 8.128893485038532,
+      "maxDrawdown": 14.562969022159352,
+      "profitFactor": 5.5338474095684305,
+      "avgHoldHours": 6.908814589665654,
       "exitReasons": {
-        "funding_normalized": 42,
-        "time_limit": 51,
-        "stop_loss": 1
+        "time_limit": 1086,
+        "funding_normalized": 496,
+        "stop_loss": 63
       }
     },
     "-2": {
       "symbol": "ADA",
-      "totalTrades": 20,
-      "winRate": 70,
-      "avgPnl": 0.9261358590099892,
-      "totalPnl": 18.522717180199784,
-      "sharpe": 10.417168914115969,
-      "maxDrawdown": 12.723917903327536,
-      "profitFactor": 4.897154962019981,
-      "avgHoldHours": 7.25,
+      "totalTrades": 701,
+      "winRate": 79.17261055634808,
+      "avgPnl": 1.8128686735061335,
+      "totalPnl": 1270.8209401277995,
+      "sharpe": 8.570300622128993,
+      "maxDrawdown": 13.263360620987532,
+      "profitFactor": 5.843266059897362,
+      "avgHoldHours": 6.944365192582025,
       "exitReasons": {
-        "time_limit": 14,
-        "funding_normalized": 6
+        "time_limit": 479,
+        "funding_normalized": 186,
+        "stop_loss": 36
       }
     },
     "-3": {
       "symbol": "ADA",
-      "totalTrades": 1,
-      "winRate": 0,
-      "avgPnl": -0.22583892617449444,
-      "totalPnl": -0.22583892617449444,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 8,
+      "totalTrades": 283,
+      "winRate": 79.85865724381625,
+      "avgPnl": 1.9871915280823889,
+      "totalPnl": 562.375202447316,
+      "sharpe": 9.28599719694761,
+      "maxDrawdown": 13.315535563539212,
+      "profitFactor": 5.983884221949584,
+      "avgHoldHours": 7,
       "exitReasons": {
-        "time_limit": 1
+        "funding_normalized": 63,
+        "time_limit": 205,
+        "stop_loss": 15
       }
     }
   },
   "AVAX": {
     "-0.25": {
       "symbol": "AVAX",
-      "totalTrades": 218,
-      "winRate": 76.60550458715596,
-      "avgPnl": 0.9157081220058819,
-      "totalPnl": 199.62437059728225,
-      "sharpe": 8.763371241234342,
-      "maxDrawdown": 201.32349163188468,
-      "profitFactor": 5.665744768242095,
-      "avgHoldHours": 6.18348623853211,
+      "totalTrades": 4079,
+      "winRate": 72.59132140230449,
+      "avgPnl": 1.2921681405598802,
+      "totalPnl": 5270.753845343751,
+      "sharpe": 6.497193579340753,
+      "maxDrawdown": 50.79712302611381,
+      "profitFactor": 3.849551285964101,
+      "avgHoldHours": 6.66241725913214,
       "exitReasons": {
-        "time_limit": 102,
-        "funding_normalized": 113,
-        "stop_loss": 3
+        "time_limit": 2450,
+        "stop_loss": 233,
+        "funding_normalized": 1396
       }
     },
     "-0.5": {
       "symbol": "AVAX",
-      "totalTrades": 166,
-      "winRate": 74.09638554216868,
-      "avgPnl": 0.8358673749195655,
-      "totalPnl": 138.75398423664788,
-      "sharpe": 8.188713112580174,
-      "maxDrawdown": 89.94819795098584,
-      "profitFactor": 5.868671482871794,
-      "avgHoldHours": 6.0843373493975905,
+      "totalTrades": 3406,
+      "winRate": 71.93188490898414,
+      "avgPnl": 1.3023397859624268,
+      "totalPnl": 4435.769310988026,
+      "sharpe": 6.315191388498307,
+      "maxDrawdown": 50.79712302611381,
+      "profitFactor": 3.751820594945536,
+      "avgHoldHours": 6.724016441573694,
       "exitReasons": {
-        "time_limit": 71,
-        "funding_normalized": 93,
-        "stop_loss": 2
+        "time_limit": 2111,
+        "stop_loss": 211,
+        "funding_normalized": 1084
       }
     },
     "-1": {
       "symbol": "AVAX",
-      "totalTrades": 72,
-      "winRate": 69.44444444444444,
-      "avgPnl": 0.4246413860517037,
-      "totalPnl": 30.574179795722667,
-      "sharpe": 4.7189550489689545,
-      "maxDrawdown": 313.1485044589683,
-      "profitFactor": 2.5233832918368946,
-      "avgHoldHours": 6.416666666666667,
+      "totalTrades": 2407,
+      "winRate": 71.45824678022434,
+      "avgPnl": 1.3706544467619421,
+      "totalPnl": 3299.165253355995,
+      "sharpe": 6.053517733574488,
+      "maxDrawdown": 50.79712302611381,
+      "profitFactor": 3.5303653082498316,
+      "avgHoldHours": 6.855421686746988,
       "exitReasons": {
-        "time_limit": 35,
-        "funding_normalized": 35,
-        "stop_loss": 2
+        "time_limit": 1601,
+        "stop_loss": 175,
+        "funding_normalized": 631
       }
     },
     "-2": {
       "symbol": "AVAX",
-      "totalTrades": 11,
-      "winRate": 54.54545454545454,
-      "avgPnl": 0.7604890783231979,
-      "totalPnl": 8.365379861555176,
-      "sharpe": 5.339472979855739,
-      "maxDrawdown": 8.576588920379951,
-      "profitFactor": 3.9153657286124877,
-      "avgHoldHours": 5.090909090909091,
+      "totalTrades": 1233,
+      "winRate": 69.58637469586375,
+      "avgPnl": 1.6690106319350313,
+      "totalPnl": 2057.8901091758935,
+      "sharpe": 6.010629533055433,
+      "maxDrawdown": 103.13484708343232,
+      "profitFactor": 3.396578485412336,
+      "avgHoldHours": 6.947283049472831,
       "exitReasons": {
-        "time_limit": 3,
-        "funding_normalized": 8
+        "time_limit": 896,
+        "stop_loss": 117,
+        "funding_normalized": 220
       }
     },
     "-3": {
       "symbol": "AVAX",
-      "totalTrades": 5,
-      "winRate": 60,
-      "avgPnl": 1.6352267064773094,
-      "totalPnl": 8.176133532386547,
-      "sharpe": 8.31125908567698,
-      "maxDrawdown": 8.153238471036499,
-      "profitFactor": 4.64675410603177,
-      "avgHoldHours": 3.6,
+      "totalTrades": 746,
+      "winRate": 68.90080428954424,
+      "avgPnl": 1.7804598478784759,
+      "totalPnl": 1328.223046517343,
+      "sharpe": 5.78792732455092,
+      "maxDrawdown": 103.13484708343232,
+      "profitFactor": 3.1768971892828293,
+      "avgHoldHours": 6.994638069705094,
       "exitReasons": {
-        "time_limit": 1,
-        "funding_normalized": 4
+        "time_limit": 567,
+        "stop_loss": 90,
+        "funding_normalized": 89
       }
     }
   },
   "LINK": {
     "-0.25": {
       "symbol": "LINK",
-      "totalTrades": 161,
-      "winRate": 75.15527950310559,
-      "avgPnl": 0.829537668036589,
-      "totalPnl": 133.55556455389083,
-      "sharpe": 9.689611081102134,
-      "maxDrawdown": 9.68596442849049,
-      "profitFactor": 6.32864966983719,
-      "avgHoldHours": 6.329192546583851,
+      "totalTrades": 1690,
+      "winRate": 73.55029585798817,
+      "avgPnl": 1.2672311634675237,
+      "totalPnl": 2141.6206662601153,
+      "sharpe": 6.895545322479483,
+      "maxDrawdown": 441.94012217053114,
+      "profitFactor": 4.182086774442412,
+      "avgHoldHours": 6.494082840236686,
       "exitReasons": {
-        "time_limit": 69,
-        "funding_normalized": 89,
-        "stop_loss": 3
+        "time_limit": 862,
+        "funding_normalized": 745,
+        "stop_loss": 83
       }
     },
     "-0.5": {
       "symbol": "LINK",
-      "totalTrades": 105,
-      "winRate": 77.14285714285715,
-      "avgPnl": 1.0998419888813507,
-      "totalPnl": 115.48340883254183,
-      "sharpe": 12.663042851083125,
-      "maxDrawdown": 7.553095305447585,
-      "profitFactor": 10.931751449398453,
-      "avgHoldHours": 6.619047619047619,
+      "totalTrades": 1203,
+      "winRate": 73.15045719035744,
+      "avgPnl": 1.3611706350365353,
+      "totalPnl": 1637.4882739489522,
+      "sharpe": 6.9800182209973505,
+      "maxDrawdown": 5.345140882690943,
+      "profitFactor": 4.326184290144452,
+      "avgHoldHours": 6.633416458852868,
       "exitReasons": {
-        "time_limit": 54,
-        "funding_normalized": 50,
-        "stop_loss": 1
+        "stop_loss": 66,
+        "time_limit": 663,
+        "funding_normalized": 474
       }
     },
     "-1": {
       "symbol": "LINK",
-      "totalTrades": 24,
-      "winRate": 70.83333333333334,
-      "avgPnl": 0.9025169231927873,
-      "totalPnl": 21.660406156626895,
-      "sharpe": 12.26692494583361,
-      "maxDrawdown": 4.7949812420477596,
-      "profitFactor": 9.99317002745906,
-      "avgHoldHours": 7.666666666666667,
+      "totalTrades": 660,
+      "winRate": 72.57575757575758,
+      "avgPnl": 1.75585106013324,
+      "totalPnl": 1158.8616996879384,
+      "sharpe": 7.341303727528407,
+      "maxDrawdown": 5.576639041515681,
+      "profitFactor": 4.436953107110902,
+      "avgHoldHours": 6.946969696969697,
       "exitReasons": {
-        "time_limit": 18,
-        "funding_normalized": 6
+        "stop_loss": 50,
+        "time_limit": 439,
+        "funding_normalized": 171
       }
     },
     "-2": {
       "symbol": "LINK",
-      "totalTrades": 1,
-      "winRate": 0,
-      "avgPnl": -0.9641273450824389,
-      "totalPnl": -0.9641273450824389,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 8,
+      "totalTrades": 246,
+      "winRate": 67.47967479674797,
+      "avgPnl": 2.138302342673238,
+      "totalPnl": 526.0223762976166,
+      "sharpe": 6.811874131328041,
+      "maxDrawdown": 27.77376623855391,
+      "profitFactor": 3.6015008321316717,
+      "avgHoldHours": 7.040650406504065,
       "exitReasons": {
-        "funding_normalized": 1
+        "stop_loss": 36,
+        "time_limit": 178,
+        "funding_normalized": 32
       }
     },
     "-3": {
       "symbol": "LINK",
-      "totalTrades": 0,
-      "winRate": 0,
-      "avgPnl": 0,
-      "totalPnl": 0,
-      "sharpe": 0,
-      "maxDrawdown": 0,
-      "profitFactor": 0,
-      "avgHoldHours": 0,
-      "exitReasons": {}
+      "totalTrades": 142,
+      "winRate": 64.7887323943662,
+      "avgPnl": 2.5595354575679665,
+      "totalPnl": 363.4540349746512,
+      "sharpe": 7.063980497967557,
+      "maxDrawdown": 23.668816714779087,
+      "profitFactor": 3.778918560213257,
+      "avgHoldHours": 7.204225352112676,
+      "exitReasons": {
+        "stop_loss": 21,
+        "time_limit": 111,
+        "funding_normalized": 10
+      }
     }
   }
 }

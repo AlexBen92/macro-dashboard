@@ -94,50 +94,65 @@ async function fetchPriceAndFundingData(
     }
   }
 
-  // Fetch funding rates
-  const fundingUrl = `https://fapi.binance.com/fapi/v1/fundingRate?symbol=${binanceSymbol}&startTime=${startTime}&endTime=${now}&limit=1000`;
+  // Fetch funding rates par lots de 1000 (pagination pour 6 ans)
+  const allFundingRates: any[] = [];
+  let fundingStart = startTime;
 
-  try {
-    const fundingRes = await fetch(fundingUrl);
-    if (fundingRes.ok) {
-      const fundingRates = await fundingRes.json();
-      if (Array.isArray(fundingRates) && fundingRates.length > 0) {
-        console.log(`    Fetched ${fundingRates.length} funding rates`);
-        // Afficher les premiers funding rates
-        if (fundingRates.length > 0) {
-          const firstFunding = fundingRates[0];
-          const lastFunding = fundingRates[fundingRates.length - 1];
-          console.log(`    First funding: ${new Date(firstFunding.fundingTime || firstFunding.time).toISOString()}, rate=${firstFunding.fundingRate}`);
-          console.log(`    Last funding: ${new Date(lastFunding.fundingTime || lastFunding.time).toISOString()}, rate=${lastFunding.fundingRate}`);
+  while (fundingStart < now) {
+    const fundingUrl = `https://fapi.binance.com/fapi/v1/fundingRate?symbol=${binanceSymbol}&startTime=${fundingStart}&endTime=${now}&limit=1000`;
+
+    try {
+      const fundingRes = await fetch(fundingUrl);
+      if (fundingRes.ok) {
+        const fundingRates = await fundingRes.json();
+        if (Array.isArray(fundingRates) && fundingRates.length > 0) {
+          allFundingRates.push(...fundingRates);
+          fundingStart = fundingRates[fundingRates.length - 1].fundingTime + 1;
+          if (fundingRates.length < 1000) break;
+        } else {
+          break;
         }
-
-        // Forward fill: pour chaque point, trouver le funding rate le plus récent
-        let fundingIdx = 0;
-        let currentFunding = 0;
-
-        for (let i = 0; i < allData.length; i++) {
-          const point = allData[i];
-
-          // Avancer dans les funding rates tant que le timestamp est <= au point actuel
-          while (fundingIdx < fundingRates.length) {
-            const fundingTime = fundingRates[fundingIdx].fundingTime || fundingRates[fundingIdx].time;
-            if (fundingTime <= point.timestamp) {
-              currentFunding = parseFloat(fundingRates[fundingIdx].fundingRate || '0');
-              fundingIdx++;
-            } else {
-              break;
-            }
-          }
-
-          allData[i].fundingRate = currentFunding;
-        }
-
-        // Debug: vérifier les dernières valeurs
-        console.log(`    After forward-fill, last 3 funding rates: ${allData.slice(-3).map(d => (d.fundingRate * 10000).toFixed(2) + ' bps').join(', ')}`);
+      } else {
+        break;
       }
+    } catch (e) {
+      console.error(`Error fetching funding: ${e}`);
+      break;
     }
-  } catch (e) {
-    console.error(`Error fetching funding: ${e}`);
+  }
+
+  console.log(`    Fetched ${allFundingRates.length} funding rates`);
+
+  if (allFundingRates.length > 0) {
+    // Afficher les premiers et derniers funding rates
+    const firstFunding = allFundingRates[0];
+    const lastFunding = allFundingRates[allFundingRates.length - 1];
+    console.log(`    First funding: ${new Date(firstFunding.fundingTime || firstFunding.time).toISOString()}, rate=${firstFunding.fundingRate}`);
+    console.log(`    Last funding: ${new Date(lastFunding.fundingTime || lastFunding.time).toISOString()}, rate=${lastFunding.fundingRate}`);
+
+    // Forward fill: pour chaque point, trouver le funding rate le plus récent
+    let fundingIdx = 0;
+    let currentFunding = 0;
+
+    for (let i = 0; i < allData.length; i++) {
+      const point = allData[i];
+
+      // Avancer dans les funding rates tant que le timestamp est <= au point actuel
+      while (fundingIdx < allFundingRates.length) {
+        const fundingTime = allFundingRates[fundingIdx].fundingTime || allFundingRates[fundingIdx].time;
+        if (fundingTime <= point.timestamp) {
+          currentFunding = parseFloat(allFundingRates[fundingIdx].fundingRate || '0');
+          fundingIdx++;
+        } else {
+          break;
+        }
+      }
+
+      allData[i].fundingRate = currentFunding;
+    }
+
+    // Debug: vérifier les dernières valeurs
+    console.log(`    After forward-fill, last 3 funding rates: ${allData.slice(-3).map(d => (d.fundingRate * 10000).toFixed(2) + ' bps').join(', ')}`);
   }
 
   return allData;
@@ -573,7 +588,7 @@ async function main() {
   console.log('========================================');
 
   const SYMBOLS = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'BNB', 'ADA', 'AVAX', 'LINK'];
-  const DAYS_BACK = 90; // Réduit pour test rapide
+  const DAYS_BACK = 365 * 6; // Backtest 6 ans
 
   const allResults = await testAllThresholds(SYMBOLS, DAYS_BACK);
 
