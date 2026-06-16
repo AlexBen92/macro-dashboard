@@ -1,9 +1,17 @@
 /**
  * TOP TOKENS M15 SCANNER — v9.0 (OFI + AUTOCORRELATION)
  * Scanne tous les tokens Hyperliquid toutes les 30s.
- * Score composite 0-100 : L1 (30%) + L2 (40%) + L3 (30%)
+ *
+ * SCORE SETUP (0-6) : Ancien système basé sur 6 critères binaires
+ * - Session active, Volume, Funding edge, Trend, OI, Volatilité
+ *
+ * SCALPSCORE (0-100) : Calculé en interne (pas encore affiché)
+ * - L1 (30%) + L2 (40%) + L3 (30%)
+ *
  * NOUVEAU: OFI autocorrélation + ACF + realized volatility en temps réel
  * Affiche TOP 20 avec colonnes OFI, ACF, VOL + panel de détail au clic
+ *
+ * NOTE: GARCH est implémenté mais les colonnes ne sont pas encore visibles dans le tableau
  */
 'use client';
 

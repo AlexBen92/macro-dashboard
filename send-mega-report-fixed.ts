@@ -1,5 +1,5 @@
 /**
- * SEND MEGA REPORT TO TELEGRAM
+ * SEND CORRIGED MEGA REPORT TO TELEGRAM
  */
 
 import { readFileSync } from 'fs';
@@ -20,17 +20,17 @@ const PARTS = [
 🎯 *OBJECTIF :*
 Dashboard de trading multi-actives (Crypto + Prop Firms) avec signaux temps réel, scoring multicouche, et détection de régimes de marché.`,
 
-  // Part 2 - Architecture
+  // Part 2 - Architecture CORRIGÉE
   String.raw`📊 *ARCHITECTURE GLOBALE*
 
-Le dashboard utilise une architecture en **5 Couches** :
+Le dashboard utilise une architecture en **3 Couches** :
 
 │ Couche │ Nom │ Fonction │
 │ L1 │ FILTERS │ Session, Volume, Funding │
 │ L2 │ SETUP │ VWAP, OI, OFI, Depth │
-│ L3 │ CONFIRM │ Trend, Vol, ACF, GARCH │
-│ L4 │ EXECUTION │ Risk management, TP/SL │
-│ L5 │ JOURNAL │ Tracking performance │`,
+│ L3 │ CONFIRM │ Trend, Vol, ACF │
+
+Note : L4 Execution et L5 Journal sont en développement (calculateur de position présent mais pas connecté au live).`,
 
   // Part 3 - Sessions
   String.raw`🕘 *SESSIONS DE TRADING*
@@ -40,22 +40,16 @@ Le dashboard utilise une architecture en **5 Couches** :
 │ EU Open │ 07h00–09h00 │ 80/100 │ Vert ✅ │
 │ EU/US Core │ 13h00–17h00 │ 100/100 │ Vert foncé ✅ │
 │ US Extend │ 17h00–20h00 │ 70/100 │ Vert clair ✅ │
-│ Off │ Autres │ 0/100 │ Gris ⬜ │
+│ Off │ Autres │ 0/100 │ Gris ⬜ │`,
 
-Pourquoi les Scores ?
-- Asia : Volume faible, spreads larges → Éviter
-- EU Open : Bon volume, volatilité émergente → Opportunités
-- EU/US Core : Meilleur momentum → Zone prime
-- US Extend : Volatilité décroissante → Cherry pick`,
-
-  // Part 4 - Scanner
+  // Part 4 - Scanner CORRIGÉ
   String.raw`📈 *TOP TOKEN SCANNER V9*
 
 Colonnes du Scanner :
 
 │ Colonne │ Contenu │ Usage │
 │ Token │ Symbol │ Identification │
-│ Score │ 0-6 │ Setup quality │
+│ Score │ 0-6 (Setup) │ Ancien système checklist │
 │ Prix │ Prix │ Entrée │
 │ Funding │ % (8h) │ Edge et direction │
 │ 24h │ % | Trend daily │
@@ -67,7 +61,9 @@ Colonnes du Scanner :
 │ Dir │ L/S/W | Direction trade │
 │ SL │ Prix | Stop loss calculé │
 │ TP1/TP2 │ Prix | Take profits │
-│ Size │ USDT | Taille position │`,
+│ Size │ USDT | Taille position │
+
+Note : Le "ScalpScore 0-100" composite est calculé en interne mais pas encore affiché dans le tableau. La colonne Score actuelle (0-6) est le système de checklist basé sur 6 critères.`,
 
   // Part 5 - OFI Badge
   String.raw`🔹 *LECTURE DU BADGE OFI*
@@ -77,19 +73,12 @@ Format : ▲68%ρ.41
 │ Élément │ Signification │
 │ ▲ │ Direction (BUY/SELL/NEUTRAL) │
 │ 68% │ Probabilité de continuation │
-│ ρ.41 │ Premier lag ACF (persistence) │
-
-Interprétation :
-- ▲68%ρ.41 → Flux BUY persistant, 68% de chance de continuer
-- ▼42%ρ-.20 → Flux SELL mais persistence faible (ρ négatif)
-- ◆55%ρ.05 → NEUTRAL, pas de signal clair`,
+│ ρ.41 │ Premier lag ACF (persistence) │`,
 
   // Part 6 - ACF
   String.raw`🔬 *ACF (AUTOCORRELATION FUNCTION)*
 
 ρ(k) = Corrélation(OFI_t, OFI_{t-k})
-
-Mesure si le flux d'ordres actuel influence le flux futur.
 
 │ ρ(1) │ Signification │ Trade │
 │ > 0.4 │ Flux très persistant │ Entrée dans le sens │
@@ -112,32 +101,32 @@ Mesure si le flux d'ordres actuel influence le flux futur.
 
 *L2 WebSocket* :
 
-Le dashboard se connecte en WebSocket au carnet d'ordres Hyperliquid pour capturer :
-- Trades en temps réel (L2)
-- Order flow imbalance
-- Mise à jour ACF chaque ~3 secondes
+Le dashboard se connecte en WebSocket au carnet d'ordres Hyperliquid pour capturer les trades en temps réel.
 
-Status Indicator :
 🟢 CONNECTED → Données temps réelles actives
 🔴 DISCONNECTED → Mode fallback (refresh 30s)`,
 
-  // Part 8 - Scoring
-  String.raw`🎯 *SCORING ET DÉCISION*
+  // Part 8 - Scoring CORRIGÉ
+  String.raw`🎯 *SCORING*
 
-Score Composite (0-100) :
+**Score Setup (0-6)** — Colonne actuelle du scanner :
 
-│ Élément │ Poids │ Détail │
-│ L1 (Filters) │ 30% │ Session 60% + Volume 40% │
-│ L2 (Setup) │ 40% │ Funding 25% + OI 20% + OFI 30% + Depth 15% + Spread 10% │
-│ L3 (Confirm) │ 30% │ Trend 30% + Vol 20% + ACF 30% + P(continuation) 20% │
+Basé sur 6 critères binaires :
+1. Session active (≥ 70/100)
+2. Volume significatif (≥ 10M USD)
+3. Funding edge (≥ 0.10%)
+4. Trend clair (|24h| > 0.5%)
+5. OI significatif (≥ 5M USD)
+6. Volatilité exploitable
 
-Seuils d'Action :
+Score = Nombre de critères validés (0-6)
 
-│ Score │ Action │ Rationale │
-│ 80-100 │ ENTRY IMMÉDIATE │ Setup parfait │
-│ 60-79 │ SURVEILLANCE RAPPROCHÉE │ Presque prêt │
-│ 40-59 │ OBSERVER │ Pas encore │
-│ < 40 │ ÉVITER │ Setup absent │`,
+**ScalpScore (0-100)** — Calculé en interne (pas encore affiché) :
+
+│ Élément │ Poids │
+│ L1 (Filters) │ 30% │
+│ L2 (Setup) │ 40% │
+│ L3 (Confirm) │ 30% │`,
 
   // Part 9 - Decision Bar
   String.raw`🚦 *DECISION BAR*
@@ -146,19 +135,18 @@ Seuils d'Action :
 🟡 WATCH — Presque, attendre confirmation
 🔴 AVOID — Setup absent, risque élevé`,
 
-  // Part 10 - GARCH
-  String.raw`📊 *GARCH ET VOLATILITÉ*
+  // Part 10 - VOL (sans GARCH)
+  String.raw`📊 *RÉGIMES DE VOLATILITÉ*
 
-GARCH (Generalized Autoregressive Conditional Heteroskedasticity) :
-Modèle statistique qui prédit la volatilité future.
+Le dashboard classe la volatilité en 4 régimes basés sur la variance réalisée :
 
-Régimes de Volatilité :
+│ Régime │ Description │ Action │
+│ LOW │ March calme │ Size +20% │
+│ NORMAL │ Volatilité standard │ Size standard │
+│ HIGH │ Volatilité élevée │ Size -30% │
+│ EXPLOSIVE │ Volatilité extrême │ Size -50% ou skip │
 
-│ Régime │ Vol │ Spread │ SL/TP │
-│ LOW | < 1% ATR | Standard | SL/TP normaux │
-│ NORMAL | 1-2% ATR | Standard | SL/TP normaux │
-│ HIGH | 2-4% ATR | Élargir | +20% SL/TP │
-│ EXPLOSIVE | > 4% ATR | Très large | Éviter ou sizing réduit │`,
+Note : Le modèle GARCH pour la prédiction de volatilité est implémenté mais les colonnes GARCH (vol_ratio, regime, size_mult) ne sont pas encore visibles dans le tableau principal.`,
 
   // Part 11 - Funding
   String.raw`💰 *FUNDING RATE ARBITRAGE*
@@ -168,22 +156,21 @@ Funding Rate : Paiement périodique (8h) entre longs et shorts
 - Funding négatif = Longs payent Shorts (bearish)
 - Funding positif = Shorts payent Longs (bullish)
 
-Edge de Trading : Calcul = |Funding|/8 - TakerFee (0.05%)
+Edge de Trading : |Funding|/8 - TakerFee (0.05%)
 
 │ Funding brut │ Net après fees │ Edge │
-│ 0.10% │ 0.10% - 0.05% = 0.05% │ ⚠️ Faible │
-│ 0.20% │ 0.20% - 0.05% = 0.15% │ ✅ Bon │
-│ 0.50% │ 0.50% - 0.05% = 0.45% │ 🔥 Excellent │`,
+│ 0.10% │ 0.05% | ⚠️ Faible │
+│ 0.20% │ 0.15% | ✅ Bon │
+│ 0.50% │ 0.45% | 🔥 Excellent │`,
 
   // Part 12 - Macro
   String.raw`🌍 *MACRO CONTEXT*
 
-Régimes Macro : Le dashboard analyse 4 facteurs macro
+Le dashboard analyse 4 facteurs macro :
 
 1. **VIX** : Volatilité implicite S&P500
-   - < 15 : Risk-on, carry trade favorable
-   - 15-25 : Normal
-   - > 25 : Risk-off, réduire sizing
+   - < 15 : Risk-on
+   - > 25 : Risk-off (réduire sizing)
 
 2. **Taux US (10Y)** : Croissant = USD strong = crypto pressure
 
@@ -192,8 +179,8 @@ Régimes Macro : Le dashboard analyse 4 facteurs macro
    - < 100 : USD weak, crypto favorable
 
 4. **Risk-on/off Sentiment** :
-   - Risk-on = Crypto, Tech outperform
-   - Risk-off = USD, Gold, Bonds outperform`,
+   - Risk-on = Crypto outperform
+   - Risk-off = USD, Gold safe haven`,
 
   // Part 13 - Stratégies
   String.raw`⚔️ *STRATÉGIES*
@@ -202,19 +189,19 @@ Régimes Macro : Le dashboard analyse 4 facteurs macro
 
 Setup :
 1. Session EU/US Core active
-2. Score composite ≥ 60/100
+2. Score Setup ≥ 4/6
 3. OFI BUY/SELL avec ρ(1) > 0.3
 4. p(continuation) ≥ 65%
 5. VOL NORMAL
 
-Exécution : Entrée à l'ouverture de bougie M15, SL = 0.75 × ATR, TP1 = 1.2 × SL
+Exécution : Entrée à l'ouverture M15, SL = 0.75 × ATR, TP1 = 1.2 × SL
 
 *FUNDING EDGE*
 
-Setup : Funding ≥ 0.20% net, Direction alignée
-Exécution : Hold au moins 4h, SL plus large
+Setup : Funding ≥ 0.20% net
+Exécution : Hold au moins 4h
 
-*MEAN-REVERSION ACF*
+*MEAN-REVERSION*
 
 Setup : OFI mais ρ(1) < 0, sumACF(1-5) < 0
 Exécution : Cherry pick, TP serrés`,
@@ -224,19 +211,17 @@ Exécution : Cherry pick, TP serrés`,
 
 Calculateur de Position :
 
-Risk USDT = Equity × 0.15% (1.5% du total par trade)
-Size = Risk USDT / SL distance
+Risk = Equity × 0.15%
+Size = Risk / SL distance
 
-Règles de Risk :
-
-│ Règle │ Valeur │
-│ Max risk/trade │ 0.15% equity │
-│ Max risk/jour │ 0.60% equity │
-│ Max positions │ 3 simultanées │
+Règles :
+- Max risk/trade = 0.15% equity
+- Max risk/jour = 0.60% equity
+- Max positions = 3 simultanées
 
 Adjustement Volatilité :
 
-│ VOL Régime │ Ajustement │
+│ VOL │ Ajustement │
 │ LOW | Size +20% │
 │ NORMAL | Size standard │
 │ HIGH | Size -30% │
@@ -256,7 +241,7 @@ AVANT D'OUVRIR UNE POSITION :
 ☑ OFI : ρ(1) > 0.3 dans le sens
 ☑ ACF : sumACF(1-5) confirme régime
 ☑ P(continuation) ≥ 60%
-☑ Score composite ≥ 60/100
+☑ Score Setup ≥ 4/6
 ☑ SL calculé et placé
 ☑ TP1 et TP2 définis
 ☑ Size = 0.15% equity max
@@ -269,46 +254,50 @@ Si < 8 checks → PAS DE TRADE`,
   // Part 16 - Erreurs
   String.raw`⚠️ *ERREURS COMMUNES*
 
-❌ Ignorer la Session (trader Asia avec score 35)
-❌ Ignorer ρ(1) < 0 (mean-reversion probable)
-❌ Trader VOL:EXPLOSIVE (SL large + slippage)
+❌ Ignorer la Session (trader Asia score 35)
+❌ Ignorer ρ(1) < 0 (mean-reversion)
+❌ Trader VOL:EXPLOSIVE (SL large)
 ❌ Sur-respecter le Funding (OFI est plus rapide)
 ❌ No ACF Check (entrer en fin de trend)
 ❌ Oversizing (3% risk = gamble)
-❌ Cherry Pick Contrariant (suivre le trend)
+❌ Cherry Pick Contrarian (suivre le trend)
 ❌ Ignorer Macro (VIX > 25 = réduire sizing)`,
 
-  // Part 17 - Final
-  String.raw`🚀 *RÉSUMÉ D'EXÉCUTION*
+  // Part 17 - Status et Roadmap
+  String.raw`🚀 *STATUS ET ROADMAP*
 
-FLUX DE TRADING COMPLET :
+**DÉPLOYÉ ✅**
+- TopTokenScanner v9 (OFI + ACF)
+- Session scoring
+- Funding Rate aggregator
+- OFI Badge (ρ(1) visible)
+- ACF Sparkline
+- Decision Bar
 
-1. OUVRIR DASHBOARD → Vérifier session
-2. SCANNER TOKENS → Filtrer Score ≥ 4/6
-3. VÉRIFIER ACF → ρ(1) > 0.3
-4. CONFIRMER VOL → Pas EXPLOSIVE
-5. CHECKER FUNDING → Edge ≥ 0.10%
-6. VALIDER MACRO → VIX < 25
-7. CALCULER SIZE → 0.15% equity / SL
-8. PLACER ORDRE → Entrée + SL + TP1/TP2
-9. SURVEILLER ACF → Mise à jour L2 WS
-10. AJUSTER SI BESOIN → Trail après TP1
-11. ENREGISTRER → Trade Journal
+**EN DÉVELOPPEMENT 🔨**
+- ScalpScore 0-100 (calculé mais pas affiché)
+- Colonnes GARCH (vol_ratio, regime, size_mult)
+- L4 Execution automation
+- L5 Trade Journal live
+
+**BUG RÉPARÉ 🐛**
+- CORS fix : Proxy /api/hyperliquid déployé
+- Tokens chargent maintenant (178 actifs)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📊 *DASHBOARD LIVE :* https://macro-dashboard-lemon.vercel.app
+📊 *DASHBOARD :* https://macro-dashboard-lemon.vercel.app
 
 🔄 *MAJ :*
 - Scanner : 30s
 - ACF/OFI : 3s (L2 WS)
-- Funding : 60s
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 *FIN DU RAPPORT*
 
-Version : v9.0 (OFI + ACF + GARCH)
+Version : v9.1 (OFI + ACF déployés, GARCH en dev)
+CORS fix : ✅ déployé
 Date : ` + new Date().toISOString().split('T')[0]
 ];
 
@@ -324,14 +313,7 @@ async function sendToTelegram(message: string): Promise<boolean> {
         disable_web_page_preview: true,
       }),
     });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('Telegram API error:', error);
-      return false;
-    }
-
-    return true;
+    return response.ok;
   } catch (err) {
     console.error('Error:', err);
     return false;
@@ -339,7 +321,7 @@ async function sendToTelegram(message: string): Promise<boolean> {
 }
 
 async function sendMegaReport() {
-  console.log('📤 Envoi du MEGA RAPPORT sur Telegram...');
+  console.log('📤 Envoi du RAPPORT CORRIGÉ sur Telegram...');
 
   for (let i = 0; i < PARTS.length; i++) {
     console.log(`📨 Part ${i + 1}/${PARTS.length}...`);
@@ -353,7 +335,7 @@ async function sendMegaReport() {
     }
   }
 
-  console.log('✅ MEGA RAPPORT envoyé avec succès !');
+  console.log('✅ RAPPORT CORRIGÉ envoyé !');
 }
 
 sendMegaReport();
