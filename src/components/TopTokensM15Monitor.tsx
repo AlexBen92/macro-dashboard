@@ -35,6 +35,14 @@ import { RVRegimeBadge } from './RVRegimeBadge';
 import { getGARCHEngine, type GARCHForecast } from '@/lib/garch-volatility';
 import { GARCHBadge } from './GARCHBadge';
 import { VolProjection } from './VolProjection';
+// New Decision Engine imports
+import { getGARCHEngine as getNewGARCHEngine, type GARCHOutput } from '@/lib/garch-engine';
+import { getFlickerDetector, computeExecutionScore, type ExecutionScore } from '@/lib/execution-score';
+import { computeDecision, type DecisionOutput, extractDirectionFromACF } from '@/lib/scalp-decision';
+import { GARCHCard } from './GARCHCard';
+import { DecisionCard } from './DecisionCard';
+import { GARCHRegimeBadge } from './GARCHRegimeBadge';
+import { StyleBadge } from './StyleBadge';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
 
@@ -77,6 +85,14 @@ interface ScoreCard {
   garchPhi?: number;
   sizeMultiplier?: number;
   allowedStyles?: ('TREND' | 'MEANREV' | 'SCALP' | 'NONE')[];
+  // New Decision Engine fields
+  garchOutput?: GARCHOutput;
+  execScore?: ExecutionScore;
+  decision?: DecisionOutput;
+  scalpScore?: number;
+  directionScore?: number;
+  executionScore?: number;
+  regimeScore?: number;
 }
 
 function getSessionInfo(): SessionInfo {
@@ -259,12 +275,45 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
         const signal = l2WebSocket.ofiSignals[token.symbol];
         if (!signal) return token;
 
-        // Update GARCH with recent price change
+        // Update old GARCH with recent price change
         const garchEngine = getGARCHEngine(token.symbol);
         const return_pct = (token.change24h / 100) / Math.max(1, token.score.layer1.score); // approx return
         garchEngine.update(return_pct);
 
         const garchForecast = garchEngine.forecast();
+
+        // ── NEW: Decision Engine Integration ────────────────────────
+
+        // 1. Update new GARCH engine
+        const newGarchEngine = getNewGARCHEngine(token.symbol);
+        const garchOutput = newGarchEngine.update(return_pct);
+
+        // 2. Execution Score
+        const execMetrics = {
+          spreadBps: signal.spreadBps ?? 2,
+          topBidDepth: 100000, // default
+          topAskDepth: 100000, // default
+          depthRatio: signal.depthImbalance > 0
+            ? (1 + signal.depthImbalance) / (1 - signal.depthImbalance)
+            : 1,
+          flickerCount: 0, // TODO: from FlickerDetector
+          refillScore: 0.7, // default
+        };
+        const execScore = computeExecutionScore(execMetrics);
+
+        // 3. Direction Input
+        const dirInput = {
+          ofiScore: signal.ofiScore ?? 50,
+          autoCorr: signal.autoCorr ?? 50,
+          pContinuation: signal.pContinuation ?? 0.5,
+          vwapDeviation: 0, // TODO: from token data
+          fundingSignal: 50, // TODO: from layer1
+          oiSignal: 50, // TODO: from layer1
+          acfDirection: signal.acfDirection ?? 'NEUTRAL',
+        };
+
+        // 4. Decision Engine
+        const decision = computeDecision(dirInput, execScore, garchOutput);
 
         return {
           ...token,
@@ -277,13 +326,21 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           depthImbalance: signal.depthImbalance,
           spreadBps: signal.spreadBps,
           acfLags: signal.acfLags,
-          // GARCH fields
+          // Old GARCH fields
           garchForecast,
           garchRegime: garchForecast.regime,
           garchVolRatio: garchForecast.vol_ratio,
           garchPhi: garchForecast.phi,
           sizeMultiplier: garchForecast.size_multiplier,
           allowedStyles: garchForecast.allowed_styles,
+          // New Decision Engine fields
+          garchOutput,
+          execScore,
+          decision,
+          scalpScore: decision.scalpScore,
+          directionScore: decision.directionScore,
+          executionScore: decision.executionScore,
+          regimeScore: decision.regimeScore,
         };
       }));
     }
@@ -436,20 +493,21 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
       {/* Table */}
       <div className="bg-[#0e0e1a] border border-[#1e1e32] rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 bg-[#1a1a2e] border-b border-[#1e1e32] font-mono text-[0.6rem] text-[#5a6070] uppercase tracking-wider">
+        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 bg-[#1a1a2e] border-b border-[#1e1e32] font-mono text-[0.6rem] text-[#5a6070] uppercase tracking-wider">
           <span>#</span>
           <span>Token</span>
-          <span className="text-right">Score</span>
-          <span className="text-right">L1</span>
-          <span className="text-right">L2</span>
-          <span className="text-right">L3</span>
-          <span className="text-center">Action</span>
+          <span className="text-right">Scalp</span>
           <span className="text-center">Dir</span>
+          <span className="text-center">Exec</span>
+          <span className="text-center">Vol</span>
+          <span className="text-center">Style</span>
+          <span className="text-right">Size×</span>
+          <span className="text-center">Verdict</span>
+          <span className="text-center">L1</span>
+          <span className="text-center">L2</span>
+          <span className="text-center">L3</span>
           <span className="text-center">OFI</span>
           <span className="text-center">ACF</span>
-          <span className="text-center">GARCH</span>
-          <span className="text-center">Proj</span>
-          <span className="text-right">Size</span>
         </div>
 
         {/* Body */}
@@ -469,49 +527,77 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
                 <div key={token.symbol}>
                   {/* Main row */}
                   <div
-                    className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem] cursor-pointer"
+                    className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem] cursor-pointer"
                     onClick={() => setExpandedRow(isExpanded ? null : token.symbol)}
                   >
                     <span className="font-semibold text-white">{idx + 1}</span>
                     <span className="font-semibold text-white">{token.symbol}</span>
 
-                    {/* Final Score */}
+                    {/* ScalpScore */}
                     <span className="text-right">
-                      <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold" style={{
-                        background: scoreColor + '33',
-                        border: `1px solid ${scoreColor}`,
-                        color: scoreColor,
+                      <span className="font-semibold" style={{
+                        color: (token.scalpScore ?? 0) >= 75 ? '#00ff88'
+                             : (token.scalpScore ?? 0) >= 55 ? '#ffaa00' : '#ff4444',
+                        fontSize: 13
                       }}>
-                        {token.score.finalScore}
+                        {token.scalpScore ?? '—'}
                       </span>
+                    </span>
+
+                    {/* Direction from decision */}
+                    <span className="text-center">
+                      <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold" style={{
+                        background: token.decision?.direction === 'LONG' ? '#22c55e22' :
+                                   token.decision?.direction === 'SHORT' ? '#ef444422' : '#6b728022',
+                        border: `1px solid ${token.decision?.direction === 'LONG' ? '#22c55e' :
+                                   token.decision?.direction === 'SHORT' ? '#ef4444' : '#6b7280'}`,
+                        color: token.decision?.direction === 'LONG' ? '#22c55e' :
+                               token.decision?.direction === 'SHORT' ? '#ef4444' : '#6b7280',
+                      }}>
+                        {token.decision?.direction ?? 'FLAT'}
+                      </span>
+                    </span>
+
+                    {/* Execution Score */}
+                    <span className="text-center">
+                      <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-semibold" style={{
+                        color: token.execScore?.label === 'CLEAN'  ? '#00ff88' :
+                             token.execScore?.label === 'AVOID'  ? '#ff4444' : '#ffaa00',
+                      }}>
+                        {token.execScore?.label ?? '—'}
+                      </span>
+                    </span>
+
+                    {/* Vol Regime */}
+                    <span className="text-center">
+                      <GARCHRegimeBadge output={token.garchOutput} compact />
+                    </span>
+
+                    {/* Style */}
+                    <span className="text-center">
+                      {token.decision && <StyleBadge style={token.decision.allowed_style} compact />}
+                    </span>
+
+                    {/* Size Multiplier */}
+                    <span className="text-right">
+                      <span style={{
+                        color: (token.decision?.size_mult ?? 0) === 0 ? '#ff4444'
+                             : (token.decision?.size_mult ?? 1) < 0.6 ? '#ffaa00' : '#00ff88',
+                        fontFamily: 'monospace', fontWeight: 700
+                      }}>
+                        ×{((token.decision?.size_mult ?? 1) * 100).toFixed(0)}%
+                      </span>
+                    </span>
+
+                    {/* Verdict */}
+                    <span className="text-center" style={{ fontSize: 14 }}>
+                      {token.decision?.verdictEmoji ?? '—'}
                     </span>
 
                     {/* Layer scores */}
                     <span className="text-right tabular-nums text-[#3b82f6]">{token.score.layer1.score}</span>
                     <span className="text-right tabular-nums text-[#8b5cf6]">{token.score.layer2.total}</span>
                     <span className="text-right tabular-nums text-[#ec4899]">{token.score.layer3.total}</span>
-
-                    {/* Action */}
-                    <span className="text-center">
-                      <span className="px-2 py-0.5 rounded text-[0.65rem] font-semibold" style={{
-                        background: actionColor + '22',
-                        border: `1px solid ${actionColor}`,
-                        color: actionColor,
-                      }}>
-                        {token.score.action}
-                      </span>
-                    </span>
-
-                    {/* Direction */}
-                    <span className="text-center">
-                      <span className="px-2 py-0.5 rounded text-[0.65rem] font-semibold" style={{
-                        background: directionColor + '22',
-                        border: `1px solid ${directionColor}`,
-                        color: directionColor,
-                      }}>
-                        {token.score.direction}
-                      </span>
-                    </span>
 
                     {/* OFI Badge */}
                     <span className="text-center">
@@ -525,116 +611,63 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
 
                     {/* ACF MiniChart */}
                     <span className="text-center flex justify-center">
-                      <ACFMiniChart lags={token.acfLags || []} width={60} height={20} />
+                      <ACFMiniChart lags={token.acfLags || []} width={50} height={18} />
                     </span>
-
-                    {/* RV Regime Badge */}
-                    <span className="text-center">
-                      <RVRegimeBadge regime={token.rvRegime || 'NORMAL'} compact />
-                    </span>
-
-                    {/* GARCH Badge */}
-                    <span className="text-center">
-                      <GARCHBadge
-                        regime={token.garchForecast?.regime || 'NORMAL'}
-                        vol_ratio={token.garchForecast?.vol_ratio}
-                        persistence={token.garchForecast?.persistence}
-                        phi={token.garchForecast?.phi}
-                        compact
-                      />
-                    </span>
-
-                    {/* Vol Projection */}
-                    <span className="text-center flex justify-center">
-                      {token.garchForecast && (
-                        <VolProjection
-                          sigma2_1m={token.garchForecast.sigma2_1m}
-                          sigma2_5m={token.garchForecast.sigma2_5m}
-                          sigma2_15m={token.garchForecast.sigma2_15m}
-                          sigma2_1h={token.garchForecast.sigma2_1h}
-                          current_vol={token.garchForecast.sigma_next}
-                        />
-                      )}
-                    </span>
-
-                    {/* Size */}
-                    <span className="text-right text-white">{calcSize(token)}×</span>
                   </div>
 
-                  {/* Expanded details */}
+                  {/* Expanded details - 4-card layout */}
                   {isExpanded && (
                     <div className="px-3 py-2 bg-[#0d0d1a] border-b border-[#1e1e32]">
-                      <div className="grid grid-cols-3 gap-4 text-[0.65rem]">
-                        {/* Layer 1 breakdown */}
-                        <div>
-                          <div className="font-semibold text-[#3b82f6] mb-1">L1: Hard Filters</div>
-                          <div className="space-y-0.5 text-[#94a3b8]">
-                            {token.score.layer1.reasons.map((r, i) => (
-                              <div key={i}>{r}</div>
-                            ))}
+                      <div className="grid grid-cols-2 gap-3 text-[0.65rem]">
+                        {/* Card 1 — Signal (OFI) */}
+                        <div className="bg-[#111] rounded-lg p-3">
+                          <div className="text-[#888] mb-2 text-[0.7rem]">🎯 SIGNAL (OFI)</div>
+                          <OFIBadge
+                            direction={token.acfDirection || 'NEUTRAL'}
+                            strength={token.acfStrength || 'WEAK'}
+                            pContinuation={token.pContinuation || 0.5}
+                            ofiScore={token.ofiScore || 50}
+                          />
+                          <div className="mt-2"><ACFMiniChart lags={token.acfLags ?? []} width={180} height={32} /></div>
+                          <div className="text-[#666] mt-2 text-[0.6rem]">
+                            VWAP dev: {(token.decision?.directionScore ?? 0).toFixed(1)}% · Fund: {token.funding > 0 ? '+' : ''}{token.funding.toFixed(4)}%
                           </div>
                         </div>
 
-                        {/* Layer 2 breakdown */}
-                        <div>
-                          <div className="font-semibold text-[#8b5cf6] mb-1">L2: Setup</div>
-                          <div className="space-y-0.5 text-[#94a3b8]">
-                            {token.score.layer2.reasons.slice(0, 5).map((r, i) => (
-                              <div key={i}>{r}</div>
-                            ))}
-                          </div>
+                        {/* Card 2 — GARCH Volatility */}
+                        {token.garchOutput && <GARCHCard output={token.garchOutput} asset={token.symbol} />}
+
+                        {/* Card 3 — Execution */}
+                        <div className="bg-[#111] rounded-lg p-3">
+                          <div className="text-[#888] mb-2 text-[0.7rem]">⚙️ EXECUTION</div>
+                          {token.execScore && (
+                            <>
+                              <div className="text-[0.8rem] font-bold" style={{
+                                color: token.execScore.label === 'CLEAN' ? '#00ff88' :
+                                       token.execScore.label === 'AVOID' ? '#ff4444' : '#ffaa00'
+                              }}>
+                                {token.execScore.label}
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                {[
+                                  { label: 'Spread', value: `${token.spreadBps?.toFixed(1) ?? '—'}bps` },
+                                  { label: 'Depth',  value: token.execScore.depthOk ? '✅ OK' : '⚠️ THIN' },
+                                  { label: 'Spoof',  value: token.execScore.spoofy ? '⚠️ YES' : '✅ NO' },
+                                  { label: 'Score',  value: `${Math.round(token.execScore.raw)}/100` },
+                                ].map(({ label, value }) => (
+                                  <div key={label} className="bg-[#0a0a0f] rounded p-2">
+                                    <div className="text-[#666] text-[0.55rem]">{label}</div>
+                                    <div className="text-[#ccc] text-[0.7rem]">{value}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
 
-                        {/* Layer 3 breakdown */}
-                        <div>
-                          <div className="font-semibold text-[#ec4899] mb-1">L3: Confirmation</div>
-                          <div className="space-y-0.5 text-[#94a3b8]">
-                            {token.score.layer3.reasons.slice(0, 5).map((r, i) => (
-                              <div key={i}>{r}</div>
-                            ))}
-                          </div>
-                        </div>
+                        {/* Card 4 — Decision Engine */}
+                        {token.decision && <DecisionCard decision={token.decision} />}
                       </div>
-
-                      {/* Token metrics */}
-                      <div className="mt-2 pt-2 border-t border-[#1e1e32] grid grid-cols-4 gap-2 text-[0.6rem] text-[#64748b]">
-                        <div>Price: ${token.price < 1 ? token.price.toFixed(5) : token.price.toFixed(2)}</div>
-                        <div>Funding: {token.funding > 0 ? '+' : ''}{token.funding.toFixed(4)}%</div>
-                        <div>OI: {fmtVol(token.oi)}</div>
-                        <div>Vol24h: {fmtVol(token.vol24h)}</div>
-                      </div>
-
-                      {/* Confidence scores */}
-                      {token.score.confidenceScores && (
-                        <div className="mt-2 pt-2 border-t border-[#1e1e32]">
-                          <div className="font-semibold text-[#fbbf24] mb-1 text-[0.65rem]">Confidence Scores</div>
-                          <div className="grid grid-cols-4 gap-3 text-[0.6rem]">
-                            <div>
-                              <div className="text-[#94a3b8]">L1 Confidence</div>
-                              <div className="font-mono font-semibold text-white">{token.score.confidenceScores.l1}%</div>
-                              <div className="text-[#64748b]">Pass: {token.score.confidenceScores.breakdown.l1.passRate}% | Margin: {token.score.confidenceScores.breakdown.l1.safetyMargin}%</div>
-                            </div>
-                            <div>
-                              <div className="text-[#94a3b8]">L2 Confidence</div>
-                              <div className="font-mono font-semibold text-white">{token.score.confidenceScores.l2}%</div>
-                              <div className="text-[#64748b]">Coherence: {token.score.confidenceScores.breakdown.l2.coherence}% | Var: {token.score.confidenceScores.breakdown.l2.componentVariance}</div>
-                            </div>
-                            <div>
-                              <div className="text-[#94a3b8]">L3 Confidence</div>
-                              <div className="font-mono font-semibold text-white">{token.score.confidenceScores.l3}%</div>
-                              <div className="text-[#64748b]">Align: {token.score.confidenceScores.breakdown.l3.signalAlignment}% | Str: {token.score.confidenceScores.breakdown.l3.confirmationStrength}%</div>
-                            </div>
-                            <div>
-                              <div className="text-[#94a3b8]">Global Confidence</div>
-                              <div className="font-mono font-semibold" style={{
-                                color: token.score.confidenceScores.global >= 80 ? '#22c55e' :
-                                       token.score.confidenceScores.global >= 60 ? '#f97316' : '#ef4444'
-                              }}>{token.score.confidenceScores.global}%</div>
-                              <div className="text-[#64748b]">Layer Align: {token.score.confidenceScores.breakdown.global.layerAlignment}% | Weakest: {token.score.confidenceScores.breakdown.global.weakestLink}%</div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
