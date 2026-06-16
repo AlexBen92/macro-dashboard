@@ -38,9 +38,13 @@ export function useHyperliquidL2WebSocket(symbols: string[] = ['BTC', 'ETH', 'SO
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const reconnectAttemptsRef = useRef(0);
   const ofiEnginesRef = useRef<Record<string, ReturnType<typeof getOFIEngine>>>({});
+  const symbolsRef = useRef(symbols); // Store symbols in ref to avoid stale closures
 
   // Initialize OFI engines for each symbol
   useEffect(() => {
+    // Update symbols ref
+    symbolsRef.current = symbols;
+
     symbols.forEach(symbol => {
       if (!ofiEnginesRef.current[symbol]) {
         ofiEnginesRef.current[symbol] = getOFIEngine(symbol);
@@ -70,7 +74,7 @@ export function useHyperliquidL2WebSocket(symbols: string[] = ['BTC', 'ETH', 'SO
         setError(null);
 
         // Subscribe to l2Book for all symbols
-        symbols.forEach(symbol => {
+        symbolsRef.current.forEach(symbol => {
           try {
             const msg = {
               method: 'subscribe',
@@ -152,12 +156,17 @@ export function useHyperliquidL2WebSocket(symbols: string[] = ['BTC', 'ETH', 'SO
       console.error('[HyperliquidL2] Error creating WebSocket:', err);
       setError('Failed to create WebSocket connection');
     }
-  }, [symbols]);
+  }, []); // No dependencies - use refs instead
 
-  // Cleanup on unmount
+  // Cleanup on unmount - connect only once on mount
   useEffect(() => {
-    connect();
+    // Small delay to ensure we're in browser environment
+    const timer = setTimeout(() => {
+      connect();
+    }, 100);
+
     return () => {
+      clearTimeout(timer);
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -165,7 +174,7 @@ export function useHyperliquidL2WebSocket(symbols: string[] = ['BTC', 'ETH', 'SO
         wsRef.current.close();
       }
     };
-  }, [connect]);
+  }, []); // Run only once on mount
 
   return {
     connected,
