@@ -32,6 +32,9 @@ import { useMultiAssetL2WebSocket } from '@/hooks/api/useHyperliquidL2WebSocket'
 import { OFIBadge } from './OFIBadge';
 import { ACFMiniChart } from './ACFMiniChart';
 import { RVRegimeBadge } from './RVRegimeBadge';
+import { getGARCHEngine, type GARCHForecast } from '@/lib/garch-volatility';
+import { GARCHBadge } from './GARCHBadge';
+import { VolProjection } from './VolProjection';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
 
@@ -67,6 +70,13 @@ interface ScoreCard {
   depthImbalance?: number;
   spreadBps?: number;
   acfLags?: number[];
+  // GARCH Volatility Regime fields
+  garchForecast?: GARCHForecast;
+  garchRegime?: 'COMPRESSED' | 'NORMAL' | 'ELEVATED' | 'EXPLOSIVE';
+  garchVolRatio?: number;
+  garchPhi?: number;
+  sizeMultiplier?: number;
+  allowedStyles?: ('TREND' | 'MEANREV' | 'SCALP' | 'NONE')[];
 }
 
 function getSessionInfo(): SessionInfo {
@@ -249,6 +259,13 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
         const signal = l2WebSocket.ofiSignals[token.symbol];
         if (!signal) return token;
 
+        // Update GARCH with recent price change
+        const garchEngine = getGARCHEngine(token.symbol);
+        const return_pct = (token.change24h / 100) / Math.max(1, token.score.layer1.score); // approx return
+        garchEngine.update(return_pct);
+
+        const garchForecast = garchEngine.forecast();
+
         return {
           ...token,
           ofiScore: signal.ofiScore,
@@ -260,6 +277,13 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           depthImbalance: signal.depthImbalance,
           spreadBps: signal.spreadBps,
           acfLags: signal.acfLags,
+          // GARCH fields
+          garchForecast,
+          garchRegime: garchForecast.regime,
+          garchVolRatio: garchForecast.vol_ratio,
+          garchPhi: garchForecast.phi,
+          sizeMultiplier: garchForecast.size_multiplier,
+          allowedStyles: garchForecast.allowed_styles,
         };
       }));
     }
@@ -412,7 +436,7 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
       {/* Table */}
       <div className="bg-[#0e0e1a] border border-[#1e1e32] rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 bg-[#1a1a2e] border-b border-[#1e1e32] font-mono text-[0.6rem] text-[#5a6070] uppercase tracking-wider">
+        <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 bg-[#1a1a2e] border-b border-[#1e1e32] font-mono text-[0.6rem] text-[#5a6070] uppercase tracking-wider">
           <span>#</span>
           <span>Token</span>
           <span className="text-right">Score</span>
@@ -420,10 +444,11 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           <span className="text-right">L2</span>
           <span className="text-right">L3</span>
           <span className="text-center">Action</span>
-          <span className="text-center">Direction</span>
+          <span className="text-center">Dir</span>
           <span className="text-center">OFI</span>
           <span className="text-center">ACF</span>
-          <span className="text-center">VOL</span>
+          <span className="text-center">GARCH</span>
+          <span className="text-center">Proj</span>
           <span className="text-right">Size</span>
         </div>
 
@@ -444,7 +469,7 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
                 <div key={token.symbol}>
                   {/* Main row */}
                   <div
-                    className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem] cursor-pointer"
+                    className="grid grid-cols-[auto_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 px-3 py-2 border-b border-[#1e1e32] hover:bg-[#1a1a2e] transition-colors font-mono text-[0.7rem] cursor-pointer"
                     onClick={() => setExpandedRow(isExpanded ? null : token.symbol)}
                   >
                     <span className="font-semibold text-white">{idx + 1}</span>
@@ -506,6 +531,30 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
                     {/* RV Regime Badge */}
                     <span className="text-center">
                       <RVRegimeBadge regime={token.rvRegime || 'NORMAL'} compact />
+                    </span>
+
+                    {/* GARCH Badge */}
+                    <span className="text-center">
+                      <GARCHBadge
+                        regime={token.garchForecast?.regime || 'NORMAL'}
+                        vol_ratio={token.garchForecast?.vol_ratio}
+                        persistence={token.garchForecast?.persistence}
+                        phi={token.garchForecast?.phi}
+                        compact
+                      />
+                    </span>
+
+                    {/* Vol Projection */}
+                    <span className="text-center flex justify-center">
+                      {token.garchForecast && (
+                        <VolProjection
+                          sigma2_1m={token.garchForecast.sigma2_1m}
+                          sigma2_5m={token.garchForecast.sigma2_5m}
+                          sigma2_15m={token.garchForecast.sigma2_15m}
+                          sigma2_1h={token.garchForecast.sigma2_1h}
+                          current_vol={token.garchForecast.sigma_next}
+                        />
+                      )}
                     </span>
 
                     {/* Size */}
