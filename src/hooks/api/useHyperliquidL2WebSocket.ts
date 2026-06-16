@@ -36,6 +36,7 @@ export function useHyperliquidL2WebSocket(symbols: string[] = ['BTC', 'ETH', 'SO
   const [lastUpdate, setLastUpdate] = useState<Record<string, number>>({});
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const reconnectAttemptsRef = useRef(0);
   const ofiEnginesRef = useRef<Record<string, ReturnType<typeof getOFIEngine>>>({});
 
   // Initialize OFI engines for each symbol
@@ -52,25 +53,37 @@ export function useHyperliquidL2WebSocket(symbols: string[] = ['BTC', 'ETH', 'SO
       return;
     }
 
+    // Guard: only connect in browser
+    if (typeof window === 'undefined' || typeof WebSocket === 'undefined') {
+      console.error('[HyperliquidL2] WebSocket not available in this environment');
+      setError('WebSocket not available');
+      return;
+    }
+
     try {
       const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
 
       ws.onopen = () => {
         console.log('[HyperliquidL2] Connected to l2Book');
+        reconnectAttemptsRef.current = 0;
         setConnected(true);
         setError(null);
 
         // Subscribe to l2Book for all symbols
         symbols.forEach(symbol => {
-          const msg = {
-            method: 'subscribe',
-            subscription: {
-              type: 'l2Book',
-              coin: symbol,
-            },
-          };
-          ws.send(JSON.stringify(msg));
-          console.log(`[HyperliquidL2] Subscribed to l2Book for ${symbol}`);
+          try {
+            const msg = {
+              method: 'subscribe',
+              subscription: {
+                type: 'l2Book',
+                coin: symbol,
+              },
+            };
+            ws.send(JSON.stringify(msg));
+            console.log(`[HyperliquidL2] Subscribed to l2Book for ${symbol}`);
+          } catch (err) {
+            console.error(`[HyperliquidL2] Failed to subscribe to ${symbol}:`, err);
+          }
         });
       };
 
@@ -121,11 +134,17 @@ export function useHyperliquidL2WebSocket(symbols: string[] = ['BTC', 'ETH', 'SO
       };
 
       ws.onclose = () => {
-        console.log('[HyperliquidL2] Disconnected, reconnecting in 5s...');
+        console.log('[HyperliquidL2] Disconnected, reconnecting...');
         setConnected(false);
+        reconnectAttemptsRef.current++;
+
+        // Exponential backoff: 2s, 4s, 8s, max 30s
+        const delay = Math.min(30000, Math.pow(2, reconnectAttemptsRef.current) * 1000);
+        console.log(`[HyperliquidL2] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`);
+
         reconnectTimeoutRef.current = setTimeout(() => {
           connect();
-        }, 5000);
+        }, delay);
       };
 
       wsRef.current = ws;
