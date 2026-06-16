@@ -81,9 +81,8 @@ export async function POST(request: NextRequest) {
 
         const metaData = await metaResponse.json();
 
-        // Extract data from response structure
-        const dataArray = Object.values(metaData)[0];
-        data = Array.isArray(dataArray) ? dataArray : [];
+        // Extract data from response structure: [0] = {universe}, [1] = [assetCtxs]
+        data = metaData[0]?.universe || [];
         break;
 
       case 'all_mids':
@@ -223,11 +222,12 @@ export async function GET(request: NextRequest) {
       const metaData = await metaResponse.json();
 
       // Transform data for easier use - renvoyer TOUS les tokens pour le scanner
-      const coins = Object.values(metaData)[0] as any[];
-      const ctxs = Object.values(metaData)[1] as any[];
-      const transformed = coins
+      // Structure Hyperliquid: [0] = {universe}, [1] = [assetCtxs]
+      const universe = metaData[0]?.universe || [];
+      const assetCtxs = metaData[1] || [];
+      const transformed = universe
         .map((coin: any, i: number) => {
-          const ctx = ctxs[i] || {};
+          const ctx = assetCtxs[i] || {};
           return {
             symbol: coin.name,
             name: coin.name,
