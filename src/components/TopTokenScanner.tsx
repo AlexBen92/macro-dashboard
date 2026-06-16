@@ -15,7 +15,7 @@ import { RVRegimeBadge } from './RVRegimeBadge';
 import { OFIDetailPanel, type TokenSignalExtended } from './OFIDetailPanel';
 import { useMultiAssetL2WebSocket } from '@/hooks/api/useHyperliquidL2WebSocket';
 
-const HL_API = 'https://api.hyperliquid.xyz/info';
+const HL_API = '/api/hyperliquid';
 
 const FEES = { taker: 0.0005, maker: -0.0002, minEdgeRT: 0.001 };
 
@@ -203,109 +203,143 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
   const [trackedSymbols, setTrackedSymbols] = useState<string[]>(['BTC', 'ETH', 'SOL', 'DOGE', 'PEPE', 'ARB', 'OP', 'MATIC']);
   const l2WebSocket = useMultiAssetL2WebSocket(trackedSymbols);
 
-  const fetchTokens = useCallback(async () => {
-    try {
-      const res  = await fetch(HL_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'metaAndAssetCtxs' }),
-      });
-      const data = await res.json();
-      const meta = data[0]?.universe || [];
-      const ctxs = data[1] || [];
-
-      const sess = getSessionInfo();
-      setSession(sess);
-
-      const tokenList = meta.map((m: { name: string }, i: number) => {
-        const c = ctxs[i] || {};
-        const price   = parseFloat(c.markPx || 0);
-        const funding = parseFloat(c.funding || 0) * 100; // en %
-        const vol24h  = parseFloat(c.dayNtlVlm || 0);
-        const oi      = parseFloat(c.openInterest || 0) * price;
-        // change24h proxy via prevDayPx
-        const prevPx  = parseFloat(c.prevDayPx || price);
-        const change24h = prevPx > 0 ? ((price - prevPx) / prevPx) * 100 : 0;
-        // ATR proxy: assume 1% per 8h period = ~0.125% per 15min
-        const atrProxy = Math.max(0.004, Math.abs(funding) / 100 + 0.005);
-
-        const token: Partial<TokenData> = { symbol: m.name, price, funding, vol24h, oi, change24h, atrProxy };
-        const setup = computeSetupScore(token, sess.score);
-
-        // === GET OFI SIGNALS ===
-        const engine = getOFIEngine(m.name);
-        const acf = engine.computeACF();
-        const rv = engine.computeRV();
-        const depth = engine.getLastDepth();
-
-        // Compute OFI scores
-        const ofiScore = acf ? Math.max(0, Math.min(100,
-          50 +
-          (acf.direction === 'BUY' ? 15 : acf.direction === 'SELL' ? -15 : 0) +
-          (acf.persistence - 0.5) * 40 +
-          Math.min(acf.sumACF * 15, 20)
-        )) : 50;
-
-        const autoCorr = acf ? Math.max(0, Math.min(100,
-          50 + acf.sumACF * 50 + (acf.persistence - 0.5) * 60
-        )) : 50;
-
-        // Compute L1/L2/L3 for detail panel
-        const tokenWithOFI: TokenData = {
-          symbol: m.name,
-          price,
-          funding,
-          vol24h,
-          oi,
-          change24h,
-          atrProxy,
-          slDist: Math.max(0.004, 0.75 * atrProxy),
-          entryZone: price,
-          ...setup,
-          // OFI fields
-          ofiScore,
-          autoCorr,
-          acfDirection: acf?.direction ?? 'NEUTRAL',
-          acfStrength: acf?.strength ?? 'WEAK',
-          pContinuation: acf?.pContinuation ?? 0.5,
-          rvRegime: rv.regime,
-          depthImbalance: depth?.depthImbalance ?? 0,
-          spreadBps: depth?.spreadBps ?? 0,
-          acfLags: acf?.lags ?? [],
-        };
-
-        // Compute L1/L2/L3 scores
-        const layerScores = computeLayerScores(tokenWithOFI, sess.score);
-        tokenWithOFI.l1Score = layerScores.l1;
-        tokenWithOFI.l2Score = layerScores.l2;
-        tokenWithOFI.l3Score = layerScores.l3;
-
-        return tokenWithOFI;
-      }).filter((t: TokenData) => t.price > 0 && t.vol24h > 100_000);
-
-      // Trier par score décroissant, puis volume
-      tokenList.sort((a: TokenData, b: TokenData) => b.score - a.score || b.vol24h - a.vol24h);
-
-      setTokens(tokenList);
-      setLoading(false);
-      setLast(new Date());
-
-      // Alertes browser pour setup ≥ 4 en session active
-      if (alertEnabled && sess.active && typeof window !== 'undefined' && 'Notification' in window) {
-        const newSetups = tokenList.filter((t: TokenData) => t.score >= 4 && t.direction !== 'WAIT');
-        newSetups.forEach((t: TokenData) => {
-          const key = `${t.symbol}_${Date.now()}`;
-          if (Notification.permission === 'granted') {
-            new Notification(`🎯 SETUP M15: ${t.symbol}`, {
-              body: `Score ${t.score}/6 | ${t.direction} | Edge ${t.fundingEdge.toFixed(3)}%`,
-              icon: '/favicon.ico',
-            });
-          }
-          setAlerts(prev => [{ key, symbol: t.symbol, direction: t.direction, score: t.score, time: new Date() }, ...prev.slice(0, 4)]);
+  const fetchTokens = useCallback(async (retries = 3) => {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const res  = await fetch(`${HL_API}?method=meta`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
         });
+
+        if (!res.ok) {
+          if (attempt < retries - 1) {
+            const backoff = Math.pow(2, attempt) * 1000;
+            await new Promise(r => setTimeout(r, backoff));
+            continue;
+          }
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const json = await res.json();
+
+        if (!json.success) {
+          if (attempt < retries - 1) {
+            const backoff = Math.pow(2, attempt) * 1000;
+            await new Promise(r => setTimeout(r, backoff));
+            continue;
+          }
+          throw new Error(json.error || 'API error');
+        }
+
+        const data = json.data;
+        const sess = getSessionInfo();
+        setSession(sess);
+
+        // L'API GET renvoie des données transformées
+        const tokenList = data.map((token: any) => {
+          const { symbol, price, volume24h, openInterest, fundingRate, prevDayPx } = token;
+
+          // Formater les données pour compatibilité
+          const funding = fundingRate * 100; // convertir en %
+          const vol24h = volume24h;
+          const oi = openInterest;
+          // Calculer change24h à partir de prevDayPx
+          const change24h = prevDayPx > 0 ? ((price - prevDayPx) / prevDayPx) * 100 : 0;
+          const atrProxy = Math.max(0.004, Math.abs(funding) / 100 + 0.005);
+
+          const tokenPartial: Partial<TokenData> = {
+            symbol,
+            price,
+            funding,
+            vol24h,
+            oi,
+            change24h,
+            atrProxy
+          };
+          const setup = computeSetupScore(tokenPartial, sess.score);
+
+          // === GET OFI SIGNALS ===
+          const engine = getOFIEngine(symbol);
+          const acf = engine.computeACF();
+          const rv = engine.computeRV();
+          const depth = engine.getLastDepth();
+
+          // Compute OFI scores
+          const ofiScore = acf ? Math.max(0, Math.min(100,
+            50 +
+            (acf.direction === 'BUY' ? 15 : acf.direction === 'SELL' ? -15 : 0) +
+            (acf.persistence - 0.5) * 40 +
+            Math.min(acf.sumACF * 15, 20)
+          )) : 50;
+
+          const autoCorr = acf ? Math.max(0, Math.min(100,
+            50 + acf.sumACF * 50 + (acf.persistence - 0.5) * 60
+          )) : 50;
+
+          // Compute L1/L2/L3 for detail panel
+          const tokenWithOFI: TokenData = {
+            symbol,
+            price,
+            funding,
+            vol24h,
+            oi,
+            change24h,
+            atrProxy,
+            slDist: Math.max(0.004, 0.75 * atrProxy),
+            entryZone: price,
+            ...setup,
+            // OFI fields
+            ofiScore,
+            autoCorr,
+            acfDirection: acf?.direction ?? 'NEUTRAL',
+            acfStrength: acf?.strength ?? 'WEAK',
+            pContinuation: acf?.pContinuation ?? 0.5,
+            rvRegime: rv.regime,
+            depthImbalance: depth?.depthImbalance ?? 0,
+            spreadBps: depth?.spreadBps ?? 0,
+            acfLags: acf?.lags ?? [],
+          };
+
+          // Compute L1/L2/L3 scores
+          const layerScores = computeLayerScores(tokenWithOFI, sess.score);
+          tokenWithOFI.l1Score = layerScores.l1;
+          tokenWithOFI.l2Score = layerScores.l2;
+          tokenWithOFI.l3Score = layerScores.l3;
+
+          return tokenWithOFI;
+        });
+
+        const filteredList = tokenList.filter((t: TokenData) => t.price > 0 && t.vol24h > 100_000);
+
+        // Trier par score décroissant, puis volume
+        filteredList.sort((a: TokenData, b: TokenData) => b.score - a.score || b.vol24h - a.vol24h);
+
+        setTokens(filteredList);
+        setLoading(false);
+        setLast(new Date());
+
+        // Alertes browser pour setup ≥ 4 en session active
+        if (alertEnabled && sess.active && typeof window !== 'undefined' && 'Notification' in window) {
+          const newSetups = filteredList.filter((t: TokenData) => t.score >= 4 && t.direction !== 'WAIT');
+          newSetups.forEach((t: TokenData) => {
+            const key = `${t.symbol}_${Date.now()}`;
+            if (Notification.permission === 'granted') {
+              new Notification(`🎯 SETUP M15: ${t.symbol}`, {
+                body: `Score ${t.score}/6 | ${t.direction} | Edge ${t.fundingEdge.toFixed(3)}%`,
+                icon: '/favicon.ico',
+              });
+            }
+            setAlerts(prev => [{ key, symbol: t.symbol, direction: t.direction, score: t.score, time: new Date() }, ...prev.slice(0, 4)]);
+          });
+        }
+
+        return; // Success
+      } catch (err) {
+        console.error('TopTokenScanner fetch error:', err);
+        if (attempt === retries - 1) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      console.error('TopTokenScanner fetch error:', err);
     }
   }, [alertEnabled]);
 
@@ -478,8 +512,8 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #1e293b' }}>
-                {['#', 'Token', 'Score', 'Prix', 'Funding', '24h %', 'Volume', 'OI', 'OFI', 'ACF', 'VOL', 'Direction', 'SL', 'TP1', 'TP2', 'Size (USDT)'].map(h => (
-                  <th key={h} style={{ color: '#64748b', padding: '6px 8px', textAlign: 'left', fontWeight: 600, fontSize: 11 }}>{h}</th>
+                {['#', 'Token', 'Score', 'Prix', 'Funding', '24h', 'Vol', 'OI', 'OFI', 'ACF', 'VOL', 'Dir', 'SL', 'TP1', 'TP2', 'Size'].map(h => (
+                  <th key={h} style={{ color: '#64748b', padding: '4px 6px', textAlign: 'left', fontWeight: 600, fontSize: 10 }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -500,50 +534,51 @@ export default function TopTokenScanner({ equity = 1000 }: TopTokenScannerProps)
                     onMouseEnter={(e) => e.currentTarget.style.background = '#1e3a5f22'}
                     onMouseLeave={(e) => e.currentTarget.style.background = rowBg}
                   >
-                    <td style={{ color: '#475569', padding: '6px 8px' }}>{i+1}</td>
-                    <td style={{ color: isSetup ? '#22c55e' : '#f1f5f9', padding: '6px 8px', fontWeight: isSetup ? 700 : 400 }}>
+                    <td style={{ color: '#475569', padding: '4px 6px', fontSize: 11 }}>{i+1}</td>
+                    <td style={{ color: isSetup ? '#22c55e' : '#f1f5f9', padding: '4px 6px', fontWeight: isSetup ? 700 : 400, fontSize: 11 }}>
                       {isSetup && '🎯 '}{t.symbol}
                     </td>
-                    <td style={{ padding: '6px 8px' }}>
-                      <span style={{ background: scoreColor(t.score) + '33', border: `1px solid ${scoreColor(t.score)}`, borderRadius: 4, padding: '1px 6px', color: scoreColor(t.score), fontWeight: 700, fontSize: 12 }}>
+                    <td style={{ padding: '4px 6px' }}>
+                      <span style={{ background: scoreColor(t.score) + '33', border: `1px solid ${scoreColor(t.score)}`, borderRadius: 3, padding: '1px 4px', color: scoreColor(t.score), fontWeight: 700, fontSize: 11 }}>
                         {t.score}/6
                       </span>
                     </td>
-                    <td style={{ color: '#e2e8f0', padding: '6px 8px' }}>${t.price < 1 ? t.price.toFixed(5) : t.price < 100 ? t.price.toFixed(3) : t.price.toFixed(1)}</td>
-                    <td style={{ color: t.funding > 0.02 ? '#f87171' : t.funding < -0.02 ? '#4ade80' : '#94a3b8', padding: '6px 8px' }}>
-                      {t.funding > 0 ? '+' : ''}{t.funding.toFixed(4)}%
+                    <td style={{ color: '#e2e8f0', padding: '4px 6px', fontSize: 11 }}>${t.price < 1 ? t.price.toFixed(5) : t.price < 100 ? t.price.toFixed(3) : t.price.toFixed(1)}</td>
+                    <td style={{ color: t.funding > 0.02 ? '#f87171' : t.funding < -0.02 ? '#4ade80' : '#94a3b8', padding: '4px 6px', fontSize: 10 }}>
+                      {t.funding > 0 ? '+' : ''}{t.funding.toFixed(3)}%
                     </td>
-                    <td style={{ color: t.change24h > 0 ? '#4ade80' : '#f87171', padding: '6px 8px' }}>
-                      {t.change24h > 0 ? '+' : ''}{t.change24h.toFixed(2)}%
+                    <td style={{ color: t.change24h > 0 ? '#4ade80' : '#f87171', padding: '4px 6px', fontSize: 10 }}>
+                      {t.change24h > 0 ? '+' : ''}{t.change24h.toFixed(1)}%
                     </td>
-                    <td style={{ color: '#94a3b8', padding: '6px 8px' }}>{fmtVol(t.vol24h)}</td>
-                    <td style={{ color: '#94a3b8', padding: '6px 8px' }}>{fmtVol(t.oi)}</td>
+                    <td style={{ color: '#94a3b8', padding: '4px 6px', fontSize: 10 }}>{fmtVol(t.vol24h)}</td>
+                    <td style={{ color: '#94a3b8', padding: '4px 6px', fontSize: 10 }}>{fmtVol(t.oi)}</td>
                     {/* OFI Badge */}
-                    <td style={{ padding: '6px 8px' }}>
+                    <td style={{ padding: '4px 6px' }}>
                       <OFIBadge
                         direction={t.acfDirection}
                         strength={t.acfStrength}
                         pContinuation={t.pContinuation}
                         ofiScore={t.ofiScore}
+                        rho1={t.acfLags[0]}  // Premier lag ACF pour décision immédiate
                       />
                     </td>
                     {/* ACF MiniChart */}
-                    <td style={{ padding: '6px 8px' }}>
+                    <td style={{ padding: '4px 6px' }}>
                       <ACFMiniChart lags={t.acfLags} />
                     </td>
                     {/* RV Regime Badge */}
-                    <td style={{ padding: '6px 8px' }}>
+                    <td style={{ padding: '4px 6px' }}>
                       <RVRegimeBadge regime={t.rvRegime} compact />
                     </td>
-                    <td style={{ padding: '6px 8px' }}>
+                    <td style={{ padding: '4px 6px', fontSize: 10 }}>
                       <span style={{ color: t.direction === 'LONG 📈' ? '#4ade80' : t.direction === 'SHORT 📉' ? '#f87171' : '#64748b', fontWeight: 600 }}>
-                        {t.direction}
+                        {t.direction === 'LONG 📈' ? 'L' : t.direction === 'SHORT 📉' ? 'S' : 'W'}
                       </span>
                     </td>
-                    <td style={{ color: '#f87171', padding: '6px 8px', fontSize: 11 }}>{sl}</td>
-                    <td style={{ color: '#84cc16', padding: '6px 8px', fontSize: 11 }}>{tp1}</td>
-                    <td style={{ color: '#22c55e', padding: '6px 8px', fontSize: 11 }}>{tp2}</td>
-                    <td style={{ color: '#60a5fa', padding: '6px 8px', fontWeight: t.direction !== 'WAIT' ? 600 : 400 }}>
+                    <td style={{ color: '#f87171', padding: '4px 6px', fontSize: 10 }}>{sl}</td>
+                    <td style={{ color: '#84cc16', padding: '4px 6px', fontSize: 10 }}>{tp1}</td>
+                    <td style={{ color: '#22c55e', padding: '4px 6px', fontSize: 10 }}>{tp2}</td>
+                    <td style={{ color: '#60a5fa', padding: '4px 6px', fontWeight: t.direction !== 'WAIT' ? 600 : 400, fontSize: 10 }}>
                       {t.direction !== 'WAIT' ? `$${size}` : '-'}
                     </td>
                   </tr>

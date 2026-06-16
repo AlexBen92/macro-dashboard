@@ -11,6 +11,7 @@ interface OFIBadgeProps {
   strength: 'STRONG' | 'MODERATE' | 'WEAK';
   pContinuation: number;
   ofiScore: number;
+  rho1?: number;  // Premier lag ACF pour décision immédiate
 }
 
 const DIRECTION_COLORS = {
@@ -34,32 +35,37 @@ const DIRECTION_COLORS = {
   }
 };
 
-export function OFIBadge({ direction, strength, pContinuation, ofiScore }: OFIBadgeProps) {
+export function OFIBadge({ direction, strength, pContinuation, ofiScore, rho1 }: OFIBadgeProps) {
   const colors = DIRECTION_COLORS[direction];
   const arrow = colors.arrow;
-  const strengthChar = strength === 'STRONG' ? 'S' : strength === 'MODERATE' ? 'M' : 'W';
   const pct = Math.round(pContinuation * 100);
+  const rhoDisplay = rho1 !== undefined ? Math.abs(rho1).toFixed(2) : null;
 
   return (
     <div style={{
       display: 'inline-flex',
       alignItems: 'center',
-      gap: '4px',
-      padding: '3px 8px',
-      borderRadius: '6px',
+      gap: '3px',
+      padding: '2px 6px',
+      borderRadius: '4px',
       background: colors.bg,
       border: `1px solid ${colors.border}33`,
-      fontSize: '11px',
+      fontSize: '10px',
       fontFamily: 'ui-monospace, SFMono-Regular, Monaco, monospace',
       cursor: 'default',
+      whiteSpace: 'nowrap',
     }}>
-      <span style={{ color: colors.text, fontWeight: 700, fontSize: '12px' }}>
-        {arrow} {direction}
+      <span style={{ color: colors.text, fontWeight: 700, fontSize: '11px' }}>
+        {arrow}{pct}%
       </span>
-      <span style={{ color: '#555' }}>·</span>
-      <span style={{ color: '#ccc', fontWeight: 600 }}>{strengthChar}</span>
-      <span style={{ color: '#555' }}>·</span>
-      <span style={{ color: colors.text, fontWeight: 600 }}>{pct}%</span>
+      {rhoDisplay !== null && (
+        <>
+          <span style={{ color: '#444' }}>ρ</span>
+          <span style={{ color: rho1 !== undefined && rho1 > 0.3 ? colors.text : '#666', fontWeight: 600 }}>
+            {rhoDisplay}
+          </span>
+        </>
+      )}
     </div>
   );
 }

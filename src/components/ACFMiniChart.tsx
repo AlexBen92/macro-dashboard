@@ -13,7 +13,7 @@ interface ACFMiniChartProps {
   height?: number;
 }
 
-export function ACFMiniChart({ lags, width = 80, height = 24 }: ACFMiniChartProps) {
+export function ACFMiniChart({ lags, width = 60, height = 20 }: ACFMiniChartProps) {
   if (!lags || lags.length === 0) {
     return (
       <span style={{

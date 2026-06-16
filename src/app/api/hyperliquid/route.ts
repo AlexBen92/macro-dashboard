@@ -222,20 +222,25 @@ export async function GET(request: NextRequest) {
 
       const metaData = await metaResponse.json();
 
-      // Transform data for easier use
+      // Transform data for easier use - renvoyer TOUS les tokens pour le scanner
       const coins = Object.values(metaData)[0] as any[];
+      const ctxs = Object.values(metaData)[1] as any[];
       const transformed = coins
-        .filter((coin: any) => coin.pair.endsWith('USDT'))
-        .slice(0, 20)
-        .map((coin: any) => ({
-          symbol: coin.pair.replace('-USDT', ''),
-          name: coin.name,
-          price: parseFloat(coin.markPx),
-          volume24h: coin.volume24h || 0,
-          openInterest: coin.openInterest || 0,
-          fundingRate: coin.funding || 0,
-          maxLeverage: coin.maxLeverage,
-        }));
+        .map((coin: any, i: number) => {
+          const ctx = ctxs[i] || {};
+          return {
+            symbol: coin.name,
+            name: coin.name,
+            price: parseFloat(ctx.markPx || coin.markPx || 0),
+            volume24h: parseFloat(ctx.dayNtlVlm || coin.volume24h || 0),
+            openInterest: parseFloat(ctx.openInterest || coin.openInterest || 0),
+            fundingRate: parseFloat(ctx.funding || coin.funding || 0),
+            maxLeverage: coin.maxLeverage || 20,
+            // Ajouter prevDayPx pour calculer change24h
+            prevDayPx: parseFloat(ctx.prevDayPx || 0),
+          };
+        })
+        .filter((coin: any) => coin.price > 0 && coin.volume24h > 1000);
 
       return NextResponse.json({
         success: true,
