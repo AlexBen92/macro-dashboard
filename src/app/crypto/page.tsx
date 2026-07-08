@@ -5,6 +5,7 @@ import FundingOIHeatmap from '@/components/crypto/FundingOIHeatmap';
 import MarketRegimePanel from '@/components/crypto/MarketRegimePanel';
 import CollapsibleSection from '@/components/ui/CollapsibleSection';
 import RealTimeCryptoDashboard from '@/components/crypto/RealTimeCryptoDashboard';
+import VolArbSignalCard from '@/components/crypto/VolArbSignalCard';
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -76,6 +77,15 @@ export default function CryptoPage() {
             <span className="text-[0.58rem] text-[#5a6070] ml-auto">SQUEEZE DETECTION</span>
           </div>
           <FundingOIHeatmap />
+        </motion.div>
+
+        {/* ROW 3.5 — S1 VOL-SURFACE ARBITRAGE (PAPER TRADING) */}
+        <motion.div variants={fadeUp}>
+          <div className="font-mono text-[0.72rem] text-[#8890a0] tracking-[3px] uppercase mb-3 flex items-center gap-2">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#d4a017]" /> S1 VOL-ARB SIGNAL
+            <span className="text-[0.58rem] text-[#d4a017] ml-auto">PAPER TRADING — NON DÉPLOYÉ</span>
+          </div>
+          <VolArbSignalCard />
         </motion.div>
 
         {/* ROW 4 — DEFI OPPORTUNITIES (Placeholder for future) */}
