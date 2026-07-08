@@ -25,6 +25,14 @@ interface VolArbPayload {
   paper_trading_since: string;
   next_reeval: string;
   assets: { BTC: AssetSignal; ETH: AssetSignal };
+  v17_section0?: {
+    resolved_date: string;
+    vega_real: { status: string; sharpe_delta_pct: { BTC: number; ETH: number }; note: string };
+    walk_forward: { status: string; months_positive_pct: { BTC: number; ETH: number }; note: string };
+    survivorship: { status: string; excluded_pct: { BTC: number; ETH: number }; note: string };
+    sharpe_corrected: { applied: boolean; method: string; side_effect: string };
+    verdict: string;
+  };
   disclaimer: string;
 }
 
@@ -113,6 +121,10 @@ export default function VolArbSignalCard() {
           <AssetBlock ccy="ETH" data={payload.assets.ETH} />
         </div>
 
+        {payload.v17_section0 && (
+          <V17ValidationSection data={payload.v17_section0} />
+        )}
+
         <div className="mt-5 bg-[#0e0e1a] border border-[#1e1e32] rounded-lg p-4">
           <div className="font-mono text-[0.58rem] text-[#5a6070] uppercase tracking-[2px] mb-2">
             ⚠️ Lecture importante
@@ -175,6 +187,66 @@ function ValidationBanner({ since, nextReeval }: { since: string; nextReeval: st
     </motion.div>
   );
 }
+
+function V17ValidationSection({ data }: { data: NonNullable<VolArbPayload['v17_section0']> }) {
+  const statusColor = (s: string) => {
+    if (s === 'EDGE_SURVIT') return '#4ade80';
+    if (s === 'DRIFT') return '#ffaa00';
+    if (s === 'MODERE') return '#ffaa00';
+    return '#5a6070';
+  };
+  return (
+    <div className="mt-5 bg-[#0e0e1a] border border-[#1e1e32] rounded-lg p-4">
+      <div className="font-mono text-[0.58rem] text-[#5a6070] uppercase tracking-[2px] mb-3">
+        V17 §0 — résolution 4 conditions ({data.resolved_date})
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <V17Check
+          label="Vega réel BS"
+          status={data.vega_real.status}
+          detail={`Sh Δ BTC ${data.vega_real.sharpe_delta_pct.BTC >= 0 ? '+' : ''}${data.vega_real.sharpe_delta_pct.BTC.toFixed(1)}% / ETH ${data.vega_real.sharpe_delta_pct.ETH >= 0 ? '+' : ''}${data.vega_real.sharpe_delta_pct.ETH.toFixed(1)}%`}
+          color={statusColor(data.vega_real.status)}
+        />
+        <V17Check
+          label="Walk-forward monthly"
+          status={data.walk_forward.status}
+          detail={`OOS positif BTC ${data.walk_forward.months_positive_pct.BTC}% / ETH ${data.walk_forward.months_positive_pct.ETH}%`}
+          color={statusColor(data.walk_forward.status)}
+        />
+        <V17Check
+          label="Survivorship"
+          status={data.survivorship.status}
+          detail={`Exclus BTC ${data.survivorship.excluded_pct.BTC.toFixed(1)}% / ETH ${data.survivorship.excluded_pct.ETH.toFixed(1)}%`}
+          color={statusColor(data.survivorship.status)}
+        />
+        <V17Check
+          label="Sharpe overlap fix"
+          status={data.sharpe_corrected.applied ? 'APPLIQUÉ' : 'N/A'}
+          detail="NW HAC lag=4 + drop fillna(0)"
+          color={data.sharpe_corrected.applied ? '#4ade80' : '#5a6070'}
+        />
+      </div>
+      <div className="mt-3 pt-3 border-t border-[#1e1e32]">
+        <div className="font-mono text-[0.6rem] text-[#eaeef4] leading-relaxed">
+          {data.verdict}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function V17Check({ label, status, detail, color }: { label: string; status: string; detail: string; color: string }) {
+  return (
+    <div className="bg-[#0a0a14] border border-[#1e1e32] rounded p-3">
+      <div className="font-mono text-[0.55rem] text-[#5a6070] uppercase mb-1">{label}</div>
+      <div className="font-mono text-[0.72rem] font-bold mb-1" style={{ color }}>
+        {status}
+      </div>
+      <div className="font-mono text-[0.55rem] text-[#8890a0]">{detail}</div>
+    </div>
+  );
+}
+
 
 function AssetBlock({ ccy, data }: { ccy: string; data: AssetSignal }) {
   const color = ccy === 'BTC' ? '#f97316' : '#00e5ff';
