@@ -7,7 +7,7 @@ export default function Nav() {
   const path = usePathname();
   const links = [
     { href: '/crypto', label: 'CRYPTO', color: '#00e5ff' },
-    { href: '/ftmo', label: 'FTMO', color: '#d4a017' },
+    { href: '/scalping', label: 'SCALPING', color: '#d4a017' },
   ];
 
   return (

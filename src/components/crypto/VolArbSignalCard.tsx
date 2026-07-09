@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { FlaskConical } from 'lucide-react';
 
 interface StrongestSignal {
   instrument: string;
@@ -171,7 +172,7 @@ function ValidationBanner({ since, nextReeval }: { since: string; nextReeval: st
       className="p-4 rounded-lg border-2 bg-[#3a2a1a]/40 border-[#d4a017]/60"
     >
       <div className="flex items-start gap-3">
-        <div className="text-2xl">🧪</div>
+        <FlaskConical className="w-5 h-5 text-[#d4a017] shrink-0 mt-0.5" strokeWidth={1.5} />
         <div className="flex-1">
           <div className="font-mono text-[0.72rem] text-[#d4a017] font-bold uppercase tracking-[2px] mb-1">
             En cours de validation

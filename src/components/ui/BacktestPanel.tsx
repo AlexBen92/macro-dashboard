@@ -187,7 +187,7 @@ export default function BacktestPanel({ mode = 'crypto' }: { mode?: 'crypto' | '
           </div>
           {fetchedAt && (
             <div className="font-mono text-[0.6rem] text-[#5a6070] mt-0.5">
-              {fromCache ? '📦 Cache' : '🔄 Fraîchement calculé'} · {new Date(fetchedAt).toLocaleString('fr-FR')}
+              {fromCache ? 'Cache' : 'Fresh'} · {new Date(fetchedAt).toLocaleString('fr-FR')}
               {nextRefresh && ` · Prochain refresh: ${nextRefresh.toLocaleString('fr-FR')}`}
             </div>
           )}

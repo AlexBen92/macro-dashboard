@@ -1,5 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface MoverData {
   symbol: string;
@@ -83,7 +84,7 @@ export default function TopMovers({ gainers, losers, loading }: Props) {
         {/* Top Gainers */}
         <div>
           <div className="font-mono text-[0.65rem] text-emerald-400 uppercase mb-3 flex items-center gap-2">
-            <span>🚀</span>
+            <TrendingUp className="w-3 h-3" strokeWidth={1.5} />
             <span>Top Gainers</span>
           </div>
           <div className="space-y-2">
@@ -130,7 +131,7 @@ export default function TopMovers({ gainers, losers, loading }: Props) {
         {/* Top Losers */}
         <div>
           <div className="font-mono text-[0.65rem] text-rose-400 uppercase mb-3 flex items-center gap-2">
-            <span>📉</span>
+            <TrendingDown className="w-3 h-3" strokeWidth={1.5} />
             <span>Top Losers</span>
           </div>
           <div className="space-y-2">

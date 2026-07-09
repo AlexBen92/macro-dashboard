@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #08080f;
-  --bg2: #0e0e1a;
-  --bg3: #12121e;
-  --border: #1e1e32;
+  --bg: #06070b;
+  --bg2: #0d0f15;
+  --bg3: #12141c;
+  --border: #1c2028;
   --bull: #4ade80;
   --bear: #ff3355;
   --caution: #ffaa00;
@@ -13,10 +13,14 @@
   --mag: #ff006e;
   --info: #4488ff;
   --purple: #aa66ff;
-  --text: #eaeef4;
-  --dim: #a0a8b8;
+  --text: #e8ecf2;
+  --dim: #7a8290;
   --muted: #5a6070;
   --label: #8890a0;
+
+  /* V18 §5.4 — Tabular nums obligatoire pour alignement colonnes financières */
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  font-variant-numeric: tabular-nums;
 }
 
 html {
@@ -28,52 +32,29 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  font-feature-settings: "tnum" 1, "zero" 1;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* Tous les éléments mono: tabular nums + slashed zero explicite */
+.font-mono, [class*="font-mono"], code, kbd, samp, pre {
+  font-feature-settings: "tnum" 1, "zero" 1 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar — neutre, pas de couleur SaaS */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #2a2a3e; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2a2e36; }
 
-/* Glow effects */
-.glow-bull { box-shadow: 0 0 20px rgba(74, 222, 128, 0.15); }
-.glow-accent { box-shadow: 0 0 20px rgba(0, 229, 255, 0.15); }
-.glow-gold { box-shadow: 0 0 20px rgba(212, 160, 23, 0.15); }
+/* Selection neutre */
+::selection { background: rgba(232, 236, 242, 0.08); color: var(--text); }
 
-/* Pulse animation */
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 229, 255, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(0, 229, 255, 0.4); }
-}
-
+/* Flash — informationnel sur update (gardé) */
 @keyframes flash {
-  0% { background-color: rgba(0, 229, 255, 0.3); }
+  0% { background-color: rgba(232, 236, 242, 0.06); }
   100% { background-color: transparent; }
 }
-
-/* MACRO STACK v8.0 — Additional animations */
-@keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; }
-  50%       { opacity: 0.6; box-shadow: 0 0 3px currentColor; }
-}
-
-@keyframes scanLine {
-  0%   { transform: translateY(-100%); opacity: 0; }
-  20%  { opacity: 1; }
-  100% { transform: translateY(100vh); opacity: 0; }
-}
-
-/* Scrollbar dark v8.0 */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #0f172a; }
-::-webkit-scrollbar-thumb { background: #1e3a5f; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
-
-/* Selection */
-::selection { background: #3b82f633; color: #60a5fa; }
-
-.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 .animate-flash { animation: flash 0.5s ease-out; }
 
 /* V4 — Vertical flow layout */
@@ -93,13 +74,35 @@ body {
   }
 }
 
-/* Sticky decision bar backdrop */
+/* Sticky decision bar backdrop — fonctionnel, conservé */
 .decision-bar-sticky {
   position: sticky;
   top: 0;
   z-index: 50;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  background: rgba(8, 8, 15, 0.85);
+  background: rgba(6, 7, 11, 0.85);
   border-bottom: 1px solid var(--border);
+}
+
+/* V18 §5.5 — focus clavier visible (non négociable) */
+*:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
+
+/* V18 §5.4 — prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* V18 §5.4 — prefers-contrast high */
+@media (prefers-contrast: high) {
+  :root {
+    --border: var(--text);
+  }
 }
