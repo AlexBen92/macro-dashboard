@@ -15,6 +15,7 @@ import StrategySignalEngine from '@/components/StrategySignalEngine';
 import TopTokenScanner from '@/components/TopTokenScanner';
 import BtcEcosystemSection from '@/components/btc-ecosystem/BtcEcosystemSection';
 import FundingAggregator from '@/components/FundingAggregator';
+import FundingAggregatorWired from '@/components/crypto/FundingAggregatorWired';
 import OrderFlowProxy from '@/components/OrderFlowProxy';
 import HyperliquidMonitor from '@/components/HyperliquidMonitor';
 import VolSurfaceMotif from '@/components/ui/VolSurfaceMotif';
@@ -115,48 +116,72 @@ export default function CryptoPage() {
           <>
             <motion.div variants={fadeUp}>
               <SectionLabel
-                label="VOLATILITÉ"
+                label="RECHERCHE · VOL / OPTIONS / FLOW"
                 hint={`MAJ ${lastUpdated ?? payload.last_updated}`}
-                color="var(--bull)"
-              />
-              <div className="relative mb-4">
-                <div className="absolute right-0 top-0 w-[280px] h-[80px] text-[var(--muted)] pointer-events-none opacity-40">
-                  <VolSurfaceMotif height={80} opacity={0.4} atmStrikeX={0.5} />
-                </div>
-                <VolOverviewBar payload={payload} />
-              </div>
-            </motion.div>
-
-            <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <VrpCard ccy="BTC" data={payload.vrp.BTC} ccyColor={BTC_COLOR} />
-              <VrpCard ccy="ETH" data={payload.vrp.ETH} ccyColor={ETH_COLOR} />
-              <D1Card ccy="BTC" data={payload.d1_compression.BTC} ccyColor={BTC_COLOR} />
-              <D1Card ccy="ETH" data={payload.d1_compression.ETH} ccyColor={ETH_COLOR} />
-              <TermStructureCard
-                ccy="BTC"
-                data={payload.term_structure.BTC}
-                ccyColor={BTC_COLOR}
-              />
-              <TermStructureCard
-                ccy="ETH"
-                data={payload.term_structure.ETH}
-                ccyColor={ETH_COLOR}
-              />
-              <SkewCard ccy="BTC" data={payload.skew.BTC} ccyColor={BTC_COLOR} />
-              <SkewCard ccy="ETH" data={payload.skew.ETH} ccyColor={ETH_COLOR} />
-            </motion.div>
-
-            <motion.div variants={fadeUp} className="mt-3">
-              <PedagogicalPanel />
-            </motion.div>
-
-            <motion.div variants={fadeUp} className="mt-6">
-              <SectionLabel
-                label="S1 · PAPER TRADING"
-                hint="VOL SURFACE ARBITRAGE"
                 color="var(--caution)"
               />
-              <S1PaperPerformanceSection />
+              <CollapsibleSection title="RECHERCHE — VOL SURFACE + S1 PAPER + ORDER FLOW" dot="var(--caution)" defaultOpen>
+                <div className="space-y-4 p-4">
+                  {/* Panneau pédagogique en tête */}
+                  <PedagogicalPanel />
+
+                  {/* Surface de vol — VRP / D1 / Term / Skew */}
+                  <div>
+                    <SectionLabel
+                      label="SURFACE DE VOL"
+                      hint="VRP · D1 · TERM STRUCTURE · SKEW"
+                      color="var(--bull)"
+                    />
+                    <div className="relative mb-3">
+                      <div className="absolute right-0 top-0 w-[280px] h-[80px] text-[var(--muted)] pointer-events-none opacity-40">
+                        <VolSurfaceMotif height={80} opacity={0.4} atmStrikeX={0.5} />
+                      </div>
+                      <VolOverviewBar payload={payload} />
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                      <VrpCard ccy="BTC" data={payload.vrp.BTC} ccyColor={BTC_COLOR} />
+                      <VrpCard ccy="ETH" data={payload.vrp.ETH} ccyColor={ETH_COLOR} />
+                      <D1Card ccy="BTC" data={payload.d1_compression.BTC} ccyColor={BTC_COLOR} />
+                      <D1Card ccy="ETH" data={payload.d1_compression.ETH} ccyColor={ETH_COLOR} />
+                      <TermStructureCard
+                        ccy="BTC"
+                        data={payload.term_structure.BTC}
+                        ccyColor={BTC_COLOR}
+                      />
+                      <TermStructureCard
+                        ccy="ETH"
+                        data={payload.term_structure.ETH}
+                        ccyColor={ETH_COLOR}
+                      />
+                      <SkewCard ccy="BTC" data={payload.skew.BTC} ccyColor={BTC_COLOR} />
+                      <SkewCard ccy="ETH" data={payload.skew.ETH} ccyColor={ETH_COLOR} />
+                    </div>
+                  </div>
+
+                  {/* S1 paper trading — même famille vol/IV */}
+                  <div>
+                    <SectionLabel
+                      label="S1 · PAPER TRADING"
+                      hint="VOL SURFACE ARBITRAGE"
+                      color="var(--caution)"
+                    />
+                    <S1PaperPerformanceSection />
+                  </div>
+
+                  {/* Hyperliquid + Order Flow — lecture flow perps */}
+                  <div>
+                    <SectionLabel
+                      label="PERPS FLOW"
+                      hint="HYPERLIQUID BIAS · ORDER FLOW 15M"
+                      color="var(--info)"
+                    />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                      <HyperliquidMonitor />
+                      <OrderFlowProxy symbol="BTC" />
+                    </div>
+                  </div>
+                </div>
+              </CollapsibleSection>
             </motion.div>
           </>
         )}
@@ -200,17 +225,8 @@ export default function CryptoPage() {
               <DerivativesMarketTable />
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 <FundingOIHeatmap />
-                <FundingAggregator />
+                <FundingAggregatorWired />
               </div>
-            </div>
-          </CollapsibleSection>
-        </motion.div>
-
-        <motion.div variants={fadeUp} className="mt-3">
-          <CollapsibleSection title="HYPERLIQUID + ORDER FLOW" dot="var(--info)" defaultOpen={false}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <HyperliquidMonitor />
-              <OrderFlowProxy symbol="BTC" />
             </div>
           </CollapsibleSection>
         </motion.div>
