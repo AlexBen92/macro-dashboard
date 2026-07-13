@@ -525,7 +525,7 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           <span className="w-2 h-2 rounded bg-[#ec4899]" />
           <span>L3: Confirm</span>
         </div>
-        <span className="ml-auto">Score = L1×30% + L2×40% + L3×30%</span>
+        <span className="ml-auto">Score = L1×30% + L2×40% + L3×30% · Pondération a priori — DSR/PBO non calculés (V25 §6)</span>
         <span
           className="px-2 py-0.5 rounded border border-[#ffaa00] text-[#ffaa00] bg-[#ffaa0010] uppercase"
           title="La pondération 30/40/30 est a priori (V25 §6, commit 0e2f2c3, N_trials=1). DSR/PBO/PSR non calculés. Trade-level non persisté → audit statistique en attente."

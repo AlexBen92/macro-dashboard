@@ -7,6 +7,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import ActionabilityBadge from '@/components/ui/ActionabilityBadge';
 
 const HL_API = 'https://api.hyperliquid.xyz/info';
 
@@ -78,6 +79,7 @@ export default function OrderFlowProxy({ symbol = 'BTC' }: OrderFlowProxyProps) 
     <div style={{ background: '#0a0f1a', border: '1px solid #1e3a5f', borderRadius: 12, padding: 16, fontFamily: 'monospace' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <h3 style={{ color: '#60a5fa', margin: 0, fontSize: 15, fontWeight: 700 }}>📊 ORDER FLOW 15m</h3>
+        <ActionabilityBadge variant="informational" />
         <select
           value={sel}
           onChange={e => { setSel(e.target.value); setLoading(true); }}

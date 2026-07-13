@@ -29,8 +29,8 @@ function currentVolWindow() {
 }
 
 function classifyBias(funding: number): 'LONG' | 'SHORT' | 'NEUTRAL' {
-  if (funding < -0.0002) return 'LONG';   // funding negative = longs pay shorts = carry long
-  if (funding > 0.0002) return 'SHORT';  // funding positive = shorts pay longs = carry short
+  if (funding < -0.0002) return 'SHORT';  // V21 §D2/A1: funding neg = bearish continuation
+  if (funding > 0.0002) return 'LONG';   // V21 §D2/A1: funding pos = bullish continuation
   return 'NEUTRAL';
 }
 
@@ -61,16 +61,16 @@ function computeM15Signals(ctx: Record<string, string>, win: (typeof VOL_WINDOWS
     signals.push('⬜ Off-session');
   }
 
-  // 2. Funding edge (30%)
+  // 2. Carry théorique (30%) — edge net non validé (V25 §2.1: OFI×Funding NULL, R²<4%)
   const fundingRatio = edgeNet / MIN_EDGE;
   if (fundingRatio >= 1) {
     strength += 30;
-    signals.push(`✅ Edge ${fundingRatio.toFixed(1)}×`);
+    signals.push(`• Carry ${fundingRatio.toFixed(1)}× (non validé)`);
   } else if (fundingRatio >= 0.5) {
     strength += 15;
-    signals.push(`⚠️ Edge ${fundingRatio.toFixed(1)}×`);
+    signals.push(`• Carry ${fundingRatio.toFixed(1)}× (non validé)`);
   } else {
-    signals.push(`❌ Edge ${(fundingRatio * 100).toFixed(1)}%`);
+    signals.push(`• Carry ${(fundingRatio * 100).toFixed(1)}% (non validé)`);
   }
 
   // 3. Liquidity (20%)
@@ -289,7 +289,7 @@ export default function M15ScalpingSignals() {
               {/* Strength */}
               <div className="text-right">
                 <div className="font-mono text-sm text-white">{s.signalStrength}/100</div>
-                {s.signalStrength >= 80 && <div className="text-[9px] text-green-400">PRIME</div>}
+                {s.signalStrength >= 80 && <div className="text-[9px] text-green-400">HIGH</div>}
                 {s.signalStrength >= 60 && s.signalStrength < 80 && <div className="text-[9px] text-yellow-400">STRONG</div>}
               </div>
 

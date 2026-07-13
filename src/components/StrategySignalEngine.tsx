@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { VOL_WINDOWS, MIN_EDGE } from '@/lib/constants';
+import ActionabilityBadge from '@/components/ui/ActionabilityBadge';
 
 interface StrategySignal {
   symbol:        string;
@@ -48,16 +49,16 @@ function computeSignals(
     let score = 0;
     let direction: 'LONG' | 'SHORT' | 'NEUTRAL' = 'NEUTRAL';
 
-    // 1. Funding Squeeze
+    // 1. Funding Continuation (V21 §D2/A1: funding crypto = continuation)
     const absFunding = Math.abs(funding);
     if (absFunding > 0.0004) {
       score += 30 * (absFunding / 0.001);
       if (funding < 0) {
-        direction = 'LONG';
-        reasons.push(`Funding négatif: ${(funding * 100).toFixed(4)}%`);
-      } else {
         direction = 'SHORT';
-        reasons.push(`Funding positif: +${(funding * 100).toFixed(4)}%`);
+        reasons.push(`Funding négatif: ${(funding * 100).toFixed(4)}% (bearish)`);
+      } else {
+        direction = 'LONG';
+        reasons.push(`Funding positif: +${(funding * 100).toFixed(4)}% (bullish)`);
       }
     }
 
@@ -179,8 +180,9 @@ export default function StrategySignalEngine() {
           <h2 className="text-lg font-bold text-white tracking-widest uppercase">
             ⚡ Strategy Signal Engine
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Multi-factor composite · Confidence ≥60% = VALID · {ts}
+          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
+            <span>Multi-factor composite · Confidence ≥60% = VALID · {ts}</span>
+            <ActionabilityBadge variant="validation" note="En validation · Non-backtesté" />
           </p>
         </div>
         <button

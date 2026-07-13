@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { useHyperliquid } from '@/hooks/api/useHyperliquid';
+import ActionabilityBadge from '@/components/ui/ActionabilityBadge';
 
 interface HeatmapData {
   symbol: string;
@@ -98,6 +99,7 @@ export default function FundingOIHeatmap({ data: propData, loading: propLoading 
             FUNDING × OI HEATMAP
           </span>
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <ActionabilityBadge variant="informational" />
         </div>
         <div className="font-mono text-[0.58rem] text-[#5a6070]">
           Size = OI | Color = Funding

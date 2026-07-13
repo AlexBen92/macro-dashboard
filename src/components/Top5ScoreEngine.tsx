@@ -63,12 +63,12 @@ function scoreAsset(name: string, ctx: Record<string, string>, rank: number): To
 
   // Bias
   let bias: TokenScore['bias'] = 'NEUTRAL';
-  if (absFunding > 0.0002) bias = funding < 0 ? 'LONG' : 'SHORT';
+  if (absFunding > 0.0002) bias = funding < 0 ? 'SHORT' : 'LONG';  // V21 §D2/A1 continuation
 
   const signals: string[] = [];
   if (absFunding > 0.0003) signals.push(`⚡ Funding ${funding >= 0 ? '+' : ''}${(funding * 100).toFixed(4)}%`);
   if (oi > 1e9)            signals.push(`🔥 OI $${(oi / 1e9).toFixed(2)}B`);
-  if (edgeRatio >= 1)      signals.push(`✅ Edge ${edgeRatio.toFixed(1)}× fees`);
+  if (edgeRatio >= 1)      signals.push(`• Carry ratio ${edgeRatio.toFixed(1)}× (non validé V25 §2.1)`);
   if (win)                 signals.push(`⏰ ${win.label}`);
 
   return {
@@ -193,7 +193,7 @@ export default function Top5ScoreEngine() {
                         style={{ background: bc.border + '22', color: bc.text }}>
                         {t.bias}
                       </span>
-                      {t.score >= 75 && <span className="text-xs text-green-400">🔥 PRIME</span>}
+                      {t.score >= 75 && <span className="text-xs text-green-400">🔥 HIGH</span>}
                       {t.score >= 60 && t.score < 75 && <span className="text-xs text-yellow-400">⚡ STRONG</span>}
                       {t.score < 60  && <span className="text-xs text-gray-500">👁️ WATCH</span>}
                     </div>

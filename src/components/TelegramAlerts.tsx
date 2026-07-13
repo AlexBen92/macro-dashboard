@@ -93,8 +93,8 @@ export function useTelegramAlerts() {
         const fundingRatio = edgeNet / 0.001; // vs MIN_EDGE
         if (fundingRatio >= 1) strength += 30;
 
-        const bias = funding < -0.0002 ? 'LONG' : funding > 0.0002 ? 'SHORT' : 'NEUTRAL';
-        if ((bias === 'LONG' && funding < -0.0003) || (bias === 'SHORT' && funding > 0.0003)) {
+        const bias = funding < -0.0002 ? 'SHORT' : funding > 0.0002 ? 'LONG' : 'NEUTRAL';
+        if ((bias === 'SHORT' && funding < -0.0003) || (bias === 'LONG' && funding > 0.0003)) {
           strength += 10;
         }
 

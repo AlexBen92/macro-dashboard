@@ -47,6 +47,7 @@ interface Props {
   size?: 'sm' | 'md';
   showLabel?: boolean;
   className?: string;
+  note?: string;
 }
 
 export default function ActionabilityBadge({
@@ -54,6 +55,7 @@ export default function ActionabilityBadge({
   size = 'sm',
   showLabel = true,
   className = '',
+  note,
 }: Props) {
   const cfg = CONFIG[variant];
   const Icon = cfg.icon;
@@ -61,6 +63,7 @@ export default function ActionabilityBadge({
   const padY = size === 'sm' ? '2px' : '3px';
   const padX = size === 'sm' ? '6px' : '8px';
   const font = size === 'sm' ? '0.55rem' : '0.62rem';
+  const label = note ?? cfg.label;
 
   return (
     <span
@@ -76,7 +79,7 @@ export default function ActionabilityBadge({
       }}
     >
       <Icon size={iconSize} strokeWidth={1.75} style={{ color: cfg.color }} />
-      {showLabel && <span style={{ color: 'var(--label)' }}>{cfg.label}</span>}
+      {showLabel && <span style={{ color: 'var(--label)' }}>{label}</span>}
     </span>
   );
 }

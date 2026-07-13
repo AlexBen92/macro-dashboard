@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useHyperliquidMonitor } from '@/hooks/useHyperliquidMonitor';
 import { formatVolume, formatPercentage, formatPrice } from '@/lib/market-data';
+import ActionabilityBadge from '@/components/ui/ActionabilityBadge';
 
 type SortField = 'symbol' | 'price' | 'change24h' | 'volume24h' | 'openInterest' | 'fundingRate' | 'strengthScore';
 type SortOrder = 'asc' | 'desc';
@@ -103,6 +104,7 @@ export default function HyperliquidMonitor() {
           <span className="font-mono text-[0.6rem] text-[#5a6070]">
             OI · Volume · Funding · Market Bias
           </span>
+          <ActionabilityBadge variant="informational" />
         </div>
         <div className="flex items-center gap-3">
           <button

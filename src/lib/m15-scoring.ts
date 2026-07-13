@@ -345,7 +345,7 @@ export function computeSetupScore(token: M15TokenData): SetupScore {
   const fundingEdgeStr = fundingEdge.toFixed(3);
   if (fundingEdge >= 0.10) {
     fundingScore = 100;
-    reasons.push(`✅ Funding edge ${fundingEdgeStr}%`);
+    reasons.push(`• Carry brut ${fundingEdgeStr}% (non validé V25 §2.1)`);
   } else if (fundingEdge >= 0.05) {
     fundingScore = 70;
     reasons.push(`⚠️ Funding edge ${fundingEdgeStr}%`);

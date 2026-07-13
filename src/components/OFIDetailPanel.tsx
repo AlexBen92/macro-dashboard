@@ -244,7 +244,7 @@ export function OFIDetailPanel({ token, onClose }: OFIDetailPanelProps) {
           {token.acfDirection !== 'NEUTRAL' && (
             <div>✅ OFI flow: {token.acfDirection} ({token.acfStrength})</div>
           )}
-          {p > 55 && <div>✅ Continuation: {p}% probability</div>}
+          {p > 55 && <div>• Continuation {p}% (observation microstructure, non prédictif hors coût — V25 §4.2)</div>}
           {(token.depthImbalance ?? 0) > 0.15 && <div>✅ Bid depth dominance</div>}
           {(token.depthImbalance ?? 0) < -0.15 && <div>✅ Ask depth dominance</div>}
           {(token.spreadBps ?? 99) < 3 && <div>✅ Tight spread ({(token.spreadBps ?? 0).toFixed(1)}bps)</div>}

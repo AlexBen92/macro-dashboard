@@ -101,8 +101,8 @@ function computeSetupScore(token: Partial<TokenData>, sessionScore: number): Tok
 
   // 3. Edge funding ≥ 0.10% net (funding/16 - taker fee)
   const fundingEdge = Math.abs(funding / 16) - FEES.taker * 100;
-  if (fundingEdge >= 0.10) { score++; reasons.push(`✅ Funding edge ${fundingEdge.toFixed(3)}%`); }
-  else reasons.push(`⬜ Funding edge ${fundingEdge.toFixed(3)}%`);
+  if (fundingEdge >= 0.10) { score++; reasons.push(`• Spread carry brut ${fundingEdge.toFixed(3)}% (non validé V25 §2.1)`); }
+  else reasons.push(`⬜ Carry brut ${fundingEdge.toFixed(3)}% (non validé)`);
 
   // 4. Trend proxy: prix > moyenne implicite (24h change > 0 = bull, < 0 = bear)
   const hasTrend = Math.abs(change24h) > 0.5;
@@ -120,8 +120,8 @@ function computeSetupScore(token: Partial<TokenData>, sessionScore: number): Tok
 
   // Direction bias
   let direction = 'WAIT';
-  if (funding < -0.01 && change24h > 0) direction = 'LONG 📈';
-  else if (funding > 0.01 && change24h < 0) direction = 'SHORT 📉';
+  if (funding < -0.01 && change24h < 0) direction = 'SHORT 📉';  // V21 §D2/A1: neg funding = bearish continuation
+  else if (funding > 0.01 && change24h > 0) direction = 'LONG 📈'; // V21 §D2/A1: pos funding = bullish continuation
   else if (Math.abs(change24h) > 1.5) direction = change24h > 0 ? 'LONG 📈' : 'SHORT 📉';
 
   return { score: Math.min(6, Math.round(score)), reasons, direction, fundingEdge };

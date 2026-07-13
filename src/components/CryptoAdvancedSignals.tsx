@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ActionabilityBadge from '@/components/ui/ActionabilityBadge';
 
 interface SignalDisplay {
   name: string;
@@ -56,8 +57,11 @@ export default function CryptoAdvancedSignals() {
           <h2 className="text-lg font-bold text-white tracking-widest uppercase">
             🧠 Academic Signals Engine
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            VW-TSMOM · Funding Divergence · Regime Detection · Last: {lastUpdate}
+          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
+            <span>VW-TSMOM · Funding Divergence · Regime Detection · Last: {lastUpdate}</span>
+            <ActionabilityBadge variant="actionable" note="VW-TSMOM backtesté" />
+            <ActionabilityBadge variant="validation" note="Funding Divergence NULL (V21 §D2)" />
+            <ActionabilityBadge variant="informational" note="Regime = filtre" />
           </p>
         </div>
       </div>

@@ -3,12 +3,20 @@
 import VolArbSignalCard from '@/components/crypto/VolArbSignalCard';
 import { useVolResearch } from '@/hooks/api/useVolResearch';
 import type { VolResearchPayload, S1TearsheetCcy } from '@/lib/types/vol-research';
+import ActionabilityBadge from '@/components/ui/ActionabilityBadge';
 
 export default function S1PaperPerformanceSection() {
   const { payload, available, isLoading } = useVolResearch();
 
   return (
     <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <ActionabilityBadge variant="actionable" note="Actionnable · paper" />
+        <ActionabilityBadge variant="validation" note="Paper J30 · pending 2026-08-07" />
+        <span className="font-mono text-[0.55rem] text-[var(--muted)] ml-auto">
+          S1 = seul signal EDGE_CONFIRMED (V16, nested CV 365j)
+        </span>
+      </div>
       <VolArbSignalCard />
       {available && payload && <EquityTearsheetBlock payload={payload} />}
       {!available && !isLoading && (
