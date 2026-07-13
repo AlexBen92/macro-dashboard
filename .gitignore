@@ -10,3 +10,7 @@ run-m15-backtest.ts
 .env
 .env.local
 .env.*.local
+
+# Trade-level signal log (V25 §6 audit)
+data/m15_signals.jsonl
+data/m15_signals.jsonl.*

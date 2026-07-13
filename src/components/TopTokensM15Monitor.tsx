@@ -268,6 +268,58 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
     return () => { clearInterval(interval); clearInterval(clock); };
   }, [fetchTokens]);
 
+  // Persist READY signals for DSR/PBO audit (V25 §6)
+  useEffect(() => {
+    if (tokens.length === 0) return;
+    const ready = tokens.filter(t => t.score.action === 'READY');
+    if (ready.length === 0) return;
+    const ts = new Date().toISOString();
+    void Promise.all(ready.map(t => {
+      const layers = {
+        l1: t.score.layer1.score,
+        l2: t.score.layer2.total,
+        l3: t.score.layer3.total,
+        final: t.score.finalScore,
+      };
+      const sizeUsd = (() => {
+        const slDist = Math.max(0.004, 0.75 * (Math.abs(t.funding) / 100 + 0.005));
+        const riskUSDT = equityInput * 0.0015;
+        return Number((riskUSDT / slDist).toFixed(2));
+      })();
+      const atrProxy = t.price * 0.02;
+      const dir = t.decision?.direction ?? t.score.direction;
+      const sl = dir === 'LONG' ? t.price - atrProxy * 1.5
+              : dir === 'SHORT' ? t.price + atrProxy * 1.5
+              : null;
+      const tp = dir === 'LONG' ? t.price + atrProxy * 2.5
+              : dir === 'SHORT' ? t.price - atrProxy * 2.5
+              : null;
+      return fetch('/api/m15-signal-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ts,
+          symbol: t.symbol,
+          session: session.name,
+          session_score: session.score,
+          layers,
+          action: t.score.action,
+          direction: dir,
+          price_entry: t.price,
+          size_usd: sizeUsd,
+          sl, tp,
+          vol_regime: t.garchOutput?.regime ?? t.garchRegime ?? null,
+          garch_phi: t.garchOutput?.phi ?? t.garchPhi ?? null,
+          ofi_score: t.ofiScore ?? null,
+          acf_direction: t.acfDirection ?? null,
+          p_continuation: t.pContinuation ?? null,
+          funding_pct: t.funding,
+          version: '30/40/30@0e2f2c3',
+        }),
+      }).catch(err => console.error('m15-signal-log persist failed', t.symbol, err));
+    }));
+  }, [tokens, session, equityInput]);
+
   // Update tokens with real-time OFI data from L2 WebSocket
   useEffect(() => {
     if (l2WebSocket.connected && Object.keys(l2WebSocket.ofiSignals).length > 0) {
@@ -474,6 +526,12 @@ export default function TopTokensM15Monitor({ equity = 1000 }: { equity?: number
           <span>L3: Confirm</span>
         </div>
         <span className="ml-auto">Score = L1×30% + L2×40% + L3×30%</span>
+        <span
+          className="px-2 py-0.5 rounded border border-[#ffaa00] text-[#ffaa00] bg-[#ffaa0010] uppercase"
+          title="La pondération 30/40/30 est a priori (V25 §6, commit 0e2f2c3, N_trials=1). DSR/PBO/PSR non calculés. Trade-level non persisté → audit statistique en attente."
+        >
+          ⚠️ 30/40/30 non auditée · 🧪 validation en cours
+        </span>
       </div>
 
       {/* OFI Legend */}

@@ -13,12 +13,17 @@ interface FundingRow {
   edgeM30:  number;  // net edge par bougie M30
 }
 
-const SIGNAL_META: Record<Signal, { label: string; color: string; icon: string }> = {
-  SQUEEZE_LONG:  { label: 'Squeeze Long',  color: '#00ff88', icon: '🚀' },
-  SQUEEZE_SHORT: { label: 'Squeeze Short', color: '#ff4466', icon: '💥' },
-  CARRY_LONG:    { label: 'Carry Long',    color: '#55ff88', icon: '📈' },
-  CARRY_SHORT:   { label: 'Carry Short',   color: '#ff8866', icon: '📉' },
-  NEUTRAL:       { label: 'Neutre',        color: '#666',    icon: '⬜' },
+const SIGNAL_META: Record<Signal, { label: string; color: string; icon: string; hint: string }> = {
+  SQUEEZE_LONG:  { label: 'Continuation ↓', color: '#00ff88', icon: '▼',
+                   hint: 'Funding négatif extrême — continuation baissière (M1-CONT / V21 §D2), pas un squeeze haussier' },
+  SQUEEZE_SHORT: { label: 'Continuation ↑', color: '#ff4466', icon: '▲',
+                   hint: 'Funding positif extrême — continuation haussière (M1-CONT / V21 §D2), pas un squeeze baissier' },
+  CARRY_LONG:    { label: 'Carry Long',    color: '#55ff88', icon: '📈',
+                   hint: 'Funding négatif modéré — carry long possible' },
+  CARRY_SHORT:   { label: 'Carry Short',   color: '#ff8866', icon: '📉',
+                   hint: 'Funding positif modéré — carry short possible' },
+  NEUTRAL:       { label: 'Neutre',        color: '#666',    icon: '⬜',
+                   hint: 'Funding intra-range — pas de signal' },
 };
 
 function classify(f: number): Signal {
@@ -183,7 +188,8 @@ export default function FundingAggregator() {
       )}
 
       <p className="mt-3 text-[11px] text-gray-600 text-center">
-        Mis à jour toutes les 60s · Source: Hyperliquid API · Edge = (funding/16) - taker fee
+        Mis à jour toutes les 60s · Source: Hyperliquid API · Edge = (funding/16) - taker fee ·
+        Labels alignés sur V21 §D2 (funding = continuation, pas retournement)
       </p>
     </section>
   );
