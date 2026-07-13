@@ -7,3 +7,6 @@ next-env.d.ts
 
 .vercel
 run-m15-backtest.ts
+.env
+.env.local
+.env.*.local
