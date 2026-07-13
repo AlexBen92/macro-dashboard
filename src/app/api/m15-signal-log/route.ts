@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { appendSignal, readSignals, getStats, type M15SignalEntry } from '@/lib/m15-signal-log';
 
 const PROXY_URL = process.env.SIGNAL_LOG_PROXY_URL ?? '';
+const PROXY_TOKEN = process.env.SIGNAL_LOG_TOKEN ?? '';
 
 const SCHEMA_VERSION = '30/40/30@0e2f2c3';
 const RATE_LIMIT_PER_SYMBOL_MS = 15 * 60 * 1000;
@@ -61,9 +62,11 @@ export async function POST(req: NextRequest) {
     // Proxy to VPS backend if configured (Vercel serverless fs is readonly)
     if (PROXY_URL) {
       try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (PROXY_TOKEN) headers['X-Signal-Token'] = PROXY_TOKEN;
         const upstream = await fetch(`${PROXY_URL.replace(/\/$/, '')}/m15-signal-log`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify(entry),
         });
         const data = await upstream.json().catch(() => ({}));
