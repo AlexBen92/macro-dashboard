@@ -67,7 +67,7 @@ export default function D1Card({ data, ccy, ccyColor }: Props) {
         <div className="flex items-center gap-2 p-2 border border-[var(--bull)] bg-[var(--bg3)] rounded-[3px]">
           <AlertTriangle size={12} color="var(--bull)" strokeWidth={2} />
           <span className="font-mono text-[0.6rem] uppercase tracking-[0.08em] text-[var(--bull)]">
-            Compression détectée · expansion probable
+            Compression détectée · expansion observée historiquement (n&lt;30, proxy optimiste)
           </span>
         </div>
       )}
