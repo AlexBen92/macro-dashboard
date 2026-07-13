@@ -3,9 +3,15 @@
  * POST  /api/m15-signal-log        -> persist one READY signal
  * GET   /api/m15-signal-log        -> query (symbol, since, limit, action)
  * GET   /api/m15-signal-log?stats  -> aggregate stats
+ *
+ * Storage: append-only JSONL on local fs. On Vercel serverless (readonly fs),
+ * POST degrades to no-op + console.log — wire SIGNAL_LOG_PROXY_URL to a VPS
+ * backend for production persistence (pattern saas-deployment-vercel).
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { appendSignal, readSignals, getStats, type M15SignalEntry } from '@/lib/m15-signal-log';
+
+const PROXY_URL = process.env.SIGNAL_LOG_PROXY_URL ?? '';
 
 const SCHEMA_VERSION = '30/40/30@0e2f2c3';
 const RATE_LIMIT_PER_SYMBOL_MS = 15 * 60 * 1000;
@@ -51,9 +57,39 @@ export async function POST(req: NextRequest) {
     }
 
     const entry: M15SignalEntry = { ...body, version: SCHEMA_VERSION };
-    const res = await appendSignal(entry);
-    lastWriteBySymbol.set(body.symbol, now);
-    return NextResponse.json(res, { status: 200 });
+
+    // Proxy to VPS backend if configured (Vercel serverless fs is readonly)
+    if (PROXY_URL) {
+      try {
+        const upstream = await fetch(`${PROXY_URL.replace(/\/$/, '')}/m15-signal-log`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry),
+        });
+        const data = await upstream.json().catch(() => ({}));
+        return NextResponse.json({ ...data, proxied: true }, { status: upstream.status });
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'proxy_error';
+        return NextResponse.json({ error: msg, proxied: false }, { status: 502 });
+      }
+    }
+
+    // Local fs path (self-hosted / dev). Degrade gracefully on readonly fs.
+    try {
+      const res = await appendSignal(entry);
+      lastWriteBySymbol.set(body.symbol, now);
+      return NextResponse.json(res, { status: 200 });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'unknown error';
+      if (msg.startsWith('EROFS')) {
+        console.warn('[m15-signal-log] readonly fs — entry not persisted (set SIGNAL_LOG_PROXY_URL)', entry.symbol);
+        return NextResponse.json(
+          { ok: false, skipped: 'readonly_fs', reason: 'Vercel serverless — set SIGNAL_LOG_PROXY_URL to VPS backend' },
+          { status: 200 },
+        );
+      }
+      return NextResponse.json({ error: msg }, { status: 500 });
+    }
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'unknown error';
     return NextResponse.json({ error: msg }, { status: 500 });
