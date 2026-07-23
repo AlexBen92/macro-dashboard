@@ -6,7 +6,10 @@ import { AlertTriangle } from 'lucide-react';
 import DerivativesMarketTable from '@/components/crypto/DerivativesMarketTable';
 import FundingOIHeatmap from '@/components/crypto/FundingOIHeatmap';
 import MarketRegimePanel from '@/components/crypto/MarketRegimePanel';
-import CollapsibleSection from '@/components/ui/CollapsibleSection';
+import MacroRegimeBar from '@/components/crypto/MacroRegimeBar';
+import MacroCorrelationMatrix from '@/components/crypto/MacroCorrelationMatrix';
+import SectorRotationTable from '@/components/crypto/SectorRotationTable';
+import AltExposureTable from '@/components/crypto/AltExposureTable';
 import RealTimeCryptoDashboard from '@/components/crypto/RealTimeCryptoDashboard';
 import TopTokensM15Monitor from '@/components/TopTokensM15Monitor';
 import IntradayHeatmap from '@/components/IntradayHeatmap';
@@ -14,7 +17,6 @@ import CryptoAdvancedSignals from '@/components/CryptoAdvancedSignals';
 import StrategySignalEngine from '@/components/StrategySignalEngine';
 import TopTokenScanner from '@/components/TopTokenScanner';
 import BtcEcosystemSection from '@/components/btc-ecosystem/BtcEcosystemSection';
-import FundingAggregator from '@/components/FundingAggregator';
 import FundingAggregatorWired from '@/components/crypto/FundingAggregatorWired';
 import OrderFlowProxy from '@/components/OrderFlowProxy';
 import HyperliquidMonitor from '@/components/HyperliquidMonitor';
@@ -87,148 +89,154 @@ export default function CryptoPage() {
         </div>
       </div>
 
+      <MacroRegimeBar />
+
       <motion.div
         className="v4-container"
         variants={stagger}
         initial="hidden"
         animate="show"
       >
-        {isLoading && (
-          <motion.div variants={fadeUp}>
+        <motion.div variants={fadeUp} className="mt-4">
+          <SectionLabel
+            label="CORR MACRO · HEATMAP"
+            hint="BTC / ETH / SOL × DXY / SPX / GOLD"
+            color="var(--info)"
+          />
+          <MacroCorrelationMatrix />
+        </motion.div>
+
+        <motion.div variants={fadeUp} className="mt-6">
+          <SectionLabel
+            label="ROTATION & EXPOSITION"
+            hint="L1 / L2 / L3 · BETA · CORR"
+            color="var(--bull)"
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <SectorRotationTable />
+            <AltExposureTable />
+          </div>
+        </motion.div>
+
+        <motion.div variants={fadeUp} className="mt-6">
+          <SectionLabel
+            label="DÉRIVÉES · FUNDING + OI + RÉGIME"
+            hint="TABLE COMPACTE"
+            color="var(--purple)"
+          />
+          <div className="space-y-3">
+            <MarketRegimePanel />
+            <DerivativesMarketTable />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <FundingOIHeatmap />
+              <FundingAggregatorWired />
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div variants={fadeUp} className="mt-6">
+          <SectionLabel
+            label="SIGNAUX M15 · CONFLUENCE"
+            hint="STRATEGIES + SCANNERS"
+            color="var(--caution)"
+          />
+          <div className="space-y-3">
+            <CryptoAdvancedSignals />
+            <StrategySignalEngine />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <TopTokenScanner equity={1000} />
+              <IntradayHeatmap />
+            </div>
+            <BtcEcosystemSection />
+          </div>
+        </motion.div>
+
+        <motion.div variants={fadeUp} className="mt-6">
+          <SectionLabel
+            label="RECHERCHE · VOL / OPTIONS / FLOW"
+            hint={`MAJ ${lastUpdated ?? payload?.last_updated ?? '—'}`}
+            color="var(--caution)"
+          />
+          {isLoading && (
             <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-6 text-center font-mono text-[0.7rem] text-[var(--muted)]">
               CHARGEMENT VOL RESEARCH...
             </div>
-          </motion.div>
-        )}
-
-        {!isLoading && !available && (
-          <motion.div variants={fadeUp}>
+          )}
+          {!isLoading && !available && (
             <div className="bg-[var(--bg2)] border border-[var(--caution)] rounded-[4px] p-4 flex items-center gap-3">
               <AlertTriangle size={18} color="var(--caution)" strokeWidth={1.75} />
               <div className="font-mono text-[0.65rem] text-[var(--caution)]">
                 DONNÉES VOL RESEARCH INDISPONIBLES — VPS injoignable {error ? `(${error})` : ''}
               </div>
             </div>
-          </motion.div>
-        )}
-
-        {available && payload && (
-          <>
-            <motion.div variants={fadeUp}>
-              <SectionLabel
-                label="RECHERCHE · VOL / OPTIONS / FLOW"
-                hint={`MAJ ${lastUpdated ?? payload.last_updated}`}
-                color="var(--caution)"
-              />
-              <CollapsibleSection title="RECHERCHE — VOL SURFACE + S1 PAPER + ORDER FLOW" dot="var(--caution)" defaultOpen>
-                <div className="space-y-4 p-4">
-                  {/* Panneau pédagogique en tête */}
-                  <PedagogicalPanel />
-
-                  {/* Surface de vol — VRP / D1 / Term / Skew */}
-                  <div>
-                    <SectionLabel
-                      label="SURFACE DE VOL"
-                      hint="VRP · D1 · TERM STRUCTURE · SKEW"
-                      color="var(--bull)"
-                    />
-                    <div className="relative mb-3">
-                      <div className="absolute right-0 top-0 w-[280px] h-[80px] text-[var(--muted)] pointer-events-none opacity-40">
-                        <VolSurfaceMotif height={80} opacity={0.4} atmStrikeX={0.5} />
-                      </div>
-                      <VolOverviewBar payload={payload} />
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                      <VrpCard ccy="BTC" data={payload.vrp.BTC} ccyColor={BTC_COLOR} />
-                      <VrpCard ccy="ETH" data={payload.vrp.ETH} ccyColor={ETH_COLOR} />
-                      <D1Card ccy="BTC" data={payload.d1_compression.BTC} ccyColor={BTC_COLOR} />
-                      <D1Card ccy="ETH" data={payload.d1_compression.ETH} ccyColor={ETH_COLOR} />
-                      <TermStructureCard
-                        ccy="BTC"
-                        data={payload.term_structure.BTC}
-                        ccyColor={BTC_COLOR}
-                      />
-                      <TermStructureCard
-                        ccy="ETH"
-                        data={payload.term_structure.ETH}
-                        ccyColor={ETH_COLOR}
-                      />
-                      <SkewCard ccy="BTC" data={payload.skew.BTC} ccyColor={BTC_COLOR} />
-                      <SkewCard ccy="ETH" data={payload.skew.ETH} ccyColor={ETH_COLOR} />
-                    </div>
+          )}
+          {available && payload && (
+            <div className="space-y-4 p-4 bg-[var(--bg2)] border border-[var(--border)] rounded-[4px]">
+              <PedagogicalPanel />
+              <div>
+                <SectionLabel
+                  label="SURFACE DE VOL"
+                  hint="VRP · D1 · TERM STRUCTURE · SKEW"
+                  color="var(--bull)"
+                />
+                <div className="relative mb-3">
+                  <div className="absolute right-0 top-0 w-[280px] h-[80px] text-[var(--muted)] pointer-events-none opacity-40">
+                    <VolSurfaceMotif height={80} opacity={0.4} atmStrikeX={0.5} />
                   </div>
-
-                  {/* S1 paper trading — même famille vol/IV */}
-                  <div>
-                    <SectionLabel
-                      label="S1 · PAPER TRADING"
-                      hint="VOL SURFACE ARBITRAGE"
-                      color="var(--caution)"
-                    />
-                    <S1PaperPerformanceSection />
-                  </div>
-
-                  {/* Hyperliquid + Order Flow — lecture flow perps */}
-                  <div>
-                    <SectionLabel
-                      label="PERPS FLOW"
-                      hint="HYPERLIQUID BIAS · ORDER FLOW 15M"
-                      color="var(--info)"
-                    />
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                      <HyperliquidMonitor />
-                      <OrderFlowProxy symbol="BTC" />
-                    </div>
-                  </div>
+                  <VolOverviewBar payload={payload} />
                 </div>
-              </CollapsibleSection>
-            </motion.div>
-          </>
-        )}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  <VrpCard ccy="BTC" data={payload.vrp.BTC} ccyColor={BTC_COLOR} />
+                  <VrpCard ccy="ETH" data={payload.vrp.ETH} ccyColor={ETH_COLOR} />
+                  <D1Card ccy="BTC" data={payload.d1_compression.BTC} ccyColor={BTC_COLOR} />
+                  <D1Card ccy="ETH" data={payload.d1_compression.ETH} ccyColor={ETH_COLOR} />
+                  <TermStructureCard
+                    ccy="BTC"
+                    data={payload.term_structure.BTC}
+                    ccyColor={BTC_COLOR}
+                  />
+                  <TermStructureCard
+                    ccy="ETH"
+                    data={payload.term_structure.ETH}
+                    ccyColor={ETH_COLOR}
+                  />
+                  <SkewCard ccy="BTC" data={payload.skew.BTC} ccyColor={BTC_COLOR} />
+                  <SkewCard ccy="ETH" data={payload.skew.ETH} ccyColor={ETH_COLOR} />
+                </div>
+              </div>
+              <div>
+                <SectionLabel
+                  label="S1 · PAPER TRADING"
+                  hint="VOL SURFACE ARBITRAGE"
+                  color="var(--caution)"
+                />
+                <S1PaperPerformanceSection />
+              </div>
+              <div>
+                <SectionLabel
+                  label="PERPS FLOW"
+                  hint="HYPERLIQUID BIAS · ORDER FLOW 15M"
+                  color="var(--info)"
+                />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  <HyperliquidMonitor />
+                  <OrderFlowProxy symbol="BTC" />
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
 
         <motion.div variants={fadeUp} className="mt-6">
           <SectionLabel
-            label="TEMPS RÉEL"
-            hint="WEBSOCKET + TOP TOKENS"
+            label="TOP TOKENS · LIVE"
+            hint="TICKER COMPACT"
             color="var(--bull)"
           />
-          <CollapsibleSection title="WEBSOCKET LIVE + TOP TOKENS" dot="var(--bull)" defaultOpen={false}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-              <div className="lg:col-span-2">
-                <RealTimeCryptoDashboard />
-              </div>
-              <div>
-                <TopTokensM15Monitor equity={1000} />
-              </div>
-            </div>
-          </CollapsibleSection>
-        </motion.div>
-
-        <motion.div variants={fadeUp} className="mt-3">
-          <CollapsibleSection title="SIGNAUX · STRATEGIES + SCANNERS" dot="var(--bull)" defaultOpen={false}>
-            <div className="space-y-3">
-              <CryptoAdvancedSignals />
-              <StrategySignalEngine />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <TopTokenScanner equity={1000} />
-                <IntradayHeatmap />
-              </div>
-              <BtcEcosystemSection />
-            </div>
-          </CollapsibleSection>
-        </motion.div>
-
-        <motion.div variants={fadeUp} className="mt-3">
-          <CollapsibleSection title="DÉRIVÉES · FUNDING + OI + RÉGIME" dot="var(--purple)" defaultOpen={false}>
-            <div className="space-y-3">
-              <MarketRegimePanel />
-              <DerivativesMarketTable />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <FundingOIHeatmap />
-                <FundingAggregatorWired />
-              </div>
-            </div>
-          </CollapsibleSection>
+          <RealTimeCryptoDashboard />
+          <div className="mt-3">
+            <TopTokensM15Monitor equity={1000} />
+          </div>
         </motion.div>
       </motion.div>
 

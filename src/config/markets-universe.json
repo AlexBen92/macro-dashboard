@@ -1,0 +1,28 @@
+{
+  "liquid_basket": [
+    { "ticker": "ES=F", "name": "S&P 500", "sector": "equity" },
+    { "ticker": "ZN=F", "name": "US 10Y Note", "sector": "rates" },
+    { "ticker": "GC=F", "name": "Gold", "sector": "metals_precious" },
+    { "ticker": "CL=F", "name": "WTI Crude", "sector": "energy" },
+    { "ticker": "HG=F", "name": "Copper", "sector": "metals_industrial" },
+    { "ticker": "6J=F", "name": "JPY", "sector": "fx_g10" },
+    { "ticker": "ZC=F", "name": "Corn", "sector": "grains" },
+    { "ticker": "KC=F", "name": "Arabica Coffee", "sector": "softs" },
+    { "ticker": "BTC=F", "name": "Bitcoin", "sector": "crypto" }
+  ],
+  "edge_watchlist": [
+    { "ticker": "RC=F", "name": "Robusta Coffee", "sector": "softs", "liquidity": "medium", "catalyst": "asia weather" },
+    { "ticker": "CC=F", "name": "Cocoa", "sector": "softs", "liquidity": "medium", "catalyst": "west africa supply" },
+    { "ticker": "OJ=F", "name": "Orange Juice", "sector": "softs", "liquidity": "low", "catalyst": "frost/hurricane" },
+    { "ticker": "CT=F", "name": "Cotton", "sector": "softs", "liquidity": "medium", "catalyst": "USDA + china exports" },
+    { "ticker": "SB=F", "name": "Sugar", "sector": "softs", "liquidity": "medium", "catalyst": "ethanol arb" },
+    { "ticker": "GF=F", "name": "Feeder Cattle", "sector": "livestock", "liquidity": "low", "catalyst": "USDA Cattle on Feed" },
+    { "ticker": "HE=F", "name": "Lean Hogs", "sector": "livestock", "liquidity": "low", "catalyst": "pork cutout" },
+    { "ticker": "DC=F", "name": "Class III Milk", "sector": "dairy", "liquidity": "low", "catalyst": "niche quant" },
+    { "ticker": "LBR=F", "name": "Lumber", "sector": "materials", "liquidity": "low", "catalyst": "housing data" },
+    { "ticker": "BRL=X", "name": "BRL", "sector": "fx_em", "liquidity": "medium", "catalyst": "carry" },
+    { "ticker": "MXN=X", "name": "MXN", "sector": "fx_em", "liquidity": "medium", "catalyst": "carry" },
+    { "ticker": "ZAR=X", "name": "ZAR", "sector": "fx_em", "liquidity": "low", "catalyst": "mining beta" },
+    { "ticker": "PLN=X", "name": "PLN", "sector": "fx_em", "liquidity": "low", "catalyst": "policy" }
+  ]
+}

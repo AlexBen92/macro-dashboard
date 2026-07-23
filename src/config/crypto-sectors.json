@@ -1,0 +1,5 @@
+{
+  "L1": ["BTC", "ETH", "SOL", "BNB", "AVAX", "ADA", "DOT", "TON", "NEAR", "ATOM", "APT", "SUI", "SEI", "TIA"],
+  "L2": ["ARB", "OP", "MATIC", "STRK", "MANTA", "BLAST", "SCROLL", "ZK", "LINEA", "BASE", "OP"],
+  "L3": ["UNI", "AAVE", "LDO", "MKR", "CRV", "COMP", "SNX", "DYDX", "GMX", "INJ", "PENDLE"]
+}
