@@ -15,6 +15,7 @@ import SessionPlanCard from '@/components/crypto/options/SessionPlanCard';
 import VolSurfaceDrawer from '@/components/crypto/options/VolSurfaceDrawer';
 import OptionsGuideDrawer from '@/components/crypto/options/OptionsGuideDrawer';
 import DiagnosticsDrawer from '@/components/crypto/options/DiagnosticsDrawer';
+import MacroSentimentPanel from '@/components/crypto/options/MacroSentimentPanel';
 
 import { useOptionsExposure } from '@/hooks/api/useOptionsExposure';
 import { buildSessionPlan } from '@/lib/options/session-plan';
@@ -161,6 +162,13 @@ export default function CryptoPage() {
           </div>
           <SessionPlanCard plan={plan} isLoading={isLoading && !data} />
           <ContextCorrelationPanel />
+        </section>
+
+        <section className="lg:col-span-12 lg:order-4 order-4 space-y-2">
+          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
+            D · Macro Sentiment · Bullish / Bearish verdict
+          </div>
+          <MacroSentimentPanel />
         </section>
       </main>
 
