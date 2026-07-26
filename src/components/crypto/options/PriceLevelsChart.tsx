@@ -12,7 +12,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { OptionLevel, Timeframe } from '@/lib/options/types';
-import { useMarketOHLC } from '@/hooks/api/useMarketOHLC';
+import { useCryptoCandles } from '@/hooks/api/useCryptoCandles';
 import { fmtStrike } from '@/lib/options/format';
 
 interface PriceLevelsChartProps {
@@ -26,33 +26,14 @@ interface PriceLevelsChartProps {
   };
 }
 
-function tfToYahoo(tf: Timeframe): {
-  interval: '1h' | '1d';
-  range: '1mo' | '3mo';
-  label: string;
-} {
-  switch (tf) {
-    case 'H4':
-      return { interval: '1h', range: '3mo', label: 'H1 × 3mo (H4 proxy)' };
-    case 'H1':
-      return { interval: '1h', range: '1mo', label: 'H1 × 1mo' };
-    case 'M15':
-    default:
-      return { interval: '1h', range: '1mo', label: 'M15 not exposed by Yahoo — showing H1' };
-  }
-}
-
-function yahooTicker(symbol: 'BTC' | 'ETH'): string {
-  return symbol === 'BTC' ? 'BTC=F' : 'ETH=F';
-}
+const TF_LABEL: Record<Timeframe, string> = {
+  M15: 'M15',
+  H1: 'H1',
+  H4: 'H4',
+};
 
 export default function PriceLevelsChart({ symbol, timeframe, levels }: PriceLevelsChartProps) {
-  const cfg = tfToYahoo(timeframe);
-  const { bars, isLoading, error } = useMarketOHLC(
-    yahooTicker(symbol),
-    cfg.interval,
-    cfg.range,
-  );
+  const { bars, source, error, isLoading } = useCryptoCandles(symbol, timeframe);
 
   const data = useMemo(
     () =>
@@ -74,13 +55,11 @@ export default function PriceLevelsChart({ symbol, timeframe, levels }: PriceLev
     <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px]">
       <div className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between">
         <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[2px]">
-          Price · {symbol} · {cfg.label}
+          Price · {symbol} · {TF_LABEL[timeframe]}
         </div>
-        {timeframe === 'M15' && (
-          <div className="font-mono text-[0.5rem] text-[var(--caution)] uppercase tracking-[1px]">
-            M15 fallback
-          </div>
-        )}
+        <div className="font-mono text-[0.5rem] text-[var(--muted)] uppercase tracking-[1px]">
+          {source ?? '—'}
+        </div>
       </div>
       <div className="p-2 h-[260px]">
         {isLoading && (
@@ -88,12 +67,12 @@ export default function PriceLevelsChart({ symbol, timeframe, levels }: PriceLev
         )}
         {!isLoading && error && (
           <div className="h-full flex items-center justify-center font-mono text-[0.6rem] text-[var(--bear)]">
-            OHLC unavailable — {error}
+            Candles unavailable — {error}
           </div>
         )}
         {!isLoading && !error && data.length === 0 && (
           <div className="h-full flex items-center justify-center font-mono text-[0.6rem] text-[var(--muted)]">
-            No OHLC bars
+            No candles
           </div>
         )}
         {!isLoading && !error && data.length > 0 && (
