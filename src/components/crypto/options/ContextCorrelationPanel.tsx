@@ -64,7 +64,7 @@ export default function ContextCorrelationPanel({ ctxWindow = '7d' }: ContextCor
         </span>
       </div>
       <div className="p-2">
-        <MacroCorrelationMatrix />
+        <MacroCorrelationMatrix extraRefs={['VIX', 'MSTR', 'NVDA', 'COIN']} compact />
       </div>
     </div>
   );

@@ -9,10 +9,15 @@ const ASSET_MAP: Record<string, { yahoo: string; label: string }> = {
   DXY: { yahoo: 'DX-Y.NYB', label: 'DXY' },
   SPX: { yahoo: '^GSPC', label: 'SPX' },
   Gold: { yahoo: 'GC=F', label: 'Gold' },
+  VIX: { yahoo: '^VIX', label: 'VIX' },
+  MSTR: { yahoo: 'MSTR', label: 'MSTR' },
+  NVDA: { yahoo: 'NVDA', label: 'NVDA' },
+  COIN: { yahoo: 'COIN', label: 'COIN' },
 };
 
 const CRYPTO = ['BTC', 'ETH', 'SOL'];
-const MACRO = ['DXY', 'SPX', 'Gold'];
+const MACRO = ['DXY', 'SPX', 'Gold', 'VIX'];
+const REF = ['MSTR', 'NVDA', 'COIN'];
 
 const WINDOWS = ['24h', '7d', '30d'] as const;
 type WindowKey = (typeof WINDOWS)[number];
@@ -62,8 +67,9 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   try {
+    const ALL = CRYPTO.concat(MACRO).concat(REF);
     const [hourlyAll, dailyAll] = await Promise.all([
-      Promise.all(CRYPTO.concat(MACRO).map(async (k) => [k, ASSET_MAP[k]] as const)).then((entries) =>
+      Promise.all(ALL.map(async (k) => [k, ASSET_MAP[k]] as const)).then((entries) =>
         Promise.all(
           entries.map(async ([k, m]) =>
             fetchYahoo(m.yahoo, '1h', '5d')
@@ -72,7 +78,7 @@ export async function GET(request: Request): Promise<Response> {
           ),
         ),
       ),
-      Promise.all(CRYPTO.concat(MACRO).map(async (k) => [k, ASSET_MAP[k]] as const)).then((entries) =>
+      Promise.all(ALL.map(async (k) => [k, ASSET_MAP[k]] as const)).then((entries) =>
         Promise.all(
           entries.map(async ([k, m]) =>
             fetchYahoo(m.yahoo, '1d', '40d')
@@ -97,7 +103,7 @@ export async function GET(request: Request): Promise<Response> {
     }> = [];
 
     for (const crypto of CRYPTO) {
-      for (const macro of MACRO) {
+      for (const macro of MACRO.concat(REF)) {
         for (const w of requested.length ? requested : WINDOWS) {
           let a: number[];
           let b: number[];
