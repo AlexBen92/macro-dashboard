@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import OptionsTopBar from '@/components/crypto/options/OptionsTopBar';
+import RegimeRibbon from '@/components/crypto/options/RegimeRibbon';
 import PriceLevelsChart from '@/components/crypto/options/PriceLevelsChart';
 import LevelsTable from '@/components/crypto/options/LevelsTable';
 import GexByStrikeChart from '@/components/crypto/options/GexByStrikeChart';
@@ -69,6 +70,13 @@ export default function CryptoPage() {
         onOpenVolSurface={() => setVolOpen(true)}
         onOpenGuide={() => setGuideOpen(true)}
         onOpenDiagnostics={() => setDiagOpen(true)}
+      />
+
+      <RegimeRibbon
+        gammaRegime={data?.regime.gamma ?? 'unknown'}
+        dealerDelta={data?.regime.dealerDelta ?? 'unknown'}
+        spot={data?.spot ?? null}
+        zeroGamma={data?.levels.zeroGamma ?? null}
       />
 
       <main className="flex-1 px-4 py-3 grid grid-cols-1 lg:grid-cols-12 gap-3">
