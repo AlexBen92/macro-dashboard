@@ -1,16 +1,37 @@
 'use client';
 
-import type { SessionPlan } from '@/lib/options/types';
+import type { SessionPlan, SessionSeverity } from '@/lib/options/types';
 
 interface SessionPlanCardProps {
   plan: SessionPlan | null;
   isLoading?: boolean;
 }
 
-const SEVERITY_COLOR: Record<string, string> = {
-  info: 'var(--info)',
-  caution: 'var(--caution)',
-  alert: 'var(--bear)',
+const SEVERITY_STYLE: Record<
+  SessionSeverity,
+  { bg: string; border: string; text: string; dot: string; tag: string }
+> = {
+  info: {
+    bg: 'rgba(74,222,128,0.06)',
+    border: 'var(--bull)',
+    text: 'var(--bull)',
+    dot: 'var(--bull)',
+    tag: 'INFO',
+  },
+  caution: {
+    bg: 'rgba(255,170,0,0.06)',
+    border: 'var(--caution)',
+    text: 'var(--caution)',
+    dot: 'var(--caution)',
+    tag: 'CAUTION',
+  },
+  alert: {
+    bg: 'rgba(255,51,85,0.07)',
+    border: 'var(--bear)',
+    text: 'var(--bear)',
+    dot: 'var(--bear)',
+    tag: 'ALERT',
+  },
 };
 
 export default function SessionPlanCard({ plan, isLoading }: SessionPlanCardProps) {
@@ -24,28 +45,34 @@ export default function SessionPlanCard({ plan, isLoading }: SessionPlanCardProp
           rule {plan?.ruleVersion ?? 'v1'} · conditional · ≤5
         </div>
       </div>
-      <div className="p-3 space-y-2">
+      <div className="p-2 space-y-1.5">
         {isLoading && (
           <div className="h-16 w-full animate-pulse bg-[var(--bg3)] rounded-[3px]" />
         )}
         {!isLoading && (!plan || plan.items.length === 0) && (
-          <div className="font-mono text-[0.65rem] text-[var(--muted)] italic">
+          <div className="font-mono text-[0.65rem] text-[var(--muted)] italic px-2 py-3">
             No plan computed
           </div>
         )}
         {!isLoading &&
           plan &&
-          plan.items.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-start gap-2"
-              title={item.rationale}
-            >
+          plan.items.map((item) => {
+            const s = SEVERITY_STYLE[item.severity];
+            return (
               <div
-                className="w-[6px] h-[6px] rounded-full mt-1.5 flex-shrink-0"
-                style={{ background: SEVERITY_COLOR[item.severity] }}
-              />
-              <div className="flex-1">
+                key={item.id}
+                className="border-l-[3px] rounded-[3px] px-2 py-1.5"
+                style={{ background: s.bg, borderColor: s.border }}
+                title={item.rationale}
+              >
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span
+                    className="font-mono text-[0.5rem] uppercase tracking-[1.5px] font-semibold"
+                    style={{ color: s.text }}
+                  >
+                    {s.tag}
+                  </span>
+                </div>
                 <div className="font-mono text-[0.65rem] text-[var(--text)] leading-relaxed">
                   {item.text}
                 </div>
@@ -53,8 +80,8 @@ export default function SessionPlanCard({ plan, isLoading }: SessionPlanCardProp
                   {item.rationale}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         <div className="font-mono text-[0.5rem] text-[var(--muted)] pt-1 border-t border-[var(--border)]">
           Decision aid · not investment advice · no automatic signal
         </div>
@@ -62,3 +89,4 @@ export default function SessionPlanCard({ plan, isLoading }: SessionPlanCardProp
     </div>
   );
 }
+
