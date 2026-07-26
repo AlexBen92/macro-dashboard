@@ -10,20 +10,50 @@ interface ContextCorrelationPanelProps {
   ctxWindow?: '24h' | '7d' | '30d';
 }
 
-const BADGE_COLOR: Record<ContextBadge, string> = {
-  'risk-on': 'var(--bull)',
-  'risk-off': 'var(--bear)',
-  mixed: 'var(--caution)',
-  insufficient: 'var(--muted)',
-  not_configured: 'var(--muted)',
-};
+interface BadgeStyle {
+  bg: string;
+  border: string;
+  text: string;
+  label: string;
+  emoji: string;
+}
 
-const BADGE_LABEL: Record<ContextBadge, string> = {
-  'risk-on': 'Risk-on',
-  'risk-off': 'Risk-off',
-  mixed: 'Mixed',
-  insufficient: 'Insufficient',
-  not_configured: 'Not configured',
+const BADGE_STYLE: Record<ContextBadge, BadgeStyle> = {
+  'risk-on': {
+    bg: 'rgba(74,222,128,0.08)',
+    border: 'var(--bull)',
+    text: 'var(--bull)',
+    label: 'Risk-on',
+    emoji: '🟢',
+  },
+  'risk-off': {
+    bg: 'rgba(255,51,85,0.08)',
+    border: 'var(--bear)',
+    text: 'var(--bear)',
+    label: 'Risk-off',
+    emoji: '🔴',
+  },
+  mixed: {
+    bg: 'rgba(255,170,0,0.07)',
+    border: 'var(--caution)',
+    text: 'var(--caution)',
+    label: 'Mixed',
+    emoji: '🟡',
+  },
+  insufficient: {
+    bg: 'rgba(140,140,160,0.05)',
+    border: 'var(--muted)',
+    text: 'var(--muted)',
+    label: 'Insufficient data',
+    emoji: '⚪',
+  },
+  not_configured: {
+    bg: 'rgba(140,140,160,0.04)',
+    border: 'var(--border)',
+    text: 'var(--muted)',
+    label: 'Not configured',
+    emoji: '—',
+  },
 };
 
 export default function ContextCorrelationPanel({ ctxWindow = '7d' }: ContextCorrelationPanelProps) {
@@ -33,9 +63,13 @@ export default function ContextCorrelationPanel({ ctxWindow = '7d' }: ContextCor
     [cells],
   );
   const ctx = useMemo(() => computeContextBadge(cellsLike), [cellsLike]);
+  const s = BADGE_STYLE[ctx.badge];
 
   return (
-    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px]">
+    <div
+      className="border border-[var(--border)] border-l-[3px] rounded-[4px]"
+      style={{ background: 'var(--bg2)', borderLeftColor: s.border }}
+    >
       <div className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between">
         <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[2px]">
           Context · Corr
@@ -44,21 +78,23 @@ export default function ContextCorrelationPanel({ ctxWindow = '7d' }: ContextCor
           ctx · {ctxWindow}
         </span>
       </div>
-      <div className="px-3 py-2 flex items-center gap-2 border-b border-[var(--border)]">
-        <div className="font-mono text-[0.55rem] text-[var(--muted)] uppercase tracking-[1.5px]">
-          Context
+      <div
+        className="px-3 py-2 flex items-center gap-2 border-b border-[var(--border)]"
+        style={{ background: s.bg }}
+        title={ctx.evidence.join('\n')}
+      >
+        <span className="text-sm">{s.emoji}</span>
+        <div>
+          <div className="font-mono text-[0.55rem] text-[var(--muted)] uppercase tracking-[1.5px]">
+            Context
+          </div>
+          <div
+            className="font-mono text-[0.65rem] uppercase tracking-[1.5px] font-semibold"
+            style={{ color: s.text }}
+          >
+            {s.label}
+          </div>
         </div>
-        <span
-          className="px-2 py-0.5 rounded-[3px] border font-mono text-[0.6rem] uppercase tracking-[1.5px]"
-          style={{
-            color: BADGE_COLOR[ctx.badge],
-            borderColor: `${BADGE_COLOR[ctx.badge]}55`,
-            background: `${BADGE_COLOR[ctx.badge]}11`,
-          }}
-          title={ctx.evidence.join('\n')}
-        >
-          {BADGE_LABEL[ctx.badge]}
-        </span>
         <span className="ml-auto font-mono text-[0.5rem] text-[var(--dim)]">
           rule {ctx.ruleVersion}
         </span>
