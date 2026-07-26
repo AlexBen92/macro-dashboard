@@ -12,13 +12,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { StrikeExposure } from '@/lib/options/types';
+import type { GammaRegime, StrikeExposure } from '@/lib/options/types';
 import { compactUSD, fmtStrike } from '@/lib/options/format';
 
 interface GexByStrikeChartProps {
   strikes: StrikeExposure[];
   spot: number | null;
   sourceTs: string | null;
+  gammaRegime?: GammaRegime;
 }
 
 interface Point {
@@ -31,6 +32,29 @@ interface Point {
   expiries: string;
 }
 
+const REGIME_STYLE: Record<GammaRegime, { bg: string; border: string; text: string }> = {
+  positive: {
+    bg: 'rgba(74,222,128,0.05)',
+    border: 'var(--bull)',
+    text: 'var(--bull)',
+  },
+  negative: {
+    bg: 'rgba(255,51,85,0.05)',
+    border: 'var(--bear)',
+    text: 'var(--bear)',
+  },
+  neutral: {
+    bg: 'rgba(140,140,160,0.03)',
+    border: 'var(--muted)',
+    text: 'var(--muted)',
+  },
+  unknown: {
+    bg: 'transparent',
+    border: 'var(--border)',
+    text: 'var(--muted)',
+  },
+};
+
 function decimateLabels(strikes: number[], maxLabels = 8): Set<number> {
   if (strikes.length <= maxLabels) return new Set(strikes);
   const step = Math.ceil(strikes.length / maxLabels);
@@ -40,7 +64,7 @@ function decimateLabels(strikes: number[], maxLabels = 8): Set<number> {
   return out;
 }
 
-export default function GexByStrikeChart({ strikes, spot, sourceTs }: GexByStrikeChartProps) {
+export default function GexByStrikeChart({ strikes, spot, sourceTs, gammaRegime = 'unknown' }: GexByStrikeChartProps) {
   const data: Point[] = useMemo(
     () =>
       strikes.map((s) => ({
@@ -56,12 +80,22 @@ export default function GexByStrikeChart({ strikes, spot, sourceTs }: GexByStrik
   );
 
   const labelSet = useMemo(() => decimateLabels(strikes.map((s) => s.strike)), [strikes]);
+  const g = REGIME_STYLE[gammaRegime];
 
   return (
-    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px]">
-      <div className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between">
-        <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[2px]">
-          GEX by strike
+    <div
+      className="border border-[var(--border)] border-l-[3px] rounded-[4px]"
+      style={{ background: `var(--bg2)`, borderLeftColor: g.border }}
+    >
+      <div
+        className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between"
+        style={{ background: g.bg }}
+      >
+        <div
+          className="font-mono text-[0.6rem] uppercase tracking-[2px] font-semibold"
+          style={{ color: g.text }}
+        >
+          GEX · {gammaRegime}
         </div>
         <div className="font-mono text-[0.5rem] text-[var(--muted)] uppercase tracking-[1px]">
           USD / 1% spot · provider net
