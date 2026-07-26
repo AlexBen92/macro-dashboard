@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { OptionLevel, Timeframe } from '@/lib/options/types';
+import type { GammaRegime, OptionLevel, Timeframe } from '@/lib/options/types';
 import { useCryptoCandles } from '@/hooks/api/useCryptoCandles';
 import { fmtStrike } from '@/lib/options/format';
 
@@ -24,6 +24,8 @@ interface PriceLevelsChartProps {
     zeroGamma: OptionLevel | null;
     hvl: OptionLevel | null;
   };
+  gammaRegime?: GammaRegime;
+  spot?: number | null;
 }
 
 const TF_LABEL: Record<Timeframe, string> = {
@@ -32,8 +34,38 @@ const TF_LABEL: Record<Timeframe, string> = {
   H4: 'H4',
 };
 
-export default function PriceLevelsChart({ symbol, timeframe, levels }: PriceLevelsChartProps) {
+const REGIME_STYLE: Record<GammaRegime, { bg: string; border: string; text: string }> = {
+  positive: {
+    bg: 'rgba(74,222,128,0.05)',
+    border: 'var(--bull)',
+    text: 'var(--bull)',
+  },
+  negative: {
+    bg: 'rgba(255,51,85,0.05)',
+    border: 'var(--bear)',
+    text: 'var(--bear)',
+  },
+  neutral: {
+    bg: 'rgba(140,140,160,0.03)',
+    border: 'var(--muted)',
+    text: 'var(--muted)',
+  },
+  unknown: {
+    bg: 'transparent',
+    border: 'var(--border)',
+    text: 'var(--muted)',
+  },
+};
+
+export default function PriceLevelsChart({
+  symbol,
+  timeframe,
+  levels,
+  gammaRegime = 'unknown',
+  spot,
+}: PriceLevelsChartProps) {
   const { bars, source, error, isLoading } = useCryptoCandles(symbol, timeframe);
+  const g = REGIME_STYLE[gammaRegime];
 
   const data = useMemo(
     () =>
@@ -52,13 +84,34 @@ export default function PriceLevelsChart({ symbol, timeframe, levels }: PriceLev
     levels.callWall || levels.putWall || levels.zeroGamma || levels.hvl;
 
   return (
-    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px]">
-      <div className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between">
-        <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[2px]">
-          Price · {symbol} · {TF_LABEL[timeframe]}
+    <div
+      className="border border-[var(--border)] border-l-[3px] rounded-[4px]"
+      style={{ background: 'var(--bg2)', borderLeftColor: g.border }}
+    >
+      <div
+        className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between"
+        style={{ background: g.bg }}
+      >
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[2px]">
+            Price · {symbol} · {TF_LABEL[timeframe]}
+          </span>
+          {gammaRegime !== 'unknown' && (
+            <span
+              className="font-mono text-[0.5rem] uppercase tracking-[1.5px] px-1.5 py-0.5 rounded-[2px]"
+              style={{
+                color: g.text,
+                background: `${g.text}11`,
+                border: `1px solid ${g.text}44`,
+              }}
+            >
+              γ {gammaRegime}
+            </span>
+          )}
         </div>
         <div className="font-mono text-[0.5rem] text-[var(--muted)] uppercase tracking-[1px]">
           {source ?? '—'}
+          {spot != null && ` · spot ${fmtStrike(spot, 0)}`}
         </div>
       </div>
       <div className="p-2 h-[260px]">

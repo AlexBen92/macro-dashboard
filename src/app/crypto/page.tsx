@@ -89,6 +89,8 @@ export default function CryptoPage() {
             symbol={symbol}
             timeframe={timeframe}
             levels={data?.levels ?? { callWall: null, putWall: null, zeroGamma: null, hvl: null }}
+            gammaRegime={data?.regime.gamma}
+            spot={data?.spot}
           />
           <LevelsTable
             spot={data?.spot ?? null}
