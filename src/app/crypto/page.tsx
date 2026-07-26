@@ -151,7 +151,11 @@ export default function CryptoPage() {
                 sourceTs={data.freshness.sourceTs}
                 gammaRegime={data.regime.gamma}
               />
-              <DexByStrikeChart strikes={data.strikes} spot={data.spot} />
+              <DexByStrikeChart
+                strikes={data.strikes}
+                spot={data.spot}
+                dealerDelta={data.regime.dealerDelta}
+              />
               <OptionsReadCard snapshot={data} />
             </>
           )}

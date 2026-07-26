@@ -12,12 +12,13 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { StrikeExposure } from '@/lib/options/types';
+import type { DealerDeltaBias, StrikeExposure } from '@/lib/options/types';
 import { compactUSD, fmtStrike } from '@/lib/options/format';
 
 interface DexByStrikeChartProps {
   strikes: StrikeExposure[];
   spot: number | null;
+  dealerDelta?: DealerDeltaBias;
 }
 
 interface Point {
@@ -26,6 +27,29 @@ interface Point {
   callDex: number;
   putDex: number;
 }
+
+const BIAS_STYLE: Record<DealerDeltaBias, { bg: string; border: string; text: string }> = {
+  long: {
+    bg: 'rgba(74,222,128,0.05)',
+    border: 'var(--bull)',
+    text: 'var(--bull)',
+  },
+  short: {
+    bg: 'rgba(255,51,85,0.05)',
+    border: 'var(--bear)',
+    text: 'var(--bear)',
+  },
+  flat: {
+    bg: 'rgba(140,140,160,0.03)',
+    border: 'var(--muted)',
+    text: 'var(--muted)',
+  },
+  unknown: {
+    bg: 'transparent',
+    border: 'var(--border)',
+    text: 'var(--muted)',
+  },
+};
 
 function decimateLabels(strikes: number[], maxLabels = 8): Set<number> {
   if (strikes.length <= maxLabels) return new Set(strikes);
@@ -36,7 +60,7 @@ function decimateLabels(strikes: number[], maxLabels = 8): Set<number> {
   return out;
 }
 
-export default function DexByStrikeChart({ strikes, spot }: DexByStrikeChartProps) {
+export default function DexByStrikeChart({ strikes, spot, dealerDelta = 'unknown' }: DexByStrikeChartProps) {
   const data: Point[] = useMemo(
     () =>
       strikes.map((s) => ({
@@ -49,12 +73,22 @@ export default function DexByStrikeChart({ strikes, spot }: DexByStrikeChartProp
   );
 
   const labelSet = useMemo(() => decimateLabels(strikes.map((s) => s.strike)), [strikes]);
+  const b = BIAS_STYLE[dealerDelta];
 
   return (
-    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px]">
-      <div className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between">
-        <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[2px]">
-          DEX by strike
+    <div
+      className="border border-[var(--border)] border-l-[3px] rounded-[4px]"
+      style={{ background: `var(--bg2)`, borderLeftColor: b.border }}
+    >
+      <div
+        className="px-3 py-1.5 border-b border-[var(--border)] flex items-center justify-between"
+        style={{ background: b.bg }}
+      >
+        <div
+          className="font-mono text-[0.6rem] uppercase tracking-[2px] font-semibold"
+          style={{ color: b.text }}
+        >
+          DEX · {dealerDelta}
         </div>
         <div className="font-mono text-[0.5rem] text-[var(--muted)] uppercase tracking-[1px]">
           USD notional × delta · provider net
