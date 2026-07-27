@@ -1,6 +1,6 @@
 import type { ContextBadge, ContextState, CorrCellLike } from './types';
 
-export const CONTEXT_RULE_VERSION = 'v1';
+export const CONTEXT_RULE_VERSION = 'v2';
 
 function find(
   cells: CorrCellLike[] | null | undefined,
@@ -48,15 +48,15 @@ export function computeContextBadge(
 
   let badge: ContextBadge = 'mixed';
 
-  if (btcDxy7 != null && btcSpx7 != null && btcDxy7 > 0.4 && btcSpx7 < 0.3) {
+  if (btcDxy7 != null && btcSpx7 != null && btcDxy7 > 0.30 && btcSpx7 < 0.10) {
     badge = 'risk-off';
     evidence.push(
-      `BTC-DXY 7d r=${btcDxy7.toFixed(2)} > +0.40 AND BTC-SPX 7d r=${btcSpx7.toFixed(2)} < +0.30`,
+      `BTC-DXY 7d r=${btcDxy7.toFixed(2)} > +0.30 AND BTC-SPX 7d r=${btcSpx7.toFixed(2)} < +0.10`,
     );
-  } else if (btcSpx7 != null && btcDxy7 != null && btcSpx7 > 0.5 && btcDxy7 < 0) {
+  } else if (btcSpx7 != null && btcDxy7 != null && btcSpx7 > 0.30 && btcDxy7 < 0.10) {
     badge = 'risk-on';
     evidence.push(
-      `BTC-SPX 7d r=${btcSpx7.toFixed(2)} > +0.50 AND BTC-DXY 7d r=${btcDxy7.toFixed(2)} < 0`,
+      `BTC-SPX 7d r=${btcSpx7.toFixed(2)} > +0.30 AND BTC-DXY 7d r=${btcDxy7.toFixed(2)} < +0.10`,
     );
   } else {
     badge = 'mixed';
