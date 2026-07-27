@@ -5,7 +5,7 @@ describe('computeContextBadge', () => {
   it('not_configured when no cells', () => {
     const r = computeContextBadge(null);
     expect(r.badge).toBe('not_configured');
-    expect(r.ruleVersion).toBe('v1');
+    expect(r.ruleVersion).toBe('v2');
   });
 
   it('insufficient when <2 points', () => {
@@ -15,10 +15,10 @@ describe('computeContextBadge', () => {
     expect(r.badge).toBe('insufficient');
   });
 
-  it('risk-off when BTC-DXY>0.4 and BTC-SPX<0.3', () => {
+  it('risk-off when BTC-DXY>0.30 and BTC-SPX<0.10', () => {
     const r = computeContextBadge([
       { a: 'BTC', b: 'DXY', r: 0.55, window: '7d', n: 7 },
-      { a: 'BTC', b: 'SPX', r: 0.1, window: '7d', n: 7 },
+      { a: 'BTC', b: 'SPX', r: 0.05, window: '7d', n: 7 },
       { a: 'BTC', b: 'DXY', r: 0.4, window: '30d', n: 30 },
       { a: 'BTC', b: 'SPX', r: 0.2, window: '30d', n: 30 },
     ]);
@@ -26,7 +26,7 @@ describe('computeContextBadge', () => {
     expect(r.evidence.length).toBeGreaterThan(0);
   });
 
-  it('risk-on when BTC-SPX>0.5 and BTC-DXY<0', () => {
+  it('risk-on when BTC-SPX>0.30 and BTC-DXY<0.10', () => {
     const r = computeContextBadge([
       { a: 'BTC', b: 'DXY', r: -0.2, window: '7d', n: 7 },
       { a: 'BTC', b: 'SPX', r: 0.7, window: '7d', n: 7 },
@@ -45,7 +45,7 @@ describe('computeContextBadge', () => {
   it('treats (a,b) symmetrically', () => {
     const r = computeContextBadge([
       { a: 'DXY', b: 'BTC', r: 0.55, window: '7d', n: 7 },
-      { a: 'SPX', b: 'BTC', r: 0.1, window: '7d', n: 7 },
+      { a: 'SPX', b: 'BTC', r: 0.05, window: '7d', n: 7 },
     ]);
     expect(r.badge).toBe('risk-off');
   });
