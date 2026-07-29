@@ -1,0 +1,156 @@
+{
+  "as_of": "2026-07-27T00:00:00+00:00",
+  "current_regime": "CALM",
+  "regime_since": "2026-04-23T00:00:00+00:00",
+  "days_in_regime": 95,
+  "regime_distribution": {
+    "CALM": 0.5021601861083417,
+    "BUILDING": 0.33732136922565636,
+    "STRESS": 0.11100033233632436,
+    "CRISIS": 0.049518112329677635
+  },
+  "matrix": [
+    {
+      "strategy": "S1_V16_thr5",
+      "pooled_sharpe": 8.04698280364184,
+      "pooled_dsr": 0.9999997176071167,
+      "pooled_n": 281,
+      "pooled_mean_bps": 477.64600023166173,
+      "regimes": [
+        {
+          "regime": "CALM",
+          "n_obs": 214,
+          "mean_bps": 475.3743148021742,
+          "sharpe_annual": 7.143002801429032,
+          "dsr_probability": 0.9995576318002285,
+          "passes_dsr": true,
+          "passes_min_n": true
+        },
+        {
+          "regime": "BUILDING",
+          "n_obs": 33,
+          "mean_bps": 501.81950256923653,
+          "sharpe_annual": 17.90588526518242,
+          "dsr_probability": 0.9999997639628999,
+          "passes_dsr": true,
+          "passes_min_n": true
+        },
+        {
+          "regime": "STRESS",
+          "n_obs": 34,
+          "mean_bps": 468.4817386072611,
+          "sharpe_annual": 20.096641875430244,
+          "dsr_probability": 0.5,
+          "passes_dsr": false,
+          "passes_min_n": true
+        }
+      ],
+      "regime_distribution": {
+        "CALM": 0.5021601861083417,
+        "BUILDING": 0.33732136922565636,
+        "STRESS": 0.11100033233632436,
+        "CRISIS": 0.049518112329677635
+      }
+    },
+    {
+      "strategy": "S10_V26_h24_agg",
+      "pooled_sharpe": 0.428918279981889,
+      "pooled_dsr": 1.0,
+      "pooled_n": 1825,
+      "pooled_mean_bps": 6.089970389543227,
+      "regimes": [
+        {
+          "regime": "CALM",
+          "n_obs": 927,
+          "mean_bps": 4.642430594211207,
+          "sharpe_annual": 0.3666287971499607,
+          "dsr_probability": 1.0,
+          "passes_dsr": true,
+          "passes_min_n": true
+        },
+        {
+          "regime": "BUILDING",
+          "n_obs": 721,
+          "mean_bps": 5.306516903440644,
+          "sharpe_annual": 0.3475684311724096,
+          "dsr_probability": 0.9999999894353712,
+          "passes_dsr": true,
+          "passes_min_n": true
+        },
+        {
+          "regime": "STRESS",
+          "n_obs": 150,
+          "mean_bps": 17.59756650364991,
+          "sharpe_annual": 1.026575714107556,
+          "dsr_probability": 1.0,
+          "passes_dsr": true,
+          "passes_min_n": true
+        },
+        {
+          "regime": "CRISIS",
+          "n_obs": 27,
+          "mean_bps": 12.778856931644563,
+          "sharpe_annual": 0.749459484799727,
+          "dsr_probability": 0.9999987204709648,
+          "passes_dsr": true,
+          "passes_min_n": false
+        }
+      ],
+      "regime_distribution": {
+        "CALM": 0.5021601861083417,
+        "BUILDING": 0.33732136922565636,
+        "STRESS": 0.11100033233632436,
+        "CRISIS": 0.049518112329677635
+      }
+    },
+    {
+      "strategy": "C2_V21_revert_ADA",
+      "pooled_sharpe": 0.6420226394124414,
+      "pooled_dsr": 1.0,
+      "pooled_n": 1043,
+      "pooled_mean_bps": 2.462627249590556,
+      "regimes": [
+        {
+          "regime": "CALM",
+          "n_obs": 715,
+          "mean_bps": 3.330150021693975,
+          "sharpe_annual": 0.8452915791322841,
+          "dsr_probability": 0.9999999999898218,
+          "passes_dsr": true,
+          "passes_min_n": true
+        },
+        {
+          "regime": "BUILDING",
+          "n_obs": 282,
+          "mean_bps": -1.5501556969398989,
+          "sharpe_annual": -0.42388248318294186,
+          "dsr_probability": 9.569414986222585e-14,
+          "passes_dsr": false,
+          "passes_min_n": true
+        },
+        {
+          "regime": "STRESS",
+          "n_obs": 46,
+          "mean_bps": 13.578410051061088,
+          "sharpe_annual": 4.240693943012857,
+          "dsr_probability": 0.9242645948817886,
+          "passes_dsr": false,
+          "passes_min_n": true
+        }
+      ],
+      "regime_distribution": {
+        "CALM": 0.5021601861083417,
+        "BUILDING": 0.33732136922565636,
+        "STRESS": 0.11100033233632436,
+        "CRISIS": 0.049518112329677635
+      }
+    }
+  ],
+  "matrix_excluded": [
+    {
+      "strategy": "D1_V21_h14",
+      "reason": "D1 entry signal (S1_rv_compression: RV_30d pct < 0.20) is a strict subset of the CALM regime definition (vol_pct < 0.30). D1 can only trigger inside CALM by construction \u2014 its per-regime breakdown is mechanical, not predictive."
+    }
+  ],
+  "rule_version": "wf_v1"
+}

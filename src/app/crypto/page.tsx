@@ -11,6 +11,7 @@ import DexByStrikeChart from '@/components/crypto/options/DexByStrikeChart';
 import ExpiryFilter from '@/components/crypto/options/ExpiryFilter';
 import OptionsReadCard from '@/components/crypto/options/OptionsReadCard';
 import ContextCorrelationPanel from '@/components/crypto/options/ContextCorrelationPanel';
+import RegimeContextCard from '@/components/crypto/options/RegimeContextCard';
 import SessionPlanCard from '@/components/crypto/options/SessionPlanCard';
 import VolSurfaceDrawer from '@/components/crypto/options/VolSurfaceDrawer';
 import OptionsGuideDrawer from '@/components/crypto/options/OptionsGuideDrawer';
@@ -167,6 +168,7 @@ export default function CryptoPage() {
           <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
             C · Context & Plan
           </div>
+          <RegimeContextCard />
           <SessionPlanCard plan={plan} isLoading={isLoading && !data} />
           <ContextCorrelationPanel />
         </section>
