@@ -1,6 +1,7 @@
 'use client';
 
 import { useRegimeStatus, type RegimeLabel } from '@/hooks/api/useRegimeStatus';
+import { useEdgeM15Status } from '@/hooks/api/useEdgeM15Status';
 
 const REGIME_STYLE: Record<RegimeLabel, {
   bg: string; border: string; text: string; emoji: string; blurb: string;
@@ -37,6 +38,7 @@ const REGIME_STYLE: Record<RegimeLabel, {
 
 export default function RegimeSummaryCard() {
   const { data, isLoading, error } = useRegimeStatus();
+  const { isStale, lastExportAgeMs } = useEdgeM15Status();
 
   if (isLoading) {
     return (
@@ -55,12 +57,26 @@ export default function RegimeSummaryCard() {
   const style = REGIME_STYLE[regime];
   const volPct = data.regime_distribution?.CALM ?? 0;
   const streak = data.days_in_regime ?? 0;
+  const ageMin = lastExportAgeMs !== null ? Math.round(lastExportAgeMs / 60000) : null;
 
   return (
     <div
       className="bg-[var(--bg2)] border rounded-[4px] p-3 flex flex-col gap-2"
       style={{ background: style.bg, borderColor: style.border }}
     >
+      {isStale && (
+        <div
+          className="font-mono text-[0.5rem] uppercase tracking-[1px] px-2 py-1 rounded-[2px] flex items-center gap-1"
+          style={{
+            background: 'rgba(255,51,85,0.12)',
+            color: 'var(--bear)',
+            border: '1px solid var(--bear)',
+          }}
+          title="Le cron d'export M15 n'a pas écrit depuis plus de 20 minutes — données possiblement obsolètes"
+        >
+          <span className="animate-pulse">●</span> STALE — export HS ({ageMin}min)
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <span className="font-mono text-[0.55rem] text-[var(--label)] uppercase tracking-[2px]">
           Régime WF
