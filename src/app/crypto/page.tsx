@@ -15,6 +15,7 @@ import DailyBriefBar from '@/components/crypto/m15/DailyBriefBar';
 import PriceLevelsM15Chart from '@/components/crypto/m15/PriceLevelsM15Chart';
 import EdgeM15BTCCard from '@/components/crypto/m15/EdgeM15BTCCard';
 import VolHeatmapM15 from '@/components/crypto/m15/VolHeatmapM15';
+import DecisionEnginePanel from '@/components/crypto/decision/DecisionEnginePanel';
 import CorrelationTable from '@/components/crypto/m15/CorrelationTable';
 import SessionPlanCard from '@/components/crypto/m15/SessionPlanCard';
 import SetupsPanel from '@/components/crypto/m15/SetupsPanel';
@@ -84,6 +85,13 @@ export default function CryptoPage() {
             <EdgeM15BTCCard />
             <VolHeatmapM15 />
           </div>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
+            Bloc 2b · Decision Engine — BTC + ETH terminal verdict (M15)
+          </div>
+          <DecisionEnginePanel />
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-3">

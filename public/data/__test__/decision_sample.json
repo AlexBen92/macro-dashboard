@@ -1,0 +1,298 @@
+{
+  "as_of": "2026-08-12T12:00:00Z",
+  "last_export_success": "2026-08-12T12:00:01Z",
+  "heartbeat": {
+    "last_attempt_iso": "2026-08-12T12:00:01Z",
+    "last_success_iso": "2026-08-12T12:00:01Z",
+    "error": null
+  },
+  "pipeline_version": "0.1.0-stage1",
+  "weights_version": "v1-2026-08-12",
+  "btc": {
+    "symbol": "BTC",
+    "verdict": "WAIT",
+    "score": 58,
+    "confidence": 52,
+    "regime": {
+      "label": "CALM",
+      "hurst": 0.48,
+      "adx": 22.3,
+      "vol_ratio": 0.92,
+      "hmm_state": "RANGING",
+      "garch_regime": "NORMAL",
+      "trend_direction": "range",
+      "confidence": 60
+    },
+    "setup": {
+      "kind": "NO_TRADE",
+      "trigger_conditions": [],
+      "contributions": [
+        { "source": "OFI", "delta_pts": 4, "reason": "CVD slightly bull 52%" },
+        { "source": "STRUCTURE", "delta_pts": -2, "reason": "Below VWAP" }
+      ],
+      "setup_score": 30
+    },
+    "entry": {
+      "state": "WATCH",
+      "price": null,
+      "armed_at_iso": null,
+      "trigger_at_iso": null,
+      "expires_at_iso": null,
+      "reason": "No qualifying setup"
+    },
+    "stop": {
+      "price": null,
+      "bps": null,
+      "method": "GARCH_3SIGMA",
+      "invalidation_reasons": ["Verdict NO_TRADE — no stop computed"]
+    },
+    "tp": { "tp1": null, "tp2": null, "tp3": null, "rr_tp1": null, "rr_tp2": null, "rr_tp3": null },
+    "risk": {
+      "size_mult": 0,
+      "notional_usd": 0,
+      "margin_usd": 0,
+      "max_loss_usd": 0,
+      "leverage_cap": 0,
+      "kelly_raw": 0,
+      "kelly_capped": 0,
+      "blocked": true,
+      "block_reasons": ["No active setup"]
+    },
+    "data_quality": {
+      "score": 95,
+      "sources": {
+        "hl": { "fresh": true, "age_ms": 1200, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
+        "binance": { "fresh": true, "age_ms": 3200, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
+        "deribit": { "fresh": true, "age_ms": 8500, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
+        "coinglass": { "fresh": false, "age_ms": null, "coverage_pct": 0, "last_ok_iso": null },
+        "yahoo": { "fresh": true, "age_ms": 42000, "coverage_pct": 100, "last_ok_iso": "2026-08-12T11:59:20Z" }
+      },
+      "stale_sources": ["coinglass"],
+      "missing_fields": ["liquidations.cascade_risk", "liquidations.clusters"]
+    },
+    "why_checklist": [
+      { "label": "4H bullish", "pass": false, "weight": 15 },
+      { "label": "M15 structure bullish", "pass": false, "weight": 15 },
+      { "label": "CVD positive divergence", "pass": false, "weight": 15 },
+      { "label": "Funding not crowded", "pass": true, "weight": 10 }
+    ],
+    "risks": ["liq-data stale — cascade model disabled", "range regime — no directional edge"],
+    "cross_asset": {
+      "btc_leadership": 100,
+      "beta_to_btc": null,
+      "relative_strength": null,
+      "suppressed_by_btc": false,
+      "suppression_reason": null
+    },
+    "session": {
+      "name": "LONDON",
+      "expectancy_bps": 12.4,
+      "n_obs": 47,
+      "sharpe": 0.8,
+      "winrate": 0.51,
+      "tag": "OK"
+    },
+    "calibration": { "brier": null, "reliability_bin": null, "n_predictions": 0 },
+    "mtf_alignment": {
+      "score": 45,
+      "directions": [
+        { "tf": "4H", "dir": "bull" },
+        { "tf": "1H", "dir": "range" },
+        { "tf": "M15", "dir": "range" },
+        { "tf": "5M", "dir": "bear" }
+      ]
+    },
+    "derivatives": {
+      "oi_now": 84000000000,
+      "oi_delta_15m_pct": 0.12,
+      "oi_delta_1h_pct": -0.31,
+      "oi_delta_4h_pct": 1.04,
+      "oi_classification": "NEUTRAL",
+      "funding_now": 0.000091,
+      "funding_annualized_pct": 9.99,
+      "funding_zscore_30d": 0.42,
+      "funding_tag": "NEUTRAL",
+      "basis_bps": 4.2
+    },
+    "orderflow": {
+      "cvd_now": -12340,
+      "cvd_slope_15m": -4500,
+      "cvd_divergence": "NONE",
+      "taker_buy_sell_ratio": 0.97,
+      "ofi": -0.18,
+      "bid_ask_imbalance": 0.02,
+      "absorption": "NONE"
+    },
+    "liquidations": {
+      "longs_1h_usd": null,
+      "shorts_1h_usd": null,
+      "longs_4h_usd": null,
+      "shorts_4h_usd": null,
+      "ratio_long_short_1h": null,
+      "cascade_risk": false,
+      "cascade_reason": null,
+      "clusters": [],
+      "stale": true
+    }
+  },
+  "eth": {
+    "symbol": "ETH",
+    "verdict": "NO_TRADE",
+    "score": 22,
+    "confidence": 30,
+    "regime": {
+      "label": "CALM",
+      "hurst": 0.46,
+      "adx": 18.1,
+      "vol_ratio": 0.88,
+      "hmm_state": "RANGING",
+      "garch_regime": "NORMAL",
+      "trend_direction": "range",
+      "confidence": 55
+    },
+    "setup": {
+      "kind": "NO_TRADE",
+      "trigger_conditions": [],
+      "contributions": [
+        { "source": "BTC_LEADERSHIP", "delta_pts": -10, "reason": "BTC range, no leadership" }
+      ],
+      "setup_score": 18
+    },
+    "entry": {
+      "state": "WATCH",
+      "price": null,
+      "armed_at_iso": null,
+      "trigger_at_iso": null,
+      "expires_at_iso": null,
+      "reason": "No qualifying setup"
+    },
+    "stop": {
+      "price": null,
+      "bps": null,
+      "method": "GARCH_3SIGMA",
+      "invalidation_reasons": ["Verdict NO_TRADE — no stop computed"]
+    },
+    "tp": { "tp1": null, "tp2": null, "tp3": null, "rr_tp1": null, "rr_tp2": null, "rr_tp3": null },
+    "risk": {
+      "size_mult": 0,
+      "notional_usd": 0,
+      "margin_usd": 0,
+      "max_loss_usd": 0,
+      "leverage_cap": 0,
+      "kelly_raw": 0,
+      "kelly_capped": 0,
+      "blocked": true,
+      "block_reasons": ["No active setup", "BTC leadership weak"]
+    },
+    "data_quality": {
+      "score": 70,
+      "sources": {
+        "hl": { "fresh": true, "age_ms": 1400, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
+        "binance": { "fresh": true, "age_ms": 3300, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
+        "deribit": { "fresh": true, "age_ms": 9100, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
+        "coinglass": { "fresh": false, "age_ms": null, "coverage_pct": 0, "last_ok_iso": null },
+        "yahoo": { "fresh": true, "age_ms": 42000, "coverage_pct": 100, "last_ok_iso": "2026-08-12T11:59:20Z" }
+      },
+      "stale_sources": ["coinglass"],
+      "missing_fields": ["liquidations.cascade_risk", "liquidations.clusters"]
+    },
+    "why_checklist": [
+      { "label": "BTC aligned", "pass": false, "weight": 15 },
+      { "label": "ETH 4H bullish", "pass": false, "weight": 15 }
+    ],
+    "risks": ["liq-data stale", "BTC range — alt bounce capped"],
+    "cross_asset": {
+      "btc_leadership": 30,
+      "beta_to_btc": 1.18,
+      "relative_strength": -0.4,
+      "suppressed_by_btc": true,
+      "suppression_reason": "BTC range, ETH direction indeterminate"
+    },
+    "session": {
+      "name": "LONDON",
+      "expectancy_bps": 4.1,
+      "n_obs": 38,
+      "sharpe": 0.3,
+      "winrate": 0.49,
+      "tag": "OK"
+    },
+    "calibration": { "brier": null, "reliability_bin": null, "n_predictions": 0 },
+    "mtf_alignment": {
+      "score": 38,
+      "directions": [
+        { "tf": "4H", "dir": "range" },
+        { "tf": "1H", "dir": "range" },
+        { "tf": "M15", "dir": "bear" },
+        { "tf": "5M", "dir": "bear" }
+      ]
+    },
+    "derivatives": {
+      "oi_now": 6200000000,
+      "oi_delta_15m_pct": 0.21,
+      "oi_delta_1h_pct": -0.42,
+      "oi_delta_4h_pct": 0.84,
+      "oi_classification": "NEUTRAL",
+      "funding_now": 0.000074,
+      "funding_annualized_pct": 8.13,
+      "funding_zscore_30d": 0.31,
+      "funding_tag": "NEUTRAL",
+      "basis_bps": 3.1
+    },
+    "orderflow": {
+      "cvd_now": -4210,
+      "cvd_slope_15m": -1800,
+      "cvd_divergence": "NONE",
+      "taker_buy_sell_ratio": 0.94,
+      "ofi": -0.12,
+      "bid_ask_imbalance": -0.05,
+      "absorption": "NONE"
+    },
+    "liquidations": {
+      "longs_1h_usd": null,
+      "shorts_1h_usd": null,
+      "longs_4h_usd": null,
+      "shorts_4h_usd": null,
+      "ratio_long_short_1h": null,
+      "cascade_risk": false,
+      "cascade_reason": null,
+      "clusters": [],
+      "stale": true
+    }
+  },
+  "cross_asset": {
+    "beta_eth_to_btc": 1.18,
+    "lead_lag_btc_eth_hours": 0,
+    "btc_leadership_score": 30,
+    "eth_suppressed": true,
+    "as_of_iso": "2026-08-12T12:00:00Z"
+  },
+  "macro": {
+    "risk_state": "NEUTRAL",
+    "macro_pressure": 42,
+    "drivers": [
+      { "asset": "DXY", "corr_30d": -0.12, "daily_change_pct": 0.04 },
+      { "asset": "SPX", "corr_30d": 0.21, "daily_change_pct": -0.18 },
+      { "asset": "VIX", "corr_30d": -0.31, "daily_change_pct": 1.42 },
+      { "asset": "US10Y", "corr_30d": -0.08, "daily_change_pct": 0.02 },
+      { "asset": "GOLD", "corr_30d": 0.16, "daily_change_pct": 0.31 },
+      { "asset": "NDX", "corr_30d": 0.19, "daily_change_pct": -0.22 }
+    ],
+    "as_of_iso": "2026-08-12T11:59:20Z"
+  },
+  "event_risk": {
+    "next_event_iso": "2026-08-13T12:30:00Z",
+    "kind": "CPI",
+    "impact": "HIGH",
+    "minutes_until": 1410,
+    "in_window": false,
+    "calendar_version": "2026-08-12-manual-v1"
+  },
+  "session_matrix": {
+    "as_of_iso": "2026-08-12T00:00:00Z",
+    "cells": [
+      { "session": "LONDON", "setup_kind": "TREND_CONTINUATION", "expectancy_bps": 12.4, "n_obs": 47, "sharpe": 0.8, "winrate": 0.51, "tag": "OK" },
+      { "session": "NY", "setup_kind": "BREAKOUT", "expectancy_bps": -8.1, "n_obs": 31, "sharpe": -0.4, "winrate": 0.42, "tag": "OK" },
+      { "session": "ASIA", "setup_kind": "MEAN_REVERSION", "expectancy_bps": null, "n_obs": 12, "sharpe": null, "winrate": null, "tag": "LOW-N" }
+    ]
+  }
+}

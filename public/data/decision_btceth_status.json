@@ -1,0 +1,854 @@
+{
+  "as_of": "2026-08-12T12:34:56.612440+00:00",
+  "last_export_success": "2026-08-12T12:34:56.612443+00:00",
+  "heartbeat": {
+    "last_attempt_iso": "2026-08-12T12:34:56.612446+00:00",
+    "last_success_iso": "2026-08-12T12:34:56.612449+00:00",
+    "error": null
+  },
+  "pipeline_version": "0.7.0-stage11",
+  "weights_version": "v1-2026-08-12",
+  "btc": {
+    "symbol": "BTC",
+    "verdict": "NO_TRADE",
+    "score": 37,
+    "confidence": 0,
+    "regime": {
+      "label": "BUILDING",
+      "hurst": null,
+      "adx": 38.58974866244397,
+      "vol_ratio": 0.76,
+      "hmm_state": null,
+      "garch_regime": null,
+      "trend_direction": "range",
+      "confidence": 0.6
+    },
+    "setup": {
+      "kind": "NO_TRADE",
+      "trigger_conditions": [],
+      "contributions": [
+        {
+          "source": "REGIME",
+          "delta_pts": 12,
+          "reason": "BUILDING conf=0.60"
+        },
+        {
+          "source": "DEPTH_IMBALANCE",
+          "delta_pts": -8,
+          "reason": "imbalance -0.41"
+        },
+        {
+          "source": "DATA_QUALITY",
+          "delta_pts": 3,
+          "reason": "data-quality 65/100"
+        }
+      ],
+      "setup_score": 0
+    },
+    "entry": {
+      "state": "WATCH",
+      "price": 64252.0,
+      "armed_at_iso": "2026-08-12T12:28:35.609183+00:00",
+      "trigger_at_iso": null,
+      "expires_at_iso": null,
+      "reason": "setup disappeared (no detection this cycle)"
+    },
+    "stop": {
+      "price": null,
+      "bps": null,
+      "method": "ATR",
+      "invalidation_reasons": [
+        "no stop"
+      ]
+    },
+    "tp": {
+      "tp1": null,
+      "tp2": null,
+      "tp3": null,
+      "rr_tp1": null,
+      "rr_tp2": null,
+      "rr_tp3": null
+    },
+    "risk": {
+      "size_mult": 0.0,
+      "notional_usd": 0.0,
+      "margin_usd": 0.0,
+      "max_loss_usd": 0.0,
+      "leverage_cap": 0.0,
+      "kelly_raw": 0.0,
+      "kelly_capped": 0.0,
+      "blocked": true,
+      "block_reasons": [
+        "verdict=NO_TRADE"
+      ]
+    },
+    "data_quality": {
+      "score": 65,
+      "sources": {
+        "hl": {
+          "fresh": true,
+          "age_ms": 1758,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:54.776826+00:00"
+        },
+        "binance": {
+          "fresh": true,
+          "age_ms": 515,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:56.020674+00:00"
+        },
+        "deribit": {
+          "fresh": true,
+          "age_ms": 468,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:56.066815+00:00"
+        },
+        "coinglass": {
+          "fresh": false,
+          "age_ms": null,
+          "coverage_pct": 0.0,
+          "last_ok_iso": null
+        },
+        "yahoo": {
+          "fresh": true,
+          "age_ms": 5,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:56.530012+00:00"
+        }
+      },
+      "stale_sources": [
+        "coinglass"
+      ],
+      "missing_fields": [
+        "coinglass.liquidations:BTC",
+        "coinglass.liquidations:ETH"
+      ]
+    },
+    "why_checklist": [
+      {
+        "label": "4H bullish",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "M15 structure aligned",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "Setup direction clear",
+        "pass": false,
+        "weight": 20
+      },
+      {
+        "label": "Data quality fresh",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "Regime allows setup",
+        "pass": true,
+        "weight": 20
+      },
+      {
+        "label": "Composite \u2265 65",
+        "pass": false,
+        "weight": 15
+      }
+    ],
+    "risks": [
+      "liq-data stale \u2014 cascade model disabled",
+      "no qualifying setup"
+    ],
+    "cross_asset": {
+      "btc_leadership": 100,
+      "beta_to_btc": null,
+      "relative_strength": null,
+      "suppressed_by_btc": false,
+      "suppression_reason": null
+    },
+    "session": {
+      "name": "LONDON",
+      "expectancy_bps": null,
+      "n_obs": 0,
+      "sharpe": null,
+      "winrate": null,
+      "tag": "NO_DATA"
+    },
+    "calibration": {
+      "brier": null,
+      "reliability_bin": null,
+      "n_predictions": 0
+    },
+    "mtf_alignment": {
+      "score": 70,
+      "directions": [
+        {
+          "tf": "4H",
+          "dir": "bear"
+        },
+        {
+          "tf": "1H",
+          "dir": "bear"
+        },
+        {
+          "tf": "M15",
+          "dir": "range"
+        },
+        {
+          "tf": "5M",
+          "dir": "bull"
+        }
+      ]
+    },
+    "derivatives": {
+      "oi_now": 107597.372,
+      "oi_delta_15m_pct": null,
+      "oi_delta_1h_pct": null,
+      "oi_delta_4h_pct": null,
+      "oi_classification": "UNKNOWN",
+      "funding_now": 6.796e-05,
+      "funding_annualized_pct": 7.441620000000001,
+      "funding_zscore_30d": null,
+      "funding_tag": "NEUTRAL",
+      "basis_bps": null
+    },
+    "orderflow": {
+      "cvd_now": 0.01889,
+      "cvd_slope_15m": null,
+      "cvd_divergence": "UNKNOWN",
+      "taker_buy_sell_ratio": null,
+      "ofi": null,
+      "bid_ask_imbalance": null,
+      "absorption": "UNKNOWN"
+    },
+    "liquidations": {
+      "longs_1h_usd": null,
+      "shorts_1h_usd": null,
+      "longs_4h_usd": null,
+      "shorts_4h_usd": null,
+      "ratio_long_short_1h": null,
+      "cascade_risk": false,
+      "cascade_reason": null,
+      "clusters": [],
+      "stale": true
+    }
+  },
+  "eth": {
+    "symbol": "ETH",
+    "verdict": "WAIT",
+    "score": 57,
+    "confidence": 57,
+    "regime": {
+      "label": "BUILDING",
+      "hurst": null,
+      "adx": 43.12202890658347,
+      "vol_ratio": 0.86,
+      "hmm_state": null,
+      "garch_regime": null,
+      "trend_direction": "bull",
+      "confidence": 0.6
+    },
+    "setup": {
+      "kind": "TREND_CONTINUATION",
+      "trigger_conditions": [
+        "ADX=43.1\u226525",
+        "EMA20/50/200 stacked bull",
+        "regime ADX confirms (43.1)"
+      ],
+      "contributions": [
+        {
+          "source": "TREND",
+          "delta_pts": 35,
+          "reason": "ADX=43.1"
+        },
+        {
+          "source": "REGIME",
+          "delta_pts": 12,
+          "reason": "BUILDING conf=0.60"
+        },
+        {
+          "source": "REGIME",
+          "delta_pts": 10,
+          "reason": "ADX trending"
+        },
+        {
+          "source": "FLOW",
+          "delta_pts": -8,
+          "reason": "trades_delta=+0.00 misaligned"
+        },
+        {
+          "source": "DATA_QUALITY",
+          "delta_pts": 3,
+          "reason": "data-quality 65/100"
+        },
+        {
+          "source": "DEPTH_IMBALANCE",
+          "delta_pts": 1,
+          "reason": "imbalance +0.06"
+        }
+      ],
+      "setup_score": 37
+    },
+    "entry": {
+      "state": "ARMED",
+      "price": 1914.0,
+      "armed_at_iso": "2026-08-12T12:14:18.391360+00:00",
+      "trigger_at_iso": null,
+      "expires_at_iso": null,
+      "reason": "setup TREND_CONTINUATION dir=LONG score=60"
+    },
+    "stop": {
+      "price": null,
+      "bps": null,
+      "method": "ATR",
+      "invalidation_reasons": [
+        "no stop"
+      ]
+    },
+    "tp": {
+      "tp1": null,
+      "tp2": null,
+      "tp3": null,
+      "rr_tp1": null,
+      "rr_tp2": null,
+      "rr_tp3": null
+    },
+    "risk": {
+      "size_mult": 0.0,
+      "notional_usd": 0.0,
+      "margin_usd": 0.0,
+      "max_loss_usd": 0.0,
+      "leverage_cap": 0.0,
+      "kelly_raw": 0.0,
+      "kelly_capped": 0.0,
+      "blocked": true,
+      "block_reasons": [
+        "verdict=WAIT"
+      ]
+    },
+    "data_quality": {
+      "score": 65,
+      "sources": {
+        "hl": {
+          "fresh": true,
+          "age_ms": 1758,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:54.776826+00:00"
+        },
+        "binance": {
+          "fresh": true,
+          "age_ms": 515,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:56.020674+00:00"
+        },
+        "deribit": {
+          "fresh": true,
+          "age_ms": 468,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:56.066815+00:00"
+        },
+        "coinglass": {
+          "fresh": false,
+          "age_ms": null,
+          "coverage_pct": 0.0,
+          "last_ok_iso": null
+        },
+        "yahoo": {
+          "fresh": true,
+          "age_ms": 5,
+          "coverage_pct": 100.0,
+          "last_ok_iso": "2026-08-12T12:34:56.530012+00:00"
+        }
+      },
+      "stale_sources": [
+        "coinglass"
+      ],
+      "missing_fields": [
+        "coinglass.liquidations:BTC",
+        "coinglass.liquidations:ETH"
+      ]
+    },
+    "why_checklist": [
+      {
+        "label": "4H bullish",
+        "pass": true,
+        "weight": 15
+      },
+      {
+        "label": "M15 structure aligned",
+        "pass": true,
+        "weight": 15
+      },
+      {
+        "label": "Setup direction clear",
+        "pass": true,
+        "weight": 20
+      },
+      {
+        "label": "Data quality fresh",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "Regime allows setup",
+        "pass": true,
+        "weight": 20
+      },
+      {
+        "label": "Composite \u2265 65",
+        "pass": false,
+        "weight": 15
+      }
+    ],
+    "risks": [
+      "liq-data stale \u2014 cascade model disabled",
+      "composite 57 < 65 threshold"
+    ],
+    "cross_asset": {
+      "btc_leadership": 48.6,
+      "beta_to_btc": null,
+      "relative_strength": null,
+      "suppressed_by_btc": false,
+      "suppression_reason": null
+    },
+    "session": {
+      "name": "LONDON",
+      "expectancy_bps": null,
+      "n_obs": 0,
+      "sharpe": null,
+      "winrate": null,
+      "tag": "NO_DATA"
+    },
+    "calibration": {
+      "brier": null,
+      "reliability_bin": null,
+      "n_predictions": 1
+    },
+    "mtf_alignment": {
+      "score": 40,
+      "directions": [
+        {
+          "tf": "4H",
+          "dir": "bear"
+        },
+        {
+          "tf": "1H",
+          "dir": "range"
+        },
+        {
+          "tf": "M15",
+          "dir": "bull"
+        },
+        {
+          "tf": "5M",
+          "dir": "bull"
+        }
+      ]
+    },
+    "derivatives": {
+      "oi_now": 2304785.983,
+      "oi_delta_15m_pct": null,
+      "oi_delta_1h_pct": null,
+      "oi_delta_4h_pct": null,
+      "oi_classification": "UNKNOWN",
+      "funding_now": 9.369e-05,
+      "funding_annualized_pct": 10.259055,
+      "funding_zscore_30d": null,
+      "funding_tag": "NEUTRAL",
+      "basis_bps": null
+    },
+    "orderflow": {
+      "cvd_now": 0,
+      "cvd_slope_15m": null,
+      "cvd_divergence": "UNKNOWN",
+      "taker_buy_sell_ratio": null,
+      "ofi": null,
+      "bid_ask_imbalance": null,
+      "absorption": "UNKNOWN"
+    },
+    "liquidations": {
+      "longs_1h_usd": null,
+      "shorts_1h_usd": null,
+      "longs_4h_usd": null,
+      "shorts_4h_usd": null,
+      "ratio_long_short_1h": null,
+      "cascade_risk": false,
+      "cascade_reason": null,
+      "clusters": [],
+      "stale": true
+    }
+  },
+  "cross_asset": {
+    "beta_eth_to_btc": null,
+    "lead_lag_btc_eth_hours": null,
+    "btc_leadership_score": 48.6,
+    "eth_suppressed": false,
+    "as_of_iso": "2026-08-12T12:34:56.612423+00:00"
+  },
+  "macro": {
+    "risk_state": "RISK_ON",
+    "macro_pressure": 18,
+    "drivers": [
+      {
+        "asset": "DXY",
+        "corr_30d": 0.124,
+        "daily_change_pct": 1.522
+      },
+      {
+        "asset": "SPX",
+        "corr_30d": 0.152,
+        "daily_change_pct": 4.254
+      },
+      {
+        "asset": "NDX",
+        "corr_30d": 0.129,
+        "daily_change_pct": 0.652
+      },
+      {
+        "asset": "VIX",
+        "corr_30d": 0.097,
+        "daily_change_pct": -14.508
+      },
+      {
+        "asset": "US10Y",
+        "corr_30d": -0.072,
+        "daily_change_pct": 4.952
+      },
+      {
+        "asset": "GOLD",
+        "corr_30d": -0.211,
+        "daily_change_pct": -4.526
+      }
+    ],
+    "as_of_iso": "2026-08-12T12:34:56.530042+00:00"
+  },
+  "event_risk": {
+    "next_event_iso": "2026-08-13T12:30:00Z",
+    "kind": "CPI",
+    "impact": "HIGH",
+    "minutes_until": 1435,
+    "in_window": false,
+    "calendar_version": "2026-08-12-manual-v1"
+  },
+  "session_matrix": {
+    "as_of_iso": "2026-08-12T12:34:56.537496+00:00",
+    "cells": [
+      {
+        "session": "ASIA",
+        "setup_kind": "TREND_CONTINUATION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "ASIA",
+        "setup_kind": "LIQUIDITY_SWEEP_REVERSAL",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "ASIA",
+        "setup_kind": "BREAKOUT",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "ASIA",
+        "setup_kind": "SHORT_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "ASIA",
+        "setup_kind": "LONG_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "ASIA",
+        "setup_kind": "MEAN_REVERSION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "ASIA",
+        "setup_kind": "NO_TRADE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "LONDON",
+        "setup_kind": "TREND_CONTINUATION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "LONDON",
+        "setup_kind": "LIQUIDITY_SWEEP_REVERSAL",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "LONDON",
+        "setup_kind": "BREAKOUT",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "LONDON",
+        "setup_kind": "SHORT_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "LONDON",
+        "setup_kind": "LONG_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "LONDON",
+        "setup_kind": "MEAN_REVERSION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "LONDON",
+        "setup_kind": "NO_TRADE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OVERLAP",
+        "setup_kind": "TREND_CONTINUATION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OVERLAP",
+        "setup_kind": "LIQUIDITY_SWEEP_REVERSAL",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OVERLAP",
+        "setup_kind": "BREAKOUT",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OVERLAP",
+        "setup_kind": "SHORT_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OVERLAP",
+        "setup_kind": "LONG_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OVERLAP",
+        "setup_kind": "MEAN_REVERSION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OVERLAP",
+        "setup_kind": "NO_TRADE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "TREND_CONTINUATION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "LIQUIDITY_SWEEP_REVERSAL",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "BREAKOUT",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "SHORT_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "LONG_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "MEAN_REVERSION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "NO_TRADE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OFF",
+        "setup_kind": "TREND_CONTINUATION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OFF",
+        "setup_kind": "LIQUIDITY_SWEEP_REVERSAL",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OFF",
+        "setup_kind": "BREAKOUT",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OFF",
+        "setup_kind": "SHORT_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OFF",
+        "setup_kind": "LONG_SQUEEZE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OFF",
+        "setup_kind": "MEAN_REVERSION",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      },
+      {
+        "session": "OFF",
+        "setup_kind": "NO_TRADE",
+        "expectancy_bps": null,
+        "n_obs": 0,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "NO_DATA"
+      }
+    ]
+  }
+}

@@ -24,6 +24,17 @@ export interface TelegramAlert {
   funding: number;
   cvd15m?: number;
   oiChange?: number;
+  // Stage 14 backward-compatible extensions for the M15 Decision Engine.
+  // All optional — existing callers keep working unchanged.
+  verdict?: 'LONG' | 'SHORT' | 'WAIT' | 'NO_TRADE';
+  entryState?: 'WATCH' | 'ARMED' | 'TRIGGERED' | 'ACTIVE' | 'INVALIDATED' | 'EXPIRED';
+  setupKind?: string;
+  stop?: number | null;
+  tp1?: number | null;
+  tp2?: number | null;
+  tp3?: number | null;
+  rrTp1?: number | null;
+  dataQualityScore?: number | null;
 }
 
 /**
