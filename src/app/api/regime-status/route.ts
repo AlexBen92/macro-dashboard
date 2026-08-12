@@ -1,41 +1,36 @@
 /**
- * GET /api/edge-m15-status
+ * GET /api/regime-status
  *
- * Two modes:
- *   1. DASH_DATA_ORIGIN set (prod Vercel): proxy-fetch VPS file (avoids
- *      mixed-content: browser HTTPS Vercel → server HTTP VPS). Cron on VPS
- *      keeps file fresh; this route bypasses Vercel's baked /public freeze.
- *   2. DASH_DATA_ORIGIN unset (local dev): read /public/data/edge_m15_status.json.
- *
- * Both paths emit X-Stale / X-Last-Export-Age-Ms headers derived from the
- * payload's last_export_success field (or fs mtime fallback).
+ * Same two-mode pattern as edge-m15-status. Regime file updates daily 05:17 UTC.
+ * Staleness threshold 30 hours.
  */
 import { NextResponse } from 'next/server';
 import { readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const LOCAL_FILE = join(process.cwd(), 'public', 'data', 'edge_m15_status.json');
+const LOCAL_FILE = join(process.cwd(), 'public', 'data', 'regime_status.json');
 const REMOTE_URL = process.env.DASH_DATA_ORIGIN
-  ? `${process.env.DASH_DATA_ORIGIN.replace(/\/$/, '')}/edge_m15_status.json`
+  ? `${process.env.DASH_DATA_ORIGIN.replace(/\/$/, '')}/regime_status.json`
   : null;
-const STALE_THRESHOLD_MS = 20 * 60 * 1000;
+const STALE_THRESHOLD_MS = 30 * 60 * 60 * 1000;
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 function buildResponse(body: string, fallbackMtimeMs: number) {
-  let parsed: { last_export_success?: string } = {};
+  let parsed: { as_of?: string } = {};
   try {
-    parsed = JSON.parse(body) as { last_export_success?: string };
+    parsed = JSON.parse(body) as { as_of?: string };
   } catch {
-    // fall through with empty parsed; staleness falls back to mtime
+    // ignore: staleness falls back to mtime
   }
-  const lastExportAgeMs = parsed.last_export_success
-    ? Date.now() - Date.parse(parsed.last_export_success)
-    : Date.now() - fallbackMtimeMs;
+  const asOfMs = parsed.as_of ? Date.parse(parsed.as_of) : NaN;
+  const lastExportAgeMs = Number.isNaN(asOfMs)
+    ? Date.now() - fallbackMtimeMs
+    : Date.now() - asOfMs;
   const isStale = lastExportAgeMs > STALE_THRESHOLD_MS;
   const headers = new Headers({
-    'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+    'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=300',
     'X-Last-Export-Age-Ms': String(lastExportAgeMs),
     'X-Stale': isStale ? '1' : '0',
   });
@@ -65,7 +60,7 @@ export async function GET() {
 
   try {
     if (!existsSync(LOCAL_FILE)) {
-      return staleBody('edge_m15_status.json not found', 503);
+      return staleBody('regime_status.json not found', 503);
     }
     const stat = statSync(LOCAL_FILE);
     const body = readFileSync(LOCAL_FILE, 'utf-8');

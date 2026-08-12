@@ -1,0 +1,1436 @@
+{
+  "as_of": "2026-08-12T07:11:19.257942+00:00",
+  "last_export_success": "2026-08-12T07:11:19.257942+00:00",
+  "last_wf_run": "2026-08-12T06:23:59.617429+00:00",
+  "stale_threshold_min": 15,
+  "data_window_days": 10,
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "alpha_term_structure_snapshot": {
+    "BTCUSDT": {
+      "1m": {
+        "ARX": 0.020845529544892237,
+        "MLP": 0.013427195816674311,
+        "LSTM": -0.015210196919817688,
+        "CNN-LSTM": 0.009559298735868887
+      },
+      "5m": {
+        "ARX": -0.030595557293371812,
+        "MLP": 0.025284737973516543,
+        "LSTM": -0.007948434447164528,
+        "CNN-LSTM": -0.020931863804991128
+      },
+      "15m": {
+        "ARX": 0.062308388087196,
+        "MLP": -0.040332705543967035,
+        "LSTM": -0.014804803601265865,
+        "CNN-LSTM": -0.03355743897902701
+      },
+      "1h": {
+        "ARX": 0.0036542799682256996,
+        "MLP": 0.07842234871686427,
+        "LSTM": 0.14619903352630634,
+        "CNN-LSTM": 0.07428549553446225
+      }
+    },
+    "ETHUSDT": {
+      "1m": {
+        "ARX": 0.0018241131431031535,
+        "MLP": -0.006906508017492432,
+        "LSTM": -0.005693244711870451,
+        "CNN-LSTM": 0.006233240080461546
+      },
+      "5m": {
+        "ARX": 0.01770330590155404,
+        "MLP": 0.002721972296175136,
+        "LSTM": -0.029595466202091657,
+        "CNN-LSTM": -0.04207610586714305
+      },
+      "15m": {
+        "ARX": 0.027150897952731515,
+        "MLP": -0.02928622394447237,
+        "LSTM": 0.03417307637444493,
+        "CNN-LSTM": -0.015003741852690286
+      },
+      "1h": {
+        "ARX": -0.12918104119325335,
+        "MLP": -0.06452143388609016,
+        "LSTM": -0.0043827045366479555,
+        "CNN-LSTM": 0.035517435180409236
+      }
+    }
+  },
+  "best_model_per_asset": {
+    "BTCUSDT": {
+      "model": "LSTM",
+      "horizon": "1h",
+      "sh_oos": 0.14619903352630634,
+      "verdict": "NULL"
+    },
+    "ETHUSDT": {
+      "model": "CNN-LSTM",
+      "horizon": "1h",
+      "sh_oos": 0.035517435180409236,
+      "verdict": "NULL"
+    }
+  },
+  "ofi_realtime": {
+    "BTCUSDT": {
+      "ofi_z_1m": 0.06257928920663143,
+      "mlofi_z_1m": -0.055167304082422215,
+      "voi": 2.3045351484838714,
+      "microprice_dev_bps": 0.025438476726640492,
+      "spread_bps": 0.053839879429211875,
+      "n_trades_last": 120.0,
+      "mid_close": 65007.575,
+      "as_of": "2026-08-08 12:49:00+00:00",
+      "stale": false
+    },
+    "ETHUSDT": {
+      "ofi_z_1m": -0.9917638445788401,
+      "mlofi_z_1m": -0.20775655653961192,
+      "voi": 1.286925285712652,
+      "microprice_dev_bps": -0.0767987625394034,
+      "spread_bps": 0.15624471046538901,
+      "n_trades_last": 121.0,
+      "mid_close": 1920.065,
+      "as_of": "2026-08-08 12:49:00+00:00",
+      "stale": false
+    }
+  },
+  "strategies": [
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -5.1208,
+        "mc_p5_bps": -0.1064,
+        "pbo": 1.0,
+        "n_trades": 2022,
+        "per_fold_worst_bps": -0.1469,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -3.3902,
+        "mc_p5_bps": -0.0444,
+        "pbo": 1.0,
+        "n_trades": 12472,
+        "per_fold_worst_bps": -0.0753,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -3.3902,
+        "mc_p5_bps": -0.0444,
+        "pbo": 1.0,
+        "n_trades": 12472,
+        "per_fold_worst_bps": -0.0753,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 0.3197,
+        "mc_p5_bps": -0.0254,
+        "pbo": 1.0,
+        "n_trades": 12363,
+        "per_fold_worst_bps": -0.0552,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -276.3157,
+        "mc_p5_bps": -1.7026,
+        "pbo": 1.0,
+        "n_trades": 2022,
+        "per_fold_worst_bps": -1.743,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -699.1427,
+        "mc_p5_bps": -2.1387,
+        "pbo": 1.0,
+        "n_trades": 12472,
+        "per_fold_worst_bps": -2.1696,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -699.1427,
+        "mc_p5_bps": -2.1387,
+        "pbo": 1.0,
+        "n_trades": 12472,
+        "per_fold_worst_bps": -2.1696,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -854.4127,
+        "mc_p5_bps": -2.2149,
+        "pbo": 1.0,
+        "n_trades": 12363,
+        "per_fold_worst_bps": -2.2447,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -5.9043,
+        "mc_p5_bps": -0.5092,
+        "pbo": 1.0,
+        "n_trades": 369,
+        "per_fold_worst_bps": -1.0951,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -3.7698,
+        "mc_p5_bps": -0.2082,
+        "pbo": 1.0,
+        "n_trades": 2742,
+        "per_fold_worst_bps": -0.3829,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -3.7698,
+        "mc_p5_bps": -0.2082,
+        "pbo": 1.0,
+        "n_trades": 2742,
+        "per_fold_worst_bps": -0.3829,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -6.0901,
+        "mc_p5_bps": -0.1893,
+        "pbo": 1.0,
+        "n_trades": 2697,
+        "per_fold_worst_bps": -0.3191,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -54.5259,
+        "mc_p5_bps": -1.8266,
+        "pbo": 1.0,
+        "n_trades": 369,
+        "per_fold_worst_bps": -2.4125,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -102.551,
+        "mc_p5_bps": -1.7441,
+        "pbo": 1.0,
+        "n_trades": 2742,
+        "per_fold_worst_bps": -1.9188,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -102.551,
+        "mc_p5_bps": -1.7441,
+        "pbo": 1.0,
+        "n_trades": 2742,
+        "per_fold_worst_bps": -1.9188,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -169.5467,
+        "mc_p5_bps": -2.1154,
+        "pbo": 1.0,
+        "n_trades": 2697,
+        "per_fold_worst_bps": -2.2452,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -0.0722,
+        "mc_p5_bps": -1.3455,
+        "pbo": 1.0,
+        "n_trades": 93,
+        "per_fold_worst_bps": -2.027,
+        "dsr_probability": 0.0017
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -5.9,
+        "mc_p5_bps": -0.7576,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -1.2647,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -5.9,
+        "mc_p5_bps": -0.7576,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -1.2647,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 10.9632,
+        "mc_p5_bps": 0.0041,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -0.189,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -10.892,
+        "mc_p5_bps": -2.3412,
+        "pbo": 1.0,
+        "n_trades": 93,
+        "per_fold_worst_bps": -3.0227,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -28.6401,
+        "mc_p5_bps": -1.8317,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -2.3388,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -28.6401,
+        "mc_p5_bps": -1.8317,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -2.3388,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -36.5577,
+        "mc_p5_bps": -1.7801,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -1.9732,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 8.4466,
+        "mc_p5_bps": -1.9591,
+        "pbo": 1.0,
+        "n_trades": 25,
+        "per_fold_worst_bps": -4.9807,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 5.8552,
+        "mc_p5_bps": -0.7472,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -0.9718,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 5.8552,
+        "mc_p5_bps": -0.7472,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -0.9718,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 4.2863,
+        "mc_p5_bps": -0.5488,
+        "pbo": 1.0,
+        "n_trades": 208,
+        "per_fold_worst_bps": -0.596,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": 5.049,
+        "mc_p5_bps": -3.0275,
+        "pbo": 1.0,
+        "n_trades": 25,
+        "per_fold_worst_bps": -6.049,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -0.8122,
+        "mc_p5_bps": -1.779,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -2.0037,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -0.8122,
+        "mc_p5_bps": -1.779,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -2.0037,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "BTCUSDT",
+      "horizon": "1h",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -10.0937,
+        "mc_p5_bps": -1.7367,
+        "pbo": 1.0,
+        "n_trades": 208,
+        "per_fold_worst_bps": -1.7839,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 8.2146,
+        "mc_p5_bps": -0.0364,
+        "pbo": 1.0,
+        "n_trades": 2296,
+        "per_fold_worst_bps": -0.1706,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 9.463,
+        "mc_p5_bps": -0.0036,
+        "pbo": 1.0,
+        "n_trades": 13368,
+        "per_fold_worst_bps": -0.0236,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 9.463,
+        "mc_p5_bps": -0.0036,
+        "pbo": 1.0,
+        "n_trades": 13368,
+        "per_fold_worst_bps": -0.0236,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 1.5169,
+        "mc_p5_bps": -0.0271,
+        "pbo": 1.0,
+        "n_trades": 13267,
+        "per_fold_worst_bps": -0.0178,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -214.4003,
+        "mc_p5_bps": -1.7252,
+        "pbo": 1.0,
+        "n_trades": 2296,
+        "per_fold_worst_bps": -1.8595,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -518.8858,
+        "mc_p5_bps": -2.1015,
+        "pbo": 1.0,
+        "n_trades": 13368,
+        "per_fold_worst_bps": -2.1215,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -518.8858,
+        "mc_p5_bps": -2.1015,
+        "pbo": 1.0,
+        "n_trades": 13368,
+        "per_fold_worst_bps": -2.1215,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "1m",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -629.0216,
+        "mc_p5_bps": -2.1453,
+        "pbo": 1.0,
+        "n_trades": 13267,
+        "per_fold_worst_bps": -2.1361,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -4.3081,
+        "mc_p5_bps": -0.617,
+        "pbo": 1.0,
+        "n_trades": 350,
+        "per_fold_worst_bps": -1.3102,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -6.7829,
+        "mc_p5_bps": -0.367,
+        "pbo": 1.0,
+        "n_trades": 2736,
+        "per_fold_worst_bps": -0.7324,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -6.7829,
+        "mc_p5_bps": -0.367,
+        "pbo": 1.0,
+        "n_trades": 2736,
+        "per_fold_worst_bps": -0.7324,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 5.4687,
+        "mc_p5_bps": -0.0838,
+        "pbo": 1.0,
+        "n_trades": 2720,
+        "per_fold_worst_bps": -0.4971,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -38.2789,
+        "mc_p5_bps": -1.8679,
+        "pbo": 1.0,
+        "n_trades": 350,
+        "per_fold_worst_bps": -2.5611,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -72.5644,
+        "mc_p5_bps": -1.7537,
+        "pbo": 1.0,
+        "n_trades": 2736,
+        "per_fold_worst_bps": -2.1191,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -72.5644,
+        "mc_p5_bps": -1.7537,
+        "pbo": 1.0,
+        "n_trades": 2736,
+        "per_fold_worst_bps": -2.1191,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "5m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -97.7246,
+        "mc_p5_bps": -1.8857,
+        "pbo": 1.0,
+        "n_trades": 2720,
+        "per_fold_worst_bps": -2.299,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -9.2051,
+        "mc_p5_bps": -3.0976,
+        "pbo": 1.0,
+        "n_trades": 79,
+        "per_fold_worst_bps": -4.608,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -9.4197,
+        "mc_p5_bps": -1.0717,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -1.5307,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -9.4197,
+        "mc_p5_bps": -1.0717,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -1.5307,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 8.8882,
+        "mc_p5_bps": -0.0521,
+        "pbo": 1.0,
+        "n_trades": 889,
+        "per_fold_worst_bps": -0.8429,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -16.209,
+        "mc_p5_bps": -3.9443,
+        "pbo": 1.0,
+        "n_trades": 79,
+        "per_fold_worst_bps": -5.4547,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -26.4131,
+        "mc_p5_bps": -2.0063,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -2.4654,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -26.4131,
+        "mc_p5_bps": -2.0063,
+        "pbo": 1.0,
+        "n_trades": 894,
+        "per_fold_worst_bps": -2.4654,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "15m",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -22.5314,
+        "mc_p5_bps": -1.5374,
+        "pbo": 1.0,
+        "n_trades": 889,
+        "per_fold_worst_bps": -2.3282,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 15.5886,
+        "mc_p5_bps": 0.6705,
+        "pbo": 1.0,
+        "n_trades": 27,
+        "per_fold_worst_bps": -9.8782,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 5.4189,
+        "mc_p5_bps": -0.8317,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -3.2875,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "ON",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": 5.4189,
+        "mc_p5_bps": -0.8317,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -3.2875,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "zero_maker",
+      "metrics": {
+        "sh_oos": -6.5326,
+        "mc_p5_bps": -2.24,
+        "pbo": 1.0,
+        "n_trades": 211,
+        "per_fold_worst_bps": -2.5783,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    },
+    {
+      "name": "Alpha2Scalp",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "OFF",
+      "regime_allowed": [],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": 12.3243,
+        "mc_p5_bps": -0.4834,
+        "pbo": 1.0,
+        "n_trades": 27,
+        "per_fold_worst_bps": -11.0321,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": false,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 40000.0
+    },
+    {
+      "name": "AlphaTermExecution",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": 0.7323,
+        "mc_p5_bps": -1.6954,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -4.1512,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 35000.0
+    },
+    {
+      "name": "OFILinearImpact",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": 0.7323,
+        "mc_p5_bps": -1.6954,
+        "pbo": 1.0,
+        "n_trades": 210,
+        "per_fold_worst_bps": -4.1512,
+        "dsr_probability": 1.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "BORDERLINE",
+      "capacity_usd": 30000.0
+    },
+    {
+      "name": "MLOFIGradient",
+      "symbol": "ETHUSDT",
+      "horizon": "1h",
+      "status": "ALPHA_DECAY",
+      "regime_allowed": [
+        "CALM",
+        "BUILDING"
+      ],
+      "fee_scenario": "alphax_real",
+      "metrics": {
+        "sh_oos": -15.5585,
+        "mc_p5_bps": -3.426,
+        "pbo": 1.0,
+        "n_trades": 211,
+        "per_fold_worst_bps": -3.7643,
+        "dsr_probability": 0.0
+      },
+      "alpha_decay_flag": true,
+      "verdict": "INCONCLUSIVE",
+      "capacity_usd": 25000.0
+    }
+  ],
+  "validation_status": {
+    "wf_complete": true,
+    "gates_passed": 0,
+    "gates_failed": 0,
+    "n_strategy_runs": 64,
+    "wf_run_at": "2026-08-12T06:23:59.619722+00:00"
+  }
+}

@@ -1,24 +1,21 @@
 /**
- * GET /api/edge-m15-status
+ * GET /api/orderflow-status
  *
- * Two modes:
- *   1. DASH_DATA_ORIGIN set (prod Vercel): proxy-fetch VPS file (avoids
- *      mixed-content: browser HTTPS Vercel → server HTTP VPS). Cron on VPS
- *      keeps file fresh; this route bypasses Vercel's baked /public freeze.
- *   2. DASH_DATA_ORIGIN unset (local dev): read /public/data/edge_m15_status.json.
+ * Two modes (same as /api/edge-m15-status):
+ *   1. DASH_DATA_ORIGIN set (prod Vercel): proxy-fetch VPS file.
+ *   2. Unset (local dev): read /public/data/orderflow_status.json.
  *
- * Both paths emit X-Stale / X-Last-Export-Age-Ms headers derived from the
- * payload's last_export_success field (or fs mtime fallback).
+ * Staleness threshold 15min (cron cadence 10min).
  */
 import { NextResponse } from 'next/server';
 import { readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const LOCAL_FILE = join(process.cwd(), 'public', 'data', 'edge_m15_status.json');
+const LOCAL_FILE = join(process.cwd(), 'public', 'data', 'orderflow_status.json');
 const REMOTE_URL = process.env.DASH_DATA_ORIGIN
-  ? `${process.env.DASH_DATA_ORIGIN.replace(/\/$/, '')}/edge_m15_status.json`
+  ? `${process.env.DASH_DATA_ORIGIN.replace(/\/$/, '')}/orderflow_status.json`
   : null;
-const STALE_THRESHOLD_MS = 20 * 60 * 1000;
+const STALE_THRESHOLD_MS = 15 * 60 * 1000;
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -28,7 +25,7 @@ function buildResponse(body: string, fallbackMtimeMs: number) {
   try {
     parsed = JSON.parse(body) as { last_export_success?: string };
   } catch {
-    // fall through with empty parsed; staleness falls back to mtime
+    // ignore: staleness falls back to mtime
   }
   const lastExportAgeMs = parsed.last_export_success
     ? Date.now() - Date.parse(parsed.last_export_success)
@@ -65,7 +62,7 @@ export async function GET() {
 
   try {
     if (!existsSync(LOCAL_FILE)) {
-      return staleBody('edge_m15_status.json not found', 503);
+      return staleBody('orderflow_status.json not found', 503);
     }
     const stat = statSync(LOCAL_FILE);
     const body = readFileSync(LOCAL_FILE, 'utf-8');

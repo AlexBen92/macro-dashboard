@@ -16,6 +16,9 @@ import VolHeatmapM15 from '@/components/crypto/m15/VolHeatmapM15';
 import CorrelationTable from '@/components/crypto/m15/CorrelationTable';
 import SessionPlanCard from '@/components/crypto/m15/SessionPlanCard';
 import SetupsPanel from '@/components/crypto/m15/SetupsPanel';
+import OrderFlowImbalanceWidget from '@/components/crypto/orderflow/OrderFlowImbalanceWidget';
+import AlphaTermStructureChart from '@/components/crypto/orderflow/AlphaTermStructureChart';
+import OfiSetupsPanel from '@/components/crypto/orderflow/OfiSetupsPanel';
 
 import { useOptionsExposure } from '@/hooks/api/useOptionsExposure';
 import type { ExpiryBucket, SupportedCurrency, Timeframe } from '@/lib/options/types';
@@ -84,6 +87,21 @@ export default function CryptoPage() {
           </div>
           <div className="lg:col-span-2">
             <SetupsPanel />
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
+            Bloc 4 · Order Flow · OFI live · Alpha Term Structure · Setups microstructure
+          </div>
+          <div className="lg:col-span-4">
+            <OrderFlowImbalanceWidget />
+          </div>
+          <div className="lg:col-span-8">
+            <AlphaTermStructureChart />
+          </div>
+          <div className="lg:col-span-12">
+            <OfiSetupsPanel />
           </div>
         </section>
 

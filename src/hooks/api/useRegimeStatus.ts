@@ -52,7 +52,7 @@ export function useRegimeStatus(): {
   error: string | null;
 } {
   const { data, error, isLoading } = useSWR<RegimeStatus>(
-    '/data/regime_status.json',
+    '/api/regime-status',
     fetcher,
     { refreshInterval: 600_000, revalidateOnFocus: false },
   );
