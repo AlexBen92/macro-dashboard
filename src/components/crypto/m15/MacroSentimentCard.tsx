@@ -62,7 +62,7 @@ export default function MacroSentimentCard() {
 
   useEffect(() => {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 10_000);
+    const timer = setTimeout(() => ctrl.abort(), 25_000);
     const run = async () => {
       try {
         const res = await fetch('/api/correlations', { signal: ctrl.signal });
@@ -84,8 +84,14 @@ export default function MacroSentimentCard() {
 
   if (error || !data) {
     return (
-      <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-3 font-mono text-[0.6rem] text-[var(--muted)] h-[110px] flex items-center justify-center">
-        Macro sentiment indisponible
+      <div className="bg-[var(--bg2)] border border-[var(--caution)]/30 rounded-[4px] p-3 font-mono text-[0.6rem] text-[var(--muted)] h-[110px] flex flex-col justify-center gap-1">
+        <div className="flex items-center justify-between">
+          <span>Macro sentiment — indisponible</span>
+          <span className="text-[var(--caution)]">/api/correlations</span>
+        </div>
+        <div className="opacity-70 text-[0.55rem]">
+          {error ? `err: ${error}` : 'chargement…'}
+        </div>
       </div>
     );
   }

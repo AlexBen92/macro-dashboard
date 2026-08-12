@@ -49,9 +49,15 @@ export default function RegimeStrategyMatrix() {
     );
   }
 
-  const rows = data.matrix;
-  const excluded = data.matrix_excluded ?? [];
   const currentRegime = data.current_regime;
+  const rows = [...data.matrix].sort((a, b) => {
+    const cellA = a.regimes.find((c) => c.regime === currentRegime);
+    const cellB = b.regimes.find((c) => c.regime === currentRegime);
+    const shA = cellA?.passes_dsr ? cellA.sharpe_annual : -999;
+    const shB = cellB?.passes_dsr ? cellB.sharpe_annual : -999;
+    return shB - shA;
+  });
+  const excluded = data.matrix_excluded ?? [];
 
   return (
     <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-3 flex flex-col gap-2">
@@ -85,6 +91,9 @@ export default function RegimeStrategyMatrix() {
               ))}
               <th className="text-right py-1 px-1.5 text-[var(--label)] uppercase tracking-[1px] font-normal border-l border-[var(--border)]">
                 Pooled
+              </th>
+              <th className="text-right py-1 px-1.5 text-[var(--bull)] uppercase tracking-[1px] font-normal">
+                Actif?
               </th>
               <th className="text-right py-1 px-1.5 text-[var(--muted)] uppercase tracking-[1px] font-normal">
                 N
@@ -132,6 +141,18 @@ export default function RegimeStrategyMatrix() {
                   >
                     {row.pooled_sharpe.toFixed(2)}
                   </td>
+                  {(() => {
+                    const cell = currentRegime ? cellByRegime.get(currentRegime) : undefined;
+                    const actionable = cell?.passes_dsr && (cell.sharpe_annual ?? 0) > 0.5;
+                    return (
+                      <td
+                        className="text-right py-1 px-1.5 uppercase tracking-[1px]"
+                        style={{ color: actionable ? 'var(--bull)' : 'var(--muted)' }}
+                      >
+                        {actionable ? '✓ GO' : '· skip'}
+                      </td>
+                    );
+                  })()}
                   <td className="text-right py-1 px-1.5 tabular-nums text-[var(--muted)]">
                     {row.pooled_n}
                   </td>

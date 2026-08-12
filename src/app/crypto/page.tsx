@@ -11,6 +11,7 @@ import RegimeSummaryCard from '@/components/crypto/m15/RegimeSummaryCard';
 import MacroSentimentCard from '@/components/crypto/m15/MacroSentimentCard';
 import EdgeM15GlobalCard from '@/components/crypto/m15/EdgeM15GlobalCard';
 import RegimeStrategyMatrix from '@/components/crypto/m15/RegimeStrategyMatrix';
+import DailyBriefBar from '@/components/crypto/m15/DailyBriefBar';
 import PriceLevelsM15Chart from '@/components/crypto/m15/PriceLevelsM15Chart';
 import EdgeM15BTCCard from '@/components/crypto/m15/EdgeM15BTCCard';
 import VolHeatmapM15 from '@/components/crypto/m15/VolHeatmapM15';
@@ -54,6 +55,8 @@ export default function CryptoPage() {
       />
 
       <main className="flex-1 px-4 py-3 flex flex-col gap-3">
+        <DailyBriefBar />
+
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
             Bloc 1 · Synthèse — Régime · Macro · Edge M15

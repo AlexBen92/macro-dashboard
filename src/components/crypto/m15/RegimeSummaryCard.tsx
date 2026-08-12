@@ -76,6 +76,30 @@ function computeBbPosition(
   return { pos: clamped, tag };
 }
 
+function computeCompositeScore(
+  adx: number,
+  rsi: number,
+  bbPos: number | null,
+  regime: RegimeLabel,
+): number {
+  let score = 0;
+  score += (rsi - 50) * 1.2;
+  if (bbPos !== null) score += (bbPos - 0.5) * 60;
+  if (regime === 'STRESS') score *= 0.7;
+  if (regime === 'CRISIS') score *= 0.4;
+  const adxMult = Math.min(1, adx / 25);
+  score *= adxMult;
+  return Math.max(-100, Math.min(100, score));
+}
+
+function compositeColor(score: number): { color: string; label: string } {
+  if (score > 30) return { color: 'var(--bull)', label: 'BULL' };
+  if (score > 10) return { color: 'var(--bull)', label: 'BULLISH' };
+  if (score < -30) return { color: 'var(--bear)', label: 'BEAR' };
+  if (score < -10) return { color: 'var(--bear)', label: 'BEARISH' };
+  return { color: 'var(--muted)', label: 'NEUTRAL' };
+}
+
 export default function RegimeSummaryCard() {
   const { data, isLoading, error } = useRegimeStatus();
   const { data: edgeData, isStale, lastExportAgeMs } = useEdgeM15Status();
@@ -103,6 +127,10 @@ export default function RegimeSummaryCard() {
   const vrGate = verdict ? classifyVolRatio(verdict.vol_ratio ?? null) : null;
   const rsiGate = verdict ? classifyRsi(verdict.rsi) : null;
   const bb = computeBbPosition(verdict?.close, verdict?.bb_upper, verdict?.bb_lower);
+  const composite = verdict
+    ? computeCompositeScore(verdict.adx, verdict.rsi, bb?.pos ?? null, regime)
+    : null;
+  const compositeStyle = composite !== null ? compositeColor(composite) : null;
 
   return (
     <div
@@ -239,6 +267,36 @@ export default function RegimeSummaryCard() {
               </span>
             </div>
           )}
+        </div>
+      )}
+
+      {composite !== null && compositeStyle && (
+        <div className="flex flex-col gap-1 pt-1 border-t border-[var(--border)]">
+          <div className="flex items-center justify-between font-mono text-[0.5rem]">
+            <span className="text-[var(--label)] uppercase tracking-[2px]">Score composite</span>
+            <span style={{ color: compositeStyle.color }}>
+              {composite >= 0 ? '+' : ''}{composite.toFixed(0)} · {compositeStyle.label}
+            </span>
+          </div>
+          <div className="relative h-[6px] bg-[var(--bg3)] rounded-full overflow-hidden">
+            <div
+              className="absolute top-0 bottom-0"
+              style={{
+                left: composite >= 0 ? '50%' : `${50 + composite / 2}%`,
+                width: `${Math.abs(composite) / 2}%`,
+                background: compositeStyle.color,
+              }}
+            />
+            <div
+              className="absolute top-[-2px] bottom-[-2px] w-[1px] bg-[var(--text)]"
+              style={{ left: '50%' }}
+            />
+          </div>
+          <div className="flex items-center justify-between font-mono text-[0.45rem] text-[var(--muted)]">
+            <span>-100 BEAR</span>
+            <span>0</span>
+            <span>+100 BULL</span>
+          </div>
         </div>
       )}
 
