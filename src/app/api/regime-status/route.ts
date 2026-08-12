@@ -9,8 +9,9 @@ import { readFileSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 const LOCAL_FILE = join(process.cwd(), 'public', 'data', 'regime_status.json');
-const REMOTE_URL = process.env.DASH_DATA_ORIGIN
-  ? `${process.env.DASH_DATA_ORIGIN.replace(/\/$/, '')}/regime_status.json`
+const DASH_DATA_ORIGIN = process.env.DASH_DATA_ORIGIN || 'http://187.124.38.41/dash-data';
+const REMOTE_URL = DASH_DATA_ORIGIN
+  ? `${DASH_DATA_ORIGIN.replace(/\/$/, '')}/regime_status.json`
   : null;
 const STALE_THRESHOLD_MS = 30 * 60 * 60 * 1000;
 
