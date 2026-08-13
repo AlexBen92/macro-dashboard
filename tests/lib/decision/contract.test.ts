@@ -109,6 +109,24 @@ describe('decision payload contract', () => {
     const back = JSON.stringify(parsed);
     expect(JSON.parse(back)).toEqual(parsed);
   });
+
+  it('every asset carries a backtest_status with a closed-enum verdict', () => {
+    const p = loadFixture();
+    const allowed = ['NO_EDGE', 'EDGE_CONFIRMED', 'UNTESTED'] as const;
+    for (const a of [p.btc, p.eth]) {
+      expect(a.backtest_status).toBeDefined();
+      expect(allowed).toContain(a.backtest_status.verdict);
+      expect(typeof a.backtest_status.n_combos_tested).toBe('number');
+      expect(typeof a.backtest_status.backtest_validated).toBe('boolean');
+      if (a.backtest_status.verdict === 'EDGE_CONFIRMED') {
+        expect(a.backtest_status.backtest_validated).toBe(true);
+        expect(a.backtest_status.best_pf).toBeGreaterThan(1.0);
+      }
+      if (a.backtest_status.verdict === 'UNTESTED') {
+        expect(a.backtest_status.n_combos_tested).toBe(0);
+      }
+    }
+  });
 });
 
 describe('closed enums are stable', () => {

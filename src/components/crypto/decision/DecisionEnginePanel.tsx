@@ -2,6 +2,7 @@
 
 import { useDecisionStatus } from '@/hooks/api/useDecisionStatus';
 import { useDecisionAlerts } from '@/lib/decision/alerts';
+import type { SessionMatrixCell } from '@/lib/decision/types';
 import DecisionVerdictCard from './DecisionVerdictCard';
 import MacroFilterBar from './MacroFilterBar';
 import DataQualityPanel from './DataQualityPanel';
@@ -63,6 +64,62 @@ export default function DecisionEnginePanel() {
           </div>
         </div>
       </div>
+
+      <SessionExpectancyMatrixView cells={data.session_matrix.cells} />
+    </div>
+  );
+}
+
+function SessionExpectancyMatrixView({ cells }: { cells: SessionMatrixCell[] }) {
+  if (!cells || cells.length === 0) {
+    return (
+      <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-2 font-mono text-[0.5rem] text-[var(--dim)]">
+        Session expectancy matrix: warming up (backtest pending)
+      </div>
+    );
+  }
+  const sessions = ['ASIA', 'LONDON', 'OVERLAP', 'NY', 'OFF'];
+  const setups = ['TREND_CONTINUATION', 'LIQUIDITY_SWEEP_REVERSAL', 'BREAKOUT', 'SHORT_SQUEEZE', 'LONG_SQUEEZE', 'MEAN_REVERSION', 'NO_TRADE'];
+  const cellMap = new Map(cells.map((c) => [`${c.session}|${c.setup_kind}`, c]));
+  return (
+    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-2 overflow-x-auto">
+      <div className="font-mono text-[0.5rem] text-[var(--label)] uppercase tracking-[2px] mb-1">
+        Session × Setup expectancy (bps)
+      </div>
+      <table className="font-mono text-[0.5rem] text-[var(--text)] border-collapse">
+        <thead>
+          <tr className="text-[var(--muted)]">
+            <th className="text-left px-1 py-0.5">session</th>
+            {setups.map((s) => (
+              <th key={s} className="px-1 py-0.5 text-center" title={s}>
+                {s.split('_')[0]}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sessions.map((sess) => (
+            <tr key={sess}>
+              <td className="text-[var(--muted)] px-1 py-0.5 uppercase tracking-[1px]">{sess}</td>
+              {setups.map((setup) => {
+                const c = cellMap.get(`${sess}|${setup}`);
+                if (!c || c.n_obs === 0) {
+                  return <td key={setup} className="px-1 py-0.5 text-center text-[var(--dim)]">—</td>;
+                }
+                const exp = c.expectancy_bps ?? 0;
+                const color = exp > 0 ? 'var(--bull)' : exp < 0 ? 'var(--bear)' : 'var(--muted)';
+                const lowN = c.tag === 'LOW-N' || c.tag === 'NO_DATA';
+                return (
+                  <td key={setup} className="px-1 py-0.5 text-center tabular-nums" style={{ color, opacity: lowN ? 0.5 : 1 }} title={`N=${c.n_obs} tag=${c.tag}`}>
+                    {exp > 0 ? '+' : ''}{exp.toFixed(0)}
+                    <span className="text-[var(--dim)] text-[0.45rem]"> ·{c.n_obs}</span>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -140,6 +140,17 @@ export interface CalibrationBlock {
   n_predictions: number;
 }
 
+export type BacktestVerdict = 'NO_EDGE' | 'EDGE_CONFIRMED' | 'UNTESTED';
+
+export interface BacktestStatus {
+  backtest_validated: boolean;
+  n_combos_tested: number;
+  best_pf: number | null;
+  verdict: BacktestVerdict;
+}
+
+export type ValidationStatus = 'UNTESTED' | 'IN_VALIDATION' | 'NULL' | 'VALIDATED';
+
 export interface AssetDecision {
   symbol: 'BTC' | 'ETH';
   verdict: Verdict;
@@ -161,6 +172,11 @@ export interface AssetDecision {
   derivatives: DerivativesBlock;
   orderflow: OrderFlowBlock;
   liquidations: LiquidationBlock;
+  backtest_status: BacktestStatus;
+  tradable: boolean;
+  validation_status: ValidationStatus;
+  validation_note?: string | null;
+  validation_sample_qualifier?: string | null;
 }
 
 export interface MTFDirectionEntry {

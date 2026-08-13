@@ -27,8 +27,16 @@
       "kind": "NO_TRADE",
       "trigger_conditions": [],
       "contributions": [
-        { "source": "OFI", "delta_pts": 4, "reason": "CVD slightly bull 52%" },
-        { "source": "STRUCTURE", "delta_pts": -2, "reason": "Below VWAP" }
+        {
+          "source": "OFI",
+          "delta_pts": 4,
+          "reason": "CVD slightly bull 52%"
+        },
+        {
+          "source": "STRUCTURE",
+          "delta_pts": -2,
+          "reason": "Below VWAP"
+        }
       ],
       "setup_score": 30
     },
@@ -44,9 +52,18 @@
       "price": null,
       "bps": null,
       "method": "GARCH_3SIGMA",
-      "invalidation_reasons": ["Verdict NO_TRADE — no stop computed"]
+      "invalidation_reasons": [
+        "Verdict NO_TRADE \u2014 no stop computed"
+      ]
     },
-    "tp": { "tp1": null, "tp2": null, "tp3": null, "rr_tp1": null, "rr_tp2": null, "rr_tp3": null },
+    "tp": {
+      "tp1": null,
+      "tp2": null,
+      "tp3": null,
+      "rr_tp1": null,
+      "rr_tp2": null,
+      "rr_tp3": null
+    },
     "risk": {
       "size_mult": 0,
       "notional_usd": 0,
@@ -56,27 +73,78 @@
       "kelly_raw": 0,
       "kelly_capped": 0,
       "blocked": true,
-      "block_reasons": ["No active setup"]
+      "block_reasons": [
+        "No active setup"
+      ]
     },
     "data_quality": {
       "score": 95,
       "sources": {
-        "hl": { "fresh": true, "age_ms": 1200, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
-        "binance": { "fresh": true, "age_ms": 3200, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
-        "deribit": { "fresh": true, "age_ms": 8500, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
-        "coinglass": { "fresh": false, "age_ms": null, "coverage_pct": 0, "last_ok_iso": null },
-        "yahoo": { "fresh": true, "age_ms": 42000, "coverage_pct": 100, "last_ok_iso": "2026-08-12T11:59:20Z" }
+        "hl": {
+          "fresh": true,
+          "age_ms": 1200,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T12:00:00Z"
+        },
+        "binance": {
+          "fresh": true,
+          "age_ms": 3200,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T12:00:00Z"
+        },
+        "deribit": {
+          "fresh": true,
+          "age_ms": 8500,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T12:00:00Z"
+        },
+        "coinglass": {
+          "fresh": false,
+          "age_ms": null,
+          "coverage_pct": 0,
+          "last_ok_iso": null
+        },
+        "yahoo": {
+          "fresh": true,
+          "age_ms": 42000,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T11:59:20Z"
+        }
       },
-      "stale_sources": ["coinglass"],
-      "missing_fields": ["liquidations.cascade_risk", "liquidations.clusters"]
+      "stale_sources": [
+        "coinglass"
+      ],
+      "missing_fields": [
+        "liquidations.cascade_risk",
+        "liquidations.clusters"
+      ]
     },
     "why_checklist": [
-      { "label": "4H bullish", "pass": false, "weight": 15 },
-      { "label": "M15 structure bullish", "pass": false, "weight": 15 },
-      { "label": "CVD positive divergence", "pass": false, "weight": 15 },
-      { "label": "Funding not crowded", "pass": true, "weight": 10 }
+      {
+        "label": "4H bullish",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "M15 structure bullish",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "CVD positive divergence",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "Funding not crowded",
+        "pass": true,
+        "weight": 10
+      }
     ],
-    "risks": ["liq-data stale — cascade model disabled", "range regime — no directional edge"],
+    "risks": [
+      "liq-data stale \u2014 cascade model disabled",
+      "range regime \u2014 no directional edge"
+    ],
     "cross_asset": {
       "btc_leadership": 100,
       "beta_to_btc": null,
@@ -92,14 +160,30 @@
       "winrate": 0.51,
       "tag": "OK"
     },
-    "calibration": { "brier": null, "reliability_bin": null, "n_predictions": 0 },
+    "calibration": {
+      "brier": null,
+      "reliability_bin": null,
+      "n_predictions": 0
+    },
     "mtf_alignment": {
       "score": 45,
       "directions": [
-        { "tf": "4H", "dir": "bull" },
-        { "tf": "1H", "dir": "range" },
-        { "tf": "M15", "dir": "range" },
-        { "tf": "5M", "dir": "bear" }
+        {
+          "tf": "4H",
+          "dir": "bull"
+        },
+        {
+          "tf": "1H",
+          "dir": "range"
+        },
+        {
+          "tf": "M15",
+          "dir": "range"
+        },
+        {
+          "tf": "5M",
+          "dir": "bear"
+        }
       ]
     },
     "derivatives": {
@@ -108,7 +192,7 @@
       "oi_delta_1h_pct": -0.31,
       "oi_delta_4h_pct": 1.04,
       "oi_classification": "NEUTRAL",
-      "funding_now": 0.000091,
+      "funding_now": 9.1e-05,
       "funding_annualized_pct": 9.99,
       "funding_zscore_30d": 0.42,
       "funding_tag": "NEUTRAL",
@@ -133,6 +217,12 @@
       "cascade_reason": null,
       "clusters": [],
       "stale": true
+    },
+    "backtest_status": {
+      "backtest_validated": false,
+      "n_combos_tested": 36,
+      "best_pf": 0.5,
+      "verdict": "NO_EDGE"
     }
   },
   "eth": {
@@ -154,7 +244,11 @@
       "kind": "NO_TRADE",
       "trigger_conditions": [],
       "contributions": [
-        { "source": "BTC_LEADERSHIP", "delta_pts": -10, "reason": "BTC range, no leadership" }
+        {
+          "source": "BTC_LEADERSHIP",
+          "delta_pts": -10,
+          "reason": "BTC range, no leadership"
+        }
       ],
       "setup_score": 18
     },
@@ -170,9 +264,18 @@
       "price": null,
       "bps": null,
       "method": "GARCH_3SIGMA",
-      "invalidation_reasons": ["Verdict NO_TRADE — no stop computed"]
+      "invalidation_reasons": [
+        "Verdict NO_TRADE \u2014 no stop computed"
+      ]
     },
-    "tp": { "tp1": null, "tp2": null, "tp3": null, "rr_tp1": null, "rr_tp2": null, "rr_tp3": null },
+    "tp": {
+      "tp1": null,
+      "tp2": null,
+      "tp3": null,
+      "rr_tp1": null,
+      "rr_tp2": null,
+      "rr_tp3": null
+    },
     "risk": {
       "size_mult": 0,
       "notional_usd": 0,
@@ -182,25 +285,69 @@
       "kelly_raw": 0,
       "kelly_capped": 0,
       "blocked": true,
-      "block_reasons": ["No active setup", "BTC leadership weak"]
+      "block_reasons": [
+        "No active setup",
+        "BTC leadership weak"
+      ]
     },
     "data_quality": {
       "score": 70,
       "sources": {
-        "hl": { "fresh": true, "age_ms": 1400, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
-        "binance": { "fresh": true, "age_ms": 3300, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
-        "deribit": { "fresh": true, "age_ms": 9100, "coverage_pct": 100, "last_ok_iso": "2026-08-12T12:00:00Z" },
-        "coinglass": { "fresh": false, "age_ms": null, "coverage_pct": 0, "last_ok_iso": null },
-        "yahoo": { "fresh": true, "age_ms": 42000, "coverage_pct": 100, "last_ok_iso": "2026-08-12T11:59:20Z" }
+        "hl": {
+          "fresh": true,
+          "age_ms": 1400,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T12:00:00Z"
+        },
+        "binance": {
+          "fresh": true,
+          "age_ms": 3300,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T12:00:00Z"
+        },
+        "deribit": {
+          "fresh": true,
+          "age_ms": 9100,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T12:00:00Z"
+        },
+        "coinglass": {
+          "fresh": false,
+          "age_ms": null,
+          "coverage_pct": 0,
+          "last_ok_iso": null
+        },
+        "yahoo": {
+          "fresh": true,
+          "age_ms": 42000,
+          "coverage_pct": 100,
+          "last_ok_iso": "2026-08-12T11:59:20Z"
+        }
       },
-      "stale_sources": ["coinglass"],
-      "missing_fields": ["liquidations.cascade_risk", "liquidations.clusters"]
+      "stale_sources": [
+        "coinglass"
+      ],
+      "missing_fields": [
+        "liquidations.cascade_risk",
+        "liquidations.clusters"
+      ]
     },
     "why_checklist": [
-      { "label": "BTC aligned", "pass": false, "weight": 15 },
-      { "label": "ETH 4H bullish", "pass": false, "weight": 15 }
+      {
+        "label": "BTC aligned",
+        "pass": false,
+        "weight": 15
+      },
+      {
+        "label": "ETH 4H bullish",
+        "pass": false,
+        "weight": 15
+      }
     ],
-    "risks": ["liq-data stale", "BTC range — alt bounce capped"],
+    "risks": [
+      "liq-data stale",
+      "BTC range \u2014 alt bounce capped"
+    ],
     "cross_asset": {
       "btc_leadership": 30,
       "beta_to_btc": 1.18,
@@ -216,14 +363,30 @@
       "winrate": 0.49,
       "tag": "OK"
     },
-    "calibration": { "brier": null, "reliability_bin": null, "n_predictions": 0 },
+    "calibration": {
+      "brier": null,
+      "reliability_bin": null,
+      "n_predictions": 0
+    },
     "mtf_alignment": {
       "score": 38,
       "directions": [
-        { "tf": "4H", "dir": "range" },
-        { "tf": "1H", "dir": "range" },
-        { "tf": "M15", "dir": "bear" },
-        { "tf": "5M", "dir": "bear" }
+        {
+          "tf": "4H",
+          "dir": "range"
+        },
+        {
+          "tf": "1H",
+          "dir": "range"
+        },
+        {
+          "tf": "M15",
+          "dir": "bear"
+        },
+        {
+          "tf": "5M",
+          "dir": "bear"
+        }
       ]
     },
     "derivatives": {
@@ -232,7 +395,7 @@
       "oi_delta_1h_pct": -0.42,
       "oi_delta_4h_pct": 0.84,
       "oi_classification": "NEUTRAL",
-      "funding_now": 0.000074,
+      "funding_now": 7.4e-05,
       "funding_annualized_pct": 8.13,
       "funding_zscore_30d": 0.31,
       "funding_tag": "NEUTRAL",
@@ -257,6 +420,12 @@
       "cascade_reason": null,
       "clusters": [],
       "stale": true
+    },
+    "backtest_status": {
+      "backtest_validated": false,
+      "n_combos_tested": 0,
+      "best_pf": null,
+      "verdict": "UNTESTED"
     }
   },
   "cross_asset": {
@@ -270,12 +439,36 @@
     "risk_state": "NEUTRAL",
     "macro_pressure": 42,
     "drivers": [
-      { "asset": "DXY", "corr_30d": -0.12, "daily_change_pct": 0.04 },
-      { "asset": "SPX", "corr_30d": 0.21, "daily_change_pct": -0.18 },
-      { "asset": "VIX", "corr_30d": -0.31, "daily_change_pct": 1.42 },
-      { "asset": "US10Y", "corr_30d": -0.08, "daily_change_pct": 0.02 },
-      { "asset": "GOLD", "corr_30d": 0.16, "daily_change_pct": 0.31 },
-      { "asset": "NDX", "corr_30d": 0.19, "daily_change_pct": -0.22 }
+      {
+        "asset": "DXY",
+        "corr_30d": -0.12,
+        "daily_change_pct": 0.04
+      },
+      {
+        "asset": "SPX",
+        "corr_30d": 0.21,
+        "daily_change_pct": -0.18
+      },
+      {
+        "asset": "VIX",
+        "corr_30d": -0.31,
+        "daily_change_pct": 1.42
+      },
+      {
+        "asset": "US10Y",
+        "corr_30d": -0.08,
+        "daily_change_pct": 0.02
+      },
+      {
+        "asset": "GOLD",
+        "corr_30d": 0.16,
+        "daily_change_pct": 0.31
+      },
+      {
+        "asset": "NDX",
+        "corr_30d": 0.19,
+        "daily_change_pct": -0.22
+      }
     ],
     "as_of_iso": "2026-08-12T11:59:20Z"
   },
@@ -290,9 +483,33 @@
   "session_matrix": {
     "as_of_iso": "2026-08-12T00:00:00Z",
     "cells": [
-      { "session": "LONDON", "setup_kind": "TREND_CONTINUATION", "expectancy_bps": 12.4, "n_obs": 47, "sharpe": 0.8, "winrate": 0.51, "tag": "OK" },
-      { "session": "NY", "setup_kind": "BREAKOUT", "expectancy_bps": -8.1, "n_obs": 31, "sharpe": -0.4, "winrate": 0.42, "tag": "OK" },
-      { "session": "ASIA", "setup_kind": "MEAN_REVERSION", "expectancy_bps": null, "n_obs": 12, "sharpe": null, "winrate": null, "tag": "LOW-N" }
+      {
+        "session": "LONDON",
+        "setup_kind": "TREND_CONTINUATION",
+        "expectancy_bps": 12.4,
+        "n_obs": 47,
+        "sharpe": 0.8,
+        "winrate": 0.51,
+        "tag": "OK"
+      },
+      {
+        "session": "NY",
+        "setup_kind": "BREAKOUT",
+        "expectancy_bps": -8.1,
+        "n_obs": 31,
+        "sharpe": -0.4,
+        "winrate": 0.42,
+        "tag": "OK"
+      },
+      {
+        "session": "ASIA",
+        "setup_kind": "MEAN_REVERSION",
+        "expectancy_bps": null,
+        "n_obs": 12,
+        "sharpe": null,
+        "winrate": null,
+        "tag": "LOW-N"
+      }
     ]
   }
 }

@@ -70,15 +70,11 @@ export interface OrderflowStatus {
   error?: string;
 }
 
-const DATA_BASE = process.env.NEXT_PUBLIC_DASH_DATA_URL ?? '';
-const ORDERFLOW_URL = DATA_BASE
-  ? `${DATA_BASE.replace(/\/$/, '')}/orderflow_status.json`
-  : '/data/orderflow_status.json';
-
+const ORDERFLOW_URL = '/api/orderflow-status';
 const STALE_THRESHOLD_MS = 15 * 60 * 1000;
 
 const fetcher = async (url: string): Promise<OrderflowStatus> => {
-  const res = await fetch(url);
+  const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as OrderflowStatus;
 };

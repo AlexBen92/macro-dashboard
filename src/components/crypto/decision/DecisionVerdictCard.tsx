@@ -2,6 +2,7 @@
 
 import type { AssetDecision } from '@/lib/decision/types';
 import { verdictColor, entryStateColor, setupKindLabel, MetricRow, Pill } from './styles';
+import BacktestHonestyBadge from './BacktestHonestyBadge';
 
 function ContributionRow({ source, delta, reason }: {
   source: string; delta: number; reason: string;
@@ -45,28 +46,64 @@ export default function DecisionVerdictCard({ asset }: { asset: AssetDecision | 
     );
   }
 
-  const style = verdictColor(asset.verdict);
+  const baseStyle = verdictColor(asset.verdict);
   const entryColor = entryStateColor(asset.entry.state);
   const dq = asset.data_quality;
   const dqColor = dq.score >= 70 ? 'var(--bull)' : dq.score >= 50 ? 'var(--caution)' : 'var(--bear)';
   const rr1 = asset.tp.rr_tp1;
+  const isNoEdge = asset.backtest_status?.verdict === 'NO_EDGE';
+  const isActionable = asset.verdict === 'LONG' || asset.verdict === 'SHORT';
+  const isNonTradable = asset.tradable === false && isActionable;
+
+  const style = isNonTradable
+    ? {
+        text: 'var(--dim)',
+        bg: 'repeating-linear-gradient(45deg, rgba(140,140,160,0.04) 0 6px, rgba(20,20,30,0.4) 6px 12px)',
+        border: 'var(--dim)',
+      }
+    : baseStyle;
+
+  const nonTradableTooltip = asset.validation_note
+    ? `NON TRADABLE · ${asset.validation_status} — ${asset.validation_note}${
+        asset.validation_sample_qualifier ? ` [${asset.validation_sample_qualifier}]` : ''
+      } · ref decision/data/backtest_sweep.json`
+    : `NON TRADABLE · ${asset.validation_status} · ref decision/data/backtest_sweep.json`;
 
   return (
     <div
       className="bg-[var(--bg2)] border rounded-[4px] p-3 flex flex-col gap-2"
-      style={{ background: style.bg, borderColor: style.border }}
+      style={{
+        background: style.bg,
+        borderColor: style.border,
+        borderStyle: isNonTradable ? 'dashed' : 'solid',
+      }}
     >
       <div className="flex items-center justify-between">
         <span className="font-mono text-[0.55rem] text-[var(--label)] uppercase tracking-[2px]">
           M15 Decision · {asset.symbol}
         </span>
-        <Pill text={asset.entry.state} color={entryColor} bg="rgba(0,0,0,0.3)" border={entryColor} />
+        <div className="flex items-center gap-1">
+          {isNonTradable && (
+            <Pill
+              text="NON TRADABLE"
+              color="var(--dim)"
+              bg="rgba(140,140,160,0.10)"
+              border="var(--dim)"
+            />
+          )}
+          <Pill text={asset.entry.state} color={entryColor} bg="rgba(0,0,0,0.3)" border={entryColor} />
+        </div>
       </div>
 
-      <div className="flex items-baseline gap-3">
+      <div className="flex items-baseline gap-3" title={isNonTradable ? nonTradableTooltip : (isNoEdge ? 'Walk-forward OOS invalidated this setup — NO_EDGE' : undefined)}>
         <span
           className="font-mono text-[1.4rem] font-bold tracking-[1px]"
-          style={{ color: style.text }}
+          style={{
+            color: style.text,
+            opacity: isNonTradable ? 0.6 : isNoEdge ? 0.55 : 1,
+            textDecoration: isNonTradable ? 'line-through' : 'none',
+            textDecorationStyle: isNonTradable ? 'dashed' : undefined,
+          }}
         >
           {asset.verdict}
         </span>
@@ -78,6 +115,17 @@ export default function DecisionVerdictCard({ asset }: { asset: AssetDecision | 
         </span>
       </div>
 
+      {isNonTradable && (
+        <div
+          className="font-mono text-[0.5rem] text-[var(--dim)] uppercase tracking-[1px] border border-dashed border-[var(--dim)] rounded-[2px] px-2 py-1"
+          title={nonTradableTooltip}
+        >
+          {asset.validation_status === 'NULL'
+            ? `SETUP NULL — PF ${asset.backtest_status.best_pf != null ? asset.backtest_status.best_pf.toFixed(2) : 'n/a'} · ${asset.backtest_status.n_combos_tested} configs · ref backtest_sweep.json`
+            : `SETUP ${asset.validation_status} — non validé pour exécution`}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-x-3 gap-y-0">
         <MetricRow label="Regime" value={asset.regime.label} />
         <MetricRow label="Trend" value={asset.regime.trend_direction} />
@@ -85,6 +133,15 @@ export default function DecisionVerdictCard({ asset }: { asset: AssetDecision | 
         <MetricRow label="Vol ratio" value={asset.regime.vol_ratio} />
         <MetricRow label="Setup" value={setupKindLabel(asset.setup.kind)} />
         <MetricRow label="MTF align" value={asset.mtf_alignment.score} />
+      </div>
+
+      <div className="border-t border-[var(--border)] pt-2 grid grid-cols-2 gap-x-3">
+        <MetricRow label="OI class" value={asset.derivatives.oi_classification} />
+        <MetricRow label="OI Δ1h" value={asset.derivatives.oi_delta_1h_pct == null ? null : `${asset.derivatives.oi_delta_1h_pct > 0 ? '+' : ''}${asset.derivatives.oi_delta_1h_pct}%`} />
+        <MetricRow label="Funding" value={asset.derivatives.funding_now == null ? null : `${(asset.derivatives.funding_now * 1e4).toFixed(2)}bps`} hint={asset.derivatives.funding_tag} />
+        <MetricRow label="Funding z30d" value={asset.derivatives.funding_zscore_30d} />
+        <MetricRow label="Basis bps" value={asset.derivatives.basis_bps} />
+        <MetricRow label="Session" value={asset.session.name} hint={asset.session.tag === 'NO_DATA' ? undefined : `exp ${asset.session.expectancy_bps ?? '—'}`} />
       </div>
 
       <div className="border-t border-[var(--border)] pt-2 grid grid-cols-2 gap-x-3">
@@ -146,6 +203,8 @@ export default function DecisionVerdictCard({ asset }: { asset: AssetDecision | 
           </ul>
         </div>
       )}
+
+      <BacktestHonestyBadge status={asset.backtest_status} />
 
       <div className="border-t border-[var(--border)] pt-1 flex items-center justify-between">
         <span className="font-mono text-[0.5rem] text-[var(--dim)] uppercase tracking-[1px]">
