@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import RotationScoreboard from '@/components/markets/RotationScoreboard';
 import SectorHeatmap from '@/components/markets/SectorHeatmap';
+import RegimeMatrixTable from '@/components/markets/RegimeMatrixTable';
 import LiquidBasketTable from '@/components/markets/LiquidBasketTable';
 import EdgeWatchlist from '@/components/markets/EdgeWatchlist';
 import { useMarketSectors } from '@/hooks/api/useMarketSectors';
@@ -65,6 +66,10 @@ export default function MarketsPage() {
 
         <motion.div variants={fadeUp}>
           <SectorHeatmap trends={trends} />
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <RegimeMatrixTable />
         </motion.div>
 
         <motion.div variants={fadeUp}>
