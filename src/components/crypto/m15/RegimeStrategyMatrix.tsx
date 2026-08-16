@@ -60,7 +60,7 @@ export default function RegimeStrategyMatrix() {
   const excluded = data.matrix_excluded ?? [];
 
   return (
-    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-3 flex flex-col gap-2">
+    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-3 flex flex-col gap-2 min-w-0">
       <div className="flex items-center justify-between">
         <span className="font-mono text-[0.55rem] text-[var(--label)] uppercase tracking-[2px]">
           Régime × Stratégie · Sharpe annualisé
@@ -70,7 +70,7 @@ export default function RegimeStrategyMatrix() {
         </span>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto min-w-0 w-full">
         <table className="w-full font-mono text-[0.55rem] border-collapse">
           <thead>
             <tr className="border-b border-[var(--border)]">

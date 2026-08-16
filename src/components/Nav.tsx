@@ -12,14 +12,14 @@ export default function Nav() {
   ];
 
   return (
-    <nav className="flex items-center gap-3 px-6 py-2.5 bg-[#06060a] border-b border-[#1a1a30]">
-      <span className="font-mono text-[0.85rem] font-bold text-[#556680] tracking-[3px] mr-4">MACRO STACK</span>
+    <nav className="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 bg-[#06060a] border-b border-[#1a1a30] overflow-x-auto">
+      <span className="font-mono text-[0.85rem] font-bold text-[#556680] tracking-[3px] mr-2 sm:mr-4 whitespace-nowrap">MACRO STACK</span>
       {links.map(l => {
         const active = path === l.href;
         return (
-          <Link key={l.href} href={l.href} className="relative">
+          <Link key={l.href} href={l.href} className="relative shrink-0">
             <span
-              className={`font-mono text-[0.9rem] font-semibold px-4 py-1.5 rounded transition-colors ${
+              className={`font-mono text-[0.9rem] font-semibold px-3 sm:px-4 py-1.5 rounded transition-colors whitespace-nowrap ${
                 active
                   ? `bg-[${l.color}]/10 border border-[${l.color}]/30`
                   : 'text-[#556680] hover:text-[#e8e8f0]'
