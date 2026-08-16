@@ -5,7 +5,7 @@ import { useEdgeM15Status } from '@/hooks/api/useEdgeM15Status';
 
 const REGIME_COLOR: Record<RegimeLabel, string> = {
   CALM: 'var(--bull)',
-  BUILDING: 'rgb(140,180,255)',
+  BUILDING: 'var(--info-soft)',
   STRESS: 'var(--caution)',
   CRISIS: 'var(--bear)',
 };

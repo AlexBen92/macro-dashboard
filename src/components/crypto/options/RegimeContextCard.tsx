@@ -23,7 +23,7 @@ const REGIME_STYLE: Record<RegimeLabel, RegimeStyle> = {
   BUILDING: {
     bg: 'rgba(100,160,255,0.06)',
     border: 'rgb(100,160,255)',
-    text: 'rgb(140,180,255)',
+    text: 'var(--info-soft)',
     label: 'BUILDING',
     emoji: '🔵',
     blurb: 'Vol rising mid-range — trend & breakout strategies favored.',
@@ -74,7 +74,7 @@ function confidenceBadge(row: StrategyRow, regime: RegimeLabel): {
 
 const TAG_STYLE: Record<string, { bg: string; text: string }> = {
   STRONG: { bg: 'rgba(74,222,128,0.10)', text: 'var(--bull)' },
-  OK: { bg: 'rgba(140,180,255,0.08)', text: 'rgb(140,180,255)' },
+  OK: { bg: 'rgba(140,180,255,0.08)', text: 'var(--info-soft)' },
   'LOW-N': { bg: 'rgba(255,170,0,0.08)', text: 'var(--caution)' },
   'LOW-DSR': { bg: 'rgba(255,170,0,0.08)', text: 'var(--caution)' },
   NONE: { bg: 'rgba(140,140,160,0.05)', text: 'var(--muted)' },

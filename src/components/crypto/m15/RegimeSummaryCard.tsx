@@ -16,7 +16,7 @@ const REGIME_STYLE: Record<RegimeLabel, {
   BUILDING: {
     bg: 'rgba(100,160,255,0.08)',
     border: 'rgb(100,160,255)',
-    text: 'rgb(140,180,255)',
+    text: 'var(--info-soft)',
     emoji: '🔵',
     blurb: 'Vol rising — trend & breakout favored',
   },
@@ -40,14 +40,14 @@ const REGIME_ORDER: RegimeLabel[] = ['CALM', 'BUILDING', 'STRESS', 'CRISIS'];
 
 function classifyAdx(adx: number): { label: string; color: string; pct: number } {
   if (adx < 20) return { label: 'RANGE', color: 'var(--bull)', pct: (adx / 25) * 100 };
-  if (adx < 25) return { label: 'BUILDING', color: 'rgb(140,180,255)', pct: (adx / 50) * 100 + 40 };
+  if (adx < 25) return { label: 'BUILDING', color: 'var(--info-soft)', pct: (adx / 50) * 100 + 40 };
   return { label: 'TREND', color: 'var(--caution)', pct: Math.min(100, (adx / 50) * 100) };
 }
 
 function classifyVolRatio(vr: number | null): { label: string; color: string; pct: number } | null {
   if (vr === null) return null;
   if (vr < 0.8) return { label: 'LOW', color: 'var(--bull)', pct: Math.max(5, vr * 60) };
-  if (vr <= 1.2) return { label: 'MID', color: 'rgb(140,180,255)', pct: vr * 60 };
+  if (vr <= 1.2) return { label: 'MID', color: 'var(--info-soft)', pct: vr * 60 };
   if (vr <= 1.5) return { label: 'HIGH', color: 'var(--caution)', pct: Math.min(100, vr * 60) };
   return { label: 'CRISIS', color: 'var(--bear)', pct: 100 };
 }
@@ -56,7 +56,7 @@ function classifyRsi(rsi: number): { label: string; color: string; pct: number }
   if (rsi < 30) return { label: 'OVERSOLD', color: 'var(--bear)', pct: rsi };
   if (rsi > 70) return { label: 'OVERBOUGHT', color: 'var(--bear)', pct: rsi };
   if (rsi > 55) return { label: 'BULLISH', color: 'var(--bull)', pct: rsi };
-  if (rsi < 45) return { label: 'BEARISH', color: 'rgb(140,180,255)', pct: rsi };
+  if (rsi < 45) return { label: 'BEARISH', color: 'var(--info-soft)', pct: rsi };
   return { label: 'NEUTRAL', color: 'var(--muted)', pct: rsi };
 }
 

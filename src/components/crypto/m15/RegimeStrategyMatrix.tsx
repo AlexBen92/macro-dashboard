@@ -6,7 +6,7 @@ const REGIME_COLS: RegimeLabel[] = ['CALM', 'BUILDING', 'STRESS', 'CRISIS'];
 
 const REGIME_COLOR: Record<RegimeLabel, string> = {
   CALM: 'var(--bull)',
-  BUILDING: 'rgb(140,180,255)',
+  BUILDING: 'var(--info-soft)',
   STRESS: 'var(--caution)',
   CRISIS: 'var(--bear)',
 };

@@ -1,9 +1,9 @@
 {
-  "as_of": "2026-08-13T08:45:10.184059+00:00",
-  "last_export_success": "2026-08-13T08:45:10.184063+00:00",
+  "as_of": "2026-08-16T13:45:16.820183+00:00",
+  "last_export_success": "2026-08-16T13:45:16.820187+00:00",
   "heartbeat": {
-    "last_attempt_iso": "2026-08-13T08:45:10.184065+00:00",
-    "last_success_iso": "2026-08-13T08:45:10.184068+00:00",
+    "last_attempt_iso": "2026-08-16T13:45:16.820189+00:00",
+    "last_success_iso": "2026-08-16T13:45:16.820191+00:00",
     "error": null
   },
   "pipeline_version": "0.7.0-stage11",
@@ -14,10 +14,10 @@
     "score": 24,
     "confidence": 0,
     "regime": {
-      "label": "BUILDING",
+      "label": "CALM",
       "hurst": null,
-      "adx": 22.791495865471376,
-      "vol_ratio": 0.005,
+      "adx": 20.21904013015052,
+      "vol_ratio": 0.07,
       "hmm_state": null,
       "garch_regime": null,
       "trend_direction": "range",
@@ -30,24 +30,24 @@
         {
           "source": "REGIME",
           "delta_pts": 8,
-          "reason": "BUILDING conf=0.40"
-        },
-        {
-          "source": "DEPTH_IMBALANCE",
-          "delta_pts": 6,
-          "reason": "imbalance +0.34"
+          "reason": "CALM conf=0.40"
         },
         {
           "source": "DATA_QUALITY",
           "delta_pts": 3,
           "reason": "data-quality 65/100"
+        },
+        {
+          "source": "DEPTH_IMBALANCE",
+          "delta_pts": 0,
+          "reason": "imbalance -0.03"
         }
       ],
       "setup_score": 0
     },
     "entry": {
       "state": "EXPIRED",
-      "price": 63770.0,
+      "price": 63040.0,
       "armed_at_iso": "2026-08-12T15:00:20.303387+00:00",
       "trigger_at_iso": null,
       "expires_at_iso": null,
@@ -87,21 +87,21 @@
       "sources": {
         "hl": {
           "fresh": true,
-          "age_ms": 2404,
+          "age_ms": 1541,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:06.642847+00:00"
+          "last_ok_iso": "2026-08-16T13:45:14.134541+00:00"
         },
         "binance": {
           "fresh": true,
-          "age_ms": 882,
+          "age_ms": 513,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:08.164645+00:00"
+          "last_ok_iso": "2026-08-16T13:45:15.162589+00:00"
         },
         "deribit": {
           "fresh": true,
-          "age_ms": 830,
+          "age_ms": 464,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:08.216765+00:00"
+          "last_ok_iso": "2026-08-16T13:45:15.211543+00:00"
         },
         "coinglass": {
           "fresh": false,
@@ -111,9 +111,9 @@
         },
         "yahoo": {
           "fresh": true,
-          "age_ms": 4,
+          "age_ms": 2,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:09.042503+00:00"
+          "last_ok_iso": "2026-08-16T13:45:15.673313+00:00"
         }
       },
       "stale_sources": [
@@ -147,7 +147,7 @@
       },
       {
         "label": "Regime allows setup",
-        "pass": true,
+        "pass": false,
         "weight": 20
       },
       {
@@ -168,7 +168,7 @@
       "suppression_reason": null
     },
     "session": {
-      "name": "LONDON",
+      "name": "OVERLAP",
       "expectancy_bps": null,
       "n_obs": 0,
       "sharpe": null,
@@ -202,19 +202,19 @@
       ]
     },
     "derivatives": {
-      "oi_now": 7037861694.3734,
-      "oi_delta_15m_pct": -0.19,
-      "oi_delta_1h_pct": -0.246,
-      "oi_delta_4h_pct": -0.806,
+      "oi_now": 7038936749.29847,
+      "oi_delta_15m_pct": 0.003,
+      "oi_delta_1h_pct": 0.166,
+      "oi_delta_4h_pct": 0.249,
       "oi_classification": "NEUTRAL",
-      "funding_now": 5.476e-05,
-      "funding_annualized_pct": 5.99622,
-      "funding_zscore_30d": 0.65,
+      "funding_now": 3.471e-05,
+      "funding_annualized_pct": 3.800745,
+      "funding_zscore_30d": -1.34,
       "funding_tag": "NEUTRAL",
       "basis_bps": null
     },
     "orderflow": {
-      "cvd_now": 0.00083,
+      "cvd_now": 0.01312,
       "cvd_slope_15m": null,
       "cvd_divergence": "UNKNOWN",
       "taker_buy_sell_ratio": null,
@@ -247,16 +247,16 @@
   "eth": {
     "symbol": "ETH",
     "verdict": "NO_TRADE",
-    "score": 30,
+    "score": 24,
     "confidence": 0,
     "regime": {
-      "label": "CALM",
+      "label": "BUILDING",
       "hurst": null,
-      "adx": 20.40471734232282,
-      "vol_ratio": 0.03,
+      "adx": 23.68965954299512,
+      "vol_ratio": 0.015,
       "hmm_state": null,
       "garch_regime": null,
-      "trend_direction": "bull",
+      "trend_direction": "range",
       "confidence": 0.4
     },
     "setup": {
@@ -266,7 +266,7 @@
         {
           "source": "REGIME",
           "delta_pts": 8,
-          "reason": "CALM conf=0.40"
+          "reason": "BUILDING conf=0.40"
         },
         {
           "source": "DATA_QUALITY",
@@ -275,15 +275,15 @@
         },
         {
           "source": "DEPTH_IMBALANCE",
-          "delta_pts": 0,
-          "reason": "imbalance +0.02"
+          "delta_pts": -3,
+          "reason": "imbalance -0.19"
         }
       ],
       "setup_score": 0
     },
     "entry": {
       "state": "EXPIRED",
-      "price": 1891.3,
+      "price": 1880.6,
       "armed_at_iso": "2026-08-12T12:14:18.391360+00:00",
       "trigger_at_iso": null,
       "expires_at_iso": null,
@@ -323,21 +323,21 @@
       "sources": {
         "hl": {
           "fresh": true,
-          "age_ms": 2404,
+          "age_ms": 1541,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:06.642847+00:00"
+          "last_ok_iso": "2026-08-16T13:45:14.134541+00:00"
         },
         "binance": {
           "fresh": true,
-          "age_ms": 882,
+          "age_ms": 513,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:08.164645+00:00"
+          "last_ok_iso": "2026-08-16T13:45:15.162589+00:00"
         },
         "deribit": {
           "fresh": true,
-          "age_ms": 830,
+          "age_ms": 464,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:08.216765+00:00"
+          "last_ok_iso": "2026-08-16T13:45:15.211543+00:00"
         },
         "coinglass": {
           "fresh": false,
@@ -347,9 +347,9 @@
         },
         "yahoo": {
           "fresh": true,
-          "age_ms": 4,
+          "age_ms": 2,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-13T08:45:09.042503+00:00"
+          "last_ok_iso": "2026-08-16T13:45:15.673313+00:00"
         }
       },
       "stale_sources": [
@@ -363,7 +363,7 @@
     "why_checklist": [
       {
         "label": "4H bullish",
-        "pass": true,
+        "pass": false,
         "weight": 15
       },
       {
@@ -383,7 +383,7 @@
       },
       {
         "label": "Regime allows setup",
-        "pass": false,
+        "pass": true,
         "weight": 20
       },
       {
@@ -397,14 +397,14 @@
       "no qualifying setup"
     ],
     "cross_asset": {
-      "btc_leadership": 34.9,
+      "btc_leadership": 30.4,
       "beta_to_btc": null,
       "relative_strength": null,
       "suppressed_by_btc": false,
       "suppression_reason": null
     },
     "session": {
-      "name": "LONDON",
+      "name": "OVERLAP",
       "expectancy_bps": null,
       "n_obs": 0,
       "sharpe": null,
@@ -417,7 +417,7 @@
       "n_predictions": 0
     },
     "mtf_alignment": {
-      "score": 40,
+      "score": 70,
       "directions": [
         {
           "tf": "4H",
@@ -425,32 +425,32 @@
         },
         {
           "tf": "1H",
-          "dir": "range"
+          "dir": "bear"
         },
         {
           "tf": "M15",
-          "dir": "bull"
+          "dir": "range"
         },
         {
           "tf": "5M",
-          "dir": "bull"
+          "dir": "range"
         }
       ]
     },
     "derivatives": {
-      "oi_now": 4473344683.498513,
-      "oi_delta_15m_pct": 0.036,
-      "oi_delta_1h_pct": -0.394,
-      "oi_delta_4h_pct": 0.07,
-      "oi_classification": "DELEVERAGING",
-      "funding_now": 7.221e-05,
-      "funding_annualized_pct": 7.906995,
-      "funding_zscore_30d": 1.68,
+      "oi_now": 4441046236.36952,
+      "oi_delta_15m_pct": 0.018,
+      "oi_delta_1h_pct": -0.017,
+      "oi_delta_4h_pct": -0.068,
+      "oi_classification": "NEUTRAL",
+      "funding_now": 2.989e-05,
+      "funding_annualized_pct": 3.2729550000000005,
+      "funding_zscore_30d": -0.44,
       "funding_tag": "NEUTRAL",
       "basis_bps": null
     },
     "orderflow": {
-      "cvd_now": 4.4808,
+      "cvd_now": 1.2856,
       "cvd_slope_15m": null,
       "cvd_divergence": "UNKNOWN",
       "taker_buy_sell_ratio": null,
@@ -483,57 +483,57 @@
   "cross_asset": {
     "beta_eth_to_btc": null,
     "lead_lag_btc_eth_hours": null,
-    "btc_leadership_score": 34.9,
+    "btc_leadership_score": 30.4,
     "eth_suppressed": false,
-    "as_of_iso": "2026-08-13T08:45:10.184044+00:00"
+    "as_of_iso": "2026-08-16T13:45:16.820150+00:00"
   },
   "macro": {
     "risk_state": "RISK_ON",
-    "macro_pressure": 17,
+    "macro_pressure": 15,
     "drivers": [
       {
         "asset": "DXY",
-        "corr_30d": 0.344,
-        "daily_change_pct": 1.52
+        "corr_30d": 0.066,
+        "daily_change_pct": 0.369
       },
       {
         "asset": "SPX",
-        "corr_30d": -0.036,
-        "daily_change_pct": 4.696
+        "corr_30d": 0.055,
+        "daily_change_pct": 3.793
       },
       {
         "asset": "NDX",
-        "corr_30d": -0.052,
-        "daily_change_pct": 1.918
+        "corr_30d": 0.048,
+        "daily_change_pct": 0.353
       },
       {
         "asset": "VIX",
-        "corr_30d": 0.152,
-        "daily_change_pct": -17.851
+        "corr_30d": 0.107,
+        "daily_change_pct": -17.439
       },
       {
         "asset": "US10Y",
-        "corr_30d": 0.372,
-        "daily_change_pct": 4.907
+        "corr_30d": -0.325,
+        "daily_change_pct": 5.268
       },
       {
         "asset": "GOLD",
-        "corr_30d": -0.225,
-        "daily_change_pct": -5.669
+        "corr_30d": -0.075,
+        "daily_change_pct": -2.601
       }
     ],
-    "as_of_iso": "2026-08-13T08:45:09.042543+00:00"
+    "as_of_iso": "2026-08-16T13:45:15.673341+00:00"
   },
   "event_risk": {
-    "next_event_iso": "2026-08-13T12:30:00Z",
-    "kind": "CPI",
+    "next_event_iso": "2026-09-04T12:30:00Z",
+    "kind": "NFP",
     "impact": "HIGH",
-    "minutes_until": 224,
+    "minutes_until": 27284,
     "in_window": false,
     "calendar_version": "2026-08-12-manual-v1"
   },
   "session_matrix": {
-    "as_of_iso": "2026-08-13T08:45:09.051351+00:00",
+    "as_of_iso": "2026-08-16T13:45:15.678639+00:00",
     "cells": [
       {
         "session": "ASIA",

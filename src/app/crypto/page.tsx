@@ -22,6 +22,8 @@ import SetupsPanel from '@/components/crypto/m15/SetupsPanel';
 import OrderFlowImbalanceWidget from '@/components/crypto/orderflow/OrderFlowImbalanceWidget';
 import AlphaTermStructureChart from '@/components/crypto/orderflow/AlphaTermStructureChart';
 import OfiSetupsPanel from '@/components/crypto/orderflow/OfiSetupsPanel';
+import Top50CryptoTable from '@/components/crypto/Top50CryptoTable';
+import ResearchProgramStatus from '@/components/ResearchProgramStatus';
 
 import { useOptionsExposure } from '@/hooks/api/useOptionsExposure';
 import type { ExpiryBucket, SupportedCurrency, Timeframe } from '@/lib/options/types';
@@ -94,6 +96,13 @@ export default function CryptoPage() {
           <DecisionEnginePanel />
         </section>
 
+        <section className="flex flex-col gap-3">
+          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
+            Bloc 2c · Top 50 — market cap · performance · funding perp
+          </div>
+          <Top50CryptoTable />
+        </section>
+
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
             Bloc 3 · Corrélation · Session Plan · Setups
@@ -130,6 +139,8 @@ export default function CryptoPage() {
             reste opérationnel via Hyperliquid live.
           </div>
         )}
+
+        <ResearchProgramStatus variant="crypto" />
 
         {!error && !data && !isLoading && (
           <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[3px] px-3 py-2 font-mono text-[0.55rem] text-[var(--muted)]">

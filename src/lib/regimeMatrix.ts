@@ -11,7 +11,14 @@ export interface RegimeMatrixAsset {
   volume_24h: number | null;
   bars: number;
   status: 'ok' | 'insufficient_history' | 'fetch_error';
-  hurst_252: number | null;
+  /** v2 payload (DFA dual windows). hurst_252 = legacy v1 field. */
+  hurst_struct?: number | null;
+  hurst_short?: number | null;
+  hurst_short_regime?: HurstRegime | null;
+  hurst_divergence?: number | null;
+  hurst_method?: string | null;
+  hurst_windows?: { short: number; structural: number } | null;
+  hurst_252?: number | null;
   hurst_regime: HurstRegime | null;
   supertrend_dir: SuperTrendDir | null;
   st_flips_30d: number | null;
@@ -71,6 +78,33 @@ export function trendScoreColor(score: number | null): string {
   if (score >= 60) return 'var(--bull)';
   if (score >= 35) return 'var(--muted)';
   return 'var(--dim)';
+}
+
+export function hurstStruct(a: RegimeMatrixAsset): number | null {
+  return a.hurst_struct ?? a.hurst_252 ?? null;
+}
+
+export function hurstShort(a: RegimeMatrixAsset): number | null {
+  return a.hurst_short ?? null;
+}
+
+export const HURST_DIVERGENCE_THRESHOLD = 0.08;
+
+/** Regime-shift signal: strong short/structural divergence means the
+ * underlying regime is transitioning (non-stationarity inside window). */
+export function hurstDivergenceState(
+  a: RegimeMatrixAsset,
+): { label: string; arrow: string | null; strong: boolean } {
+  const s = hurstShort(a);
+  const st = hurstStruct(a);
+  if (s == null || st == null || a.hurst_divergence == null) {
+    return { label: '—', arrow: null, strong: false };
+  }
+  const d = s - st; // >0: recent regime more persistent than background
+  if (Math.abs(d) < HURST_DIVERGENCE_THRESHOLD) {
+    return { label: 'alignés', arrow: '→', strong: false };
+  }
+  return { label: 'divergence', arrow: d > 0 ? '↗' : '↘', strong: true };
 }
 
 export function assetsBySource(

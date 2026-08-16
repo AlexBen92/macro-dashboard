@@ -5,6 +5,9 @@ import { useRegimeMatrix } from '@/hooks/api/useRegimeMatrix';
 import {
   assetsBySource,
   hurstColor,
+  hurstDivergenceState,
+  hurstShort,
+  hurstStruct,
   stationarityColor,
   superTrendColor,
   trendScoreColor,
@@ -15,6 +18,7 @@ type Tab = 'macro' | 'hyperliquid';
 
 function AssetRow({ a }: { a: RegimeMatrixAsset }) {
   const ok = a.status === 'ok';
+  const div = hurstDivergenceState(a);
   return (
     <tr className="hover:bg-[var(--bg3)]">
       <td className="py-1.5 pr-3">
@@ -27,8 +31,32 @@ function AssetRow({ a }: { a: RegimeMatrixAsset }) {
       >
         {ok ? a.hurst_regime ?? '—' : '—'}
       </td>
-      <td className="py-1.5 px-2 text-right text-[var(--dim)]">
-        {ok ? a.hurst_252?.toFixed(2) ?? '—' : '—'}
+      <td
+        className="py-1.5 px-2 text-right text-[var(--dim)]"
+        title={`H structural (DFA-1, ${a.hurst_windows?.structural ?? '120'} barres / régime de fond)`}
+      >
+        {ok ? hurstStruct(a)?.toFixed(2) ?? '—' : '—'}
+      </td>
+      <td
+        className="py-1.5 px-2 text-right"
+        style={{ color: hurstColor(a.hurst_short_regime ?? null) }}
+        title={`H court (DFA-1, ${a.hurst_windows?.short ?? '60'} barres / régime récent, plus bruité)`}
+      >
+        {ok ? hurstShort(a)?.toFixed(2) ?? '—' : '—'}
+      </td>
+      <td
+        className={`py-1.5 px-2 text-center ${
+          div.strong ? 'text-[var(--caution)] font-semibold' : 'text-[var(--muted)]'
+        }`}
+        title="Écart H court − H structural : divergence forte (|Δ| ≥ 0.08) = transition de régime en cours"
+      >
+        {ok && div.arrow ? (
+          <span>
+            {div.arrow} <span className="text-[0.52rem]">{div.strong ? div.label : ''}</span>
+          </span>
+        ) : (
+          '—'
+        )}
       </td>
       <td
         className="py-1.5 px-2 uppercase tracking-[1px] font-semibold"
@@ -79,7 +107,8 @@ export default function RegimeMatrixTable() {
         <div className="font-mono text-[0.72rem] text-[var(--label)] tracking-[3px] uppercase">
           REGIME MATRIX{' '}
           <span className="text-[0.58rem] text-[var(--muted)] ml-2">
-            hurst 252d · supertrend 10/3 · adx 14 · adf+kpss stationarity
+            hurst dfa-1 dual {tab === 'macro' ? '41/83 bars (≈60/120j calendaires, 252j/an)' : '60/120 bars (365j/an)'} ·
+            supertrend 10/3 · adx 14 · adf+kpss stationarity
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -111,12 +140,14 @@ export default function RegimeMatrixTable() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full font-mono text-[0.62rem] min-w-[820px]">
+        <table className="w-full font-mono text-[0.62rem] min-w-[900px]">
           <thead>
             <tr className="text-[0.55rem] text-[var(--muted)] tracking-[2px] uppercase border-b border-[var(--border)]">
               <th className="text-left py-2 pr-3">Asset</th>
               <th className="text-left py-2 px-2">Hurst Regime</th>
-              <th className="text-right py-2 px-2">H 252d</th>
+              <th className="text-right py-2 px-2" title="H structural DFA-1 (régime de fond)">H struct</th>
+              <th className="text-right py-2 px-2" title="H court DFA-1 (régime récent, plus bruité)">H court</th>
+              <th className="text-center py-2 px-2" title="Convergence/divergence des deux fenêtres — divergence = transition de régime">Δ fenêtres</th>
               <th className="text-left py-2 px-2">ST 10/3</th>
               <th className="text-right py-2 px-2">Flips 30d</th>
               <th className="text-right py-2 px-2">ADX</th>

@@ -15,7 +15,7 @@ function heatColor(pct: number): { bg: string; text: string } {
   }
   if (pct > 0.8) return { bg: 'rgba(255,51,85,0.32)', text: 'var(--bear)' };
   if (pct > 0.6) return { bg: 'rgba(255,170,0,0.25)', text: 'var(--caution)' };
-  if (pct > 0.4) return { bg: 'rgba(140,180,255,0.18)', text: 'rgb(140,180,255)' };
+  if (pct > 0.4) return { bg: 'rgba(140,180,255,0.18)', text: 'var(--info-soft)' };
   return { bg: 'rgba(74,222,128,0.15)', text: 'var(--bull)' };
 }
 

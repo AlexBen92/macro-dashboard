@@ -11,7 +11,7 @@ const HORIZONS = ['1m', '5m', '15m', '1h'];
 const MODELS = ['ARX', 'MLP', 'LSTM', 'CNN-LSTM'] as const;
 
 const MODEL_COLOR: Record<string, string> = {
-  ARX: 'rgb(140,180,255)',
+  ARX: 'var(--info-soft)',
   MLP: 'rgb(180,140,255)',
   LSTM: 'rgb(74,222,128)',
   'CNN-LSTM': 'rgb(255,170,80)',

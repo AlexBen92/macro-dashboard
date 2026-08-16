@@ -14,7 +14,7 @@ const STRATEGY_LABEL: Record<string, string> = {
 
 const TAG_STYLE: Record<SetupRow['tag'], { bg: string; text: string; border: string }> = {
   STRONG: { bg: 'rgba(74,222,128,0.18)', text: 'var(--bull)', border: 'var(--bull)' },
-  OK: { bg: 'rgba(140,180,255,0.15)', text: 'rgb(140,180,255)', border: 'rgb(140,180,255)' },
+  OK: { bg: 'rgba(140,180,255,0.15)', text: 'var(--info-soft)', border: 'var(--info-soft)' },
   'LOW-N': { bg: 'rgba(140,140,160,0.10)', text: 'var(--muted)', border: 'var(--muted)' },
   'LOW-DSR': { bg: 'rgba(140,140,160,0.10)', text: 'var(--muted)', border: 'var(--muted)' },
 };
