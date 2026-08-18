@@ -13,6 +13,8 @@ import MacroCorrelationsPanel from '@/components/MacroCorrelationsPanel';
 import QuantRegimesPanel from '@/components/QuantRegimesPanel';
 import Top5ScoreEngine from '@/components/Top5ScoreEngine';
 import MacroContext from '@/components/MacroContext';
+import ExploratorySection from '@/components/ui/ExploratorySection';
+import CompositeSignalsPanel from '@/components/CompositeSignalsPanel';
 import type { TrafficLightStatus } from '@/lib/types';
 
 function computeDecision(
@@ -134,6 +136,11 @@ export default function Home() {
         <motion.div initial={fadeUp.hidden} animate={fadeUp.show}><MacroCorrelationsPanel /></motion.div>
         <motion.div initial={fadeUp.hidden} animate={fadeUp.show}><MacroContext /></motion.div>
         <motion.div initial={fadeUp.hidden} animate={fadeUp.show}><QuantRegimesPanel /></motion.div>
+        <motion.div initial={fadeUp.hidden} animate={fadeUp.show}>
+          <ExploratorySection label="signaux composites · vw-tsmom / funding / macd">
+            <CompositeSignalsPanel />
+          </ExploratorySection>
+        </motion.div>
         <motion.div initial={fadeUp.hidden} animate={fadeUp.show}><Top5ScoreEngine /></motion.div>
         <motion.div initial={fadeUp.hidden} animate={fadeUp.show}><TradingChecklist /></motion.div>
         <motion.div initial={fadeUp.hidden} animate={fadeUp.show}><M15ScalpingSignals /></motion.div>

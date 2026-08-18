@@ -6,9 +6,9 @@ import { motion } from 'framer-motion';
 export default function Nav() {
   const path = usePathname();
   const links = [
+    { href: '/', label: 'DÉCISION', color: '#22c55e' },
     { href: '/markets', label: 'MARKETS', color: '#aa66ff' },
     { href: '/crypto', label: 'CRYPTO', color: '#00e5ff' },
-    { href: '/scalping', label: 'SCALPING', color: '#d4a017' },
   ];
 
   return (
