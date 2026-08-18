@@ -31,6 +31,7 @@ FLUXES = [
     # as_of = mardi du rapport CFTC (publication vendredi J+3) — âge pire-cas
     # 11j à cadence hebdo, seuil 12j = semaine manquée
     ("cot", "cot_status.json", ("as_of",), 12 * 24 * 60),
+    ("event_impact", "event_impact_status.json", ("last_export_success", "as_of"), 26 * 60),
 ]
 
 

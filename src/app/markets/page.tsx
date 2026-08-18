@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import RotationScoreboard from '@/components/markets/RotationScoreboard';
 import SectorHeatmap from '@/components/markets/SectorHeatmap';
 import RegimeMatrixTable from '@/components/markets/RegimeMatrixTable';
+import ImpactWindow from '@/components/markets/ImpactWindow';
 import LiquidBasketTable from '@/components/markets/LiquidBasketTable';
 import EdgeWatchlist from '@/components/markets/EdgeWatchlist';
 import ResearchProgramStatus from '@/components/ResearchProgramStatus';
@@ -75,6 +76,10 @@ export default function MarketsPage() {
 
         <motion.div variants={fadeUp}>
           <ResearchProgramStatus variant="markets" />
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <ImpactWindow />
         </motion.div>
 
         <motion.div variants={fadeUp}>
