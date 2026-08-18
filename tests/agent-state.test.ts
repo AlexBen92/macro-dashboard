@@ -64,7 +64,7 @@ const freshOrderflow = { as_of: '2026-08-17T20:30:00Z', ofi_btc_m15: 0.1 };
 
 describe('buildAgentState', () => {
   it('un setup kind NULL du registre est exposé non-tradable avec statut NULL', () => {
-    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, NOW);
+    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, null, undefined, NOW);
     const btc = s.m15.decision.find((d) => d.asset === 'BTC');
     expect(btc?.setup_kind).toBe('TREND_CONTINUATION');
     expect(btc?.status).toBe('NULL');
@@ -84,7 +84,7 @@ describe('buildAgentState', () => {
   });
 
   it('setups_actifs (M15 strategies) tous non-tradables, statut UNTESTED', () => {
-    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, NOW);
+    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, null, undefined, NOW);
     expect(s.m15.setups).toHaveLength(1);
     expect(s.m15.setups[0].name).toBe('S1_V16_thr5');
     expect(s.m15.setups[0].status).toBe('UNTESTED');
@@ -93,17 +93,43 @@ describe('buildAgentState', () => {
   });
 
   it('h4d1: seul funding_carry_d1 tradable', () => {
-    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, NOW);
+    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, null, undefined, NOW);
     const tradables = s.h4d1.filter((e) => e.tradable);
     expect(tradables.map((e) => e.id)).toEqual(['funding_carry_d1']);
     expect(s.h4d1.find((e) => e.id === 'directional_d1_h4')?.status).toBe('NO_EDGE');
   });
 
   it('funding null et orderflow null → data_complete false, stale reflete sources rapides', () => {
-    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), null, NOW);
+    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), null, null, undefined, NOW);
     expect(s.funding).toBeNull();
     expect(s.data_complete).toBe(false);
     expect(s.stale).toBe(false);
+    expect(s.sources.orderflow.ok).toBe(false);
+    expect(s.sources.orderflow.stale).toBe(true);
+    expect(s.sources.funding.stale).toBe(true);
+  });
+
+  it('funding HL propagé → sources.funding ok, data_complete true', () => {
+    const funding = {
+      as_of: '2026-08-17T20:44:00Z',
+      source: 'hyperliquid:metaAndAssetCtxs',
+      assets: {
+        BTC: { funding_hourly: 0.0000115, funding_apr_pct: 10.07, mark_px: 64259 },
+        ETH: { funding_hourly: 0.000009, funding_apr_pct: 7.88, mark_px: 1911 },
+      },
+    };
+    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, funding, undefined, NOW);
+    expect(s.funding?.assets.BTC.funding_apr_pct).toBeCloseTo(10.07);
+    expect(s.sources.funding.ok).toBe(true);
+    expect(s.sources.funding.stale).toBe(false);
+    expect(s.data_complete).toBe(true);
+  });
+
+  it('regime as_of > 26h → sources.regime stale, data_complete false', () => {
+    const oldRegime = { ...freshRegime(), as_of: '2026-08-15T00:00:00Z' };
+    const s = buildAgentState(freshEdgeM15(), oldRegime, freshDecision(), freshOrderflow, null, undefined, NOW);
+    expect(s.sources.regime.stale).toBe(true);
+    expect(s.data_complete).toBe(false);
   });
 
   it('stale si M15 export > 20 min', () => {
@@ -111,19 +137,19 @@ describe('buildAgentState', () => {
       as_of: '2026-08-17T18:00:00Z',
       last_export_success: '2026-08-17T18:00:00Z',
     });
-    const s = buildAgentState(old, freshRegime(), freshDecision(), freshOrderflow, NOW);
+    const s = buildAgentState(old, freshRegime(), freshDecision(), freshOrderflow, null, undefined, NOW);
     expect(s.stale).toBe(true);
   });
 
   it('source absente → stale true (pas de décision sur données dégradées)', () => {
-    const s = buildAgentState(null, freshRegime(), null, freshOrderflow, NOW);
+    const s = buildAgentState(null, freshRegime(), null, freshOrderflow, null, undefined, NOW);
     expect(s.stale).toBe(true);
     expect(s.m15.decision).toEqual([]);
     expect(s.m15.setups).toEqual([]);
   });
 
   it('regime wf + distribution propagés', () => {
-    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, NOW);
+    const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, null, undefined, NOW);
     expect(s.regime.wf_regime).toBe('CALM');
     expect(s.regime.distribution?.CRISIS).toBeCloseTo(0.05);
     expect(s.regime.days_in_regime).toBe(95);

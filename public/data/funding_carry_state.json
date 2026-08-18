@@ -1,0 +1,28 @@
+{
+  "as_of": "2026-08-18T09:07:08.112610+00:00",
+  "strategy": "Funding_Carry_Systematic_D1",
+  "validation": "VALIDATED 6/6 gates WF (valSh 13.6, hoSh 12.3, perm p 0.005)",
+  "paper_since": "2026-08-15",
+  "thresholds": {
+    "entry_trail_day": 0.0001,
+    "exit_hysteresis_day": 5e-05,
+    "cost_rt_bps_leg": 2.5
+  },
+  "latest_trail_day_frac": {
+    "BTC": 0.0001103999999999,
+    "ETH": 8.684666666666666e-05,
+    "SOL": -2.4703333333333328e-05
+  },
+  "positions": {
+    "BTC": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-15T05:25:23.460863+00:00",
+      "entry_perp": 63099.95252899,
+      "entry_spot": 63130.28,
+      "accrued_funding_bps": 4.4954
+    }
+  },
+  "n_open": 1,
+  "n_closed": 0,
+  "cum_net_bps": 0.0
+}

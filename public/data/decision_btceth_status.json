@@ -1,9 +1,9 @@
 {
-  "as_of": "2026-08-16T13:45:16.820183+00:00",
-  "last_export_success": "2026-08-16T13:45:16.820187+00:00",
+  "as_of": "2026-08-18T09:15:14.638402+00:00",
+  "last_export_success": "2026-08-18T09:15:14.638405+00:00",
   "heartbeat": {
-    "last_attempt_iso": "2026-08-16T13:45:16.820189+00:00",
-    "last_success_iso": "2026-08-16T13:45:16.820191+00:00",
+    "last_attempt_iso": "2026-08-18T09:15:14.638408+00:00",
+    "last_success_iso": "2026-08-18T09:15:14.638410+00:00",
     "error": null
   },
   "pipeline_version": "0.7.0-stage11",
@@ -11,17 +11,17 @@
   "btc": {
     "symbol": "BTC",
     "verdict": "NO_TRADE",
-    "score": 24,
+    "score": 20,
     "confidence": 0,
     "regime": {
       "label": "CALM",
       "hurst": null,
-      "adx": 20.21904013015052,
-      "vol_ratio": 0.07,
+      "adx": 19.077805260866196,
+      "vol_ratio": 0.335,
       "hmm_state": null,
       "garch_regime": null,
-      "trend_direction": "range",
-      "confidence": 0.4
+      "trend_direction": "bull",
+      "confidence": 0.55
     },
     "setup": {
       "kind": "NO_TRADE",
@@ -29,25 +29,25 @@
       "contributions": [
         {
           "source": "REGIME",
-          "delta_pts": 8,
-          "reason": "CALM conf=0.40"
+          "delta_pts": 11,
+          "reason": "CALM conf=0.55"
         },
         {
           "source": "DATA_QUALITY",
-          "delta_pts": 3,
-          "reason": "data-quality 65/100"
+          "delta_pts": -4,
+          "reason": "data-quality 30/100"
         },
         {
           "source": "DEPTH_IMBALANCE",
-          "delta_pts": 0,
-          "reason": "imbalance -0.03"
+          "delta_pts": -4,
+          "reason": "imbalance -0.23"
         }
       ],
       "setup_score": 0
     },
     "entry": {
       "state": "EXPIRED",
-      "price": 63040.0,
+      "price": 64207.0,
       "armed_at_iso": "2026-08-12T15:00:20.303387+00:00",
       "trigger_at_iso": null,
       "expires_at_iso": null,
@@ -79,29 +79,30 @@
       "kelly_capped": 0.0,
       "blocked": true,
       "block_reasons": [
+        "data-quality 30<50",
         "verdict=NO_TRADE"
       ]
     },
     "data_quality": {
-      "score": 65,
+      "score": 30,
       "sources": {
         "hl": {
           "fresh": true,
-          "age_ms": 1541,
+          "age_ms": 2085,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:14.134541+00:00"
+          "last_ok_iso": "2026-08-18T09:15:11.394224+00:00"
         },
         "binance": {
           "fresh": true,
-          "age_ms": 513,
+          "age_ms": 960,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:15.162589+00:00"
+          "last_ok_iso": "2026-08-18T09:15:12.519789+00:00"
         },
         "deribit": {
-          "fresh": true,
-          "age_ms": 464,
-          "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:15.211543+00:00"
+          "fresh": false,
+          "age_ms": null,
+          "coverage_pct": 0.0,
+          "last_ok_iso": null
         },
         "coinglass": {
           "fresh": false,
@@ -111,23 +112,26 @@
         },
         "yahoo": {
           "fresh": true,
-          "age_ms": 2,
+          "age_ms": 3,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:15.673313+00:00"
+          "last_ok_iso": "2026-08-18T09:15:13.476100+00:00"
         }
       },
       "stale_sources": [
-        "coinglass"
+        "coinglass",
+        "deribit"
       ],
       "missing_fields": [
         "coinglass.liquidations:BTC",
-        "coinglass.liquidations:ETH"
+        "coinglass.liquidations:ETH",
+        "deribit.index:BTC",
+        "deribit.index:ETH"
       ]
     },
     "why_checklist": [
       {
         "label": "4H bullish",
-        "pass": false,
+        "pass": true,
         "weight": 15
       },
       {
@@ -158,7 +162,7 @@
     ],
     "risks": [
       "liq-data stale \u2014 cascade model disabled",
-      "no qualifying setup"
+      "data-quality 30/100 < 50"
     ],
     "cross_asset": {
       "btc_leadership": 100,
@@ -168,7 +172,7 @@
       "suppression_reason": null
     },
     "session": {
-      "name": "OVERLAP",
+      "name": "LONDON",
       "expectancy_bps": null,
       "n_obs": 0,
       "sharpe": null,
@@ -181,19 +185,19 @@
       "n_predictions": 0
     },
     "mtf_alignment": {
-      "score": 40,
+      "score": 90,
       "directions": [
         {
           "tf": "4H",
-          "dir": "bear"
+          "dir": "bull"
         },
         {
           "tf": "1H",
-          "dir": "range"
+          "dir": "bull"
         },
         {
           "tf": "M15",
-          "dir": "range"
+          "dir": "bull"
         },
         {
           "tf": "5M",
@@ -202,19 +206,19 @@
       ]
     },
     "derivatives": {
-      "oi_now": 7038936749.29847,
-      "oi_delta_15m_pct": 0.003,
-      "oi_delta_1h_pct": 0.166,
-      "oi_delta_4h_pct": 0.249,
+      "oi_now": 6796716133.825349,
+      "oi_delta_15m_pct": -0.155,
+      "oi_delta_1h_pct": -0.016,
+      "oi_delta_4h_pct": -0.118,
       "oi_classification": "NEUTRAL",
-      "funding_now": 3.471e-05,
-      "funding_annualized_pct": 3.800745,
-      "funding_zscore_30d": -1.34,
+      "funding_now": 6.793e-05,
+      "funding_annualized_pct": 7.438334999999999,
+      "funding_zscore_30d": -0.18,
       "funding_tag": "NEUTRAL",
       "basis_bps": null
     },
     "orderflow": {
-      "cvd_now": 0.01312,
+      "cvd_now": 0.08238,
       "cvd_slope_15m": null,
       "cvd_divergence": "UNKNOWN",
       "taker_buy_sell_ratio": null,
@@ -247,13 +251,13 @@
   "eth": {
     "symbol": "ETH",
     "verdict": "NO_TRADE",
-    "score": 24,
+    "score": 22,
     "confidence": 0,
     "regime": {
       "label": "BUILDING",
       "hurst": null,
-      "adx": 23.68965954299512,
-      "vol_ratio": 0.015,
+      "adx": 24.80603202276564,
+      "vol_ratio": 0.375,
       "hmm_state": null,
       "garch_regime": null,
       "trend_direction": "range",
@@ -270,20 +274,20 @@
         },
         {
           "source": "DATA_QUALITY",
-          "delta_pts": 3,
-          "reason": "data-quality 65/100"
+          "delta_pts": -4,
+          "reason": "data-quality 30/100"
         },
         {
           "source": "DEPTH_IMBALANCE",
-          "delta_pts": -3,
-          "reason": "imbalance -0.19"
+          "delta_pts": 0,
+          "reason": "imbalance +0.02"
         }
       ],
       "setup_score": 0
     },
     "entry": {
       "state": "EXPIRED",
-      "price": 1880.6,
+      "price": 1898.0,
       "armed_at_iso": "2026-08-12T12:14:18.391360+00:00",
       "trigger_at_iso": null,
       "expires_at_iso": null,
@@ -315,29 +319,30 @@
       "kelly_capped": 0.0,
       "blocked": true,
       "block_reasons": [
+        "data-quality 30<50",
         "verdict=NO_TRADE"
       ]
     },
     "data_quality": {
-      "score": 65,
+      "score": 30,
       "sources": {
         "hl": {
           "fresh": true,
-          "age_ms": 1541,
+          "age_ms": 2085,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:14.134541+00:00"
+          "last_ok_iso": "2026-08-18T09:15:11.394224+00:00"
         },
         "binance": {
           "fresh": true,
-          "age_ms": 513,
+          "age_ms": 960,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:15.162589+00:00"
+          "last_ok_iso": "2026-08-18T09:15:12.519789+00:00"
         },
         "deribit": {
-          "fresh": true,
-          "age_ms": 464,
-          "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:15.211543+00:00"
+          "fresh": false,
+          "age_ms": null,
+          "coverage_pct": 0.0,
+          "last_ok_iso": null
         },
         "coinglass": {
           "fresh": false,
@@ -347,17 +352,20 @@
         },
         "yahoo": {
           "fresh": true,
-          "age_ms": 2,
+          "age_ms": 3,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-08-16T13:45:15.673313+00:00"
+          "last_ok_iso": "2026-08-18T09:15:13.476100+00:00"
         }
       },
       "stale_sources": [
-        "coinglass"
+        "coinglass",
+        "deribit"
       ],
       "missing_fields": [
         "coinglass.liquidations:BTC",
-        "coinglass.liquidations:ETH"
+        "coinglass.liquidations:ETH",
+        "deribit.index:BTC",
+        "deribit.index:ETH"
       ]
     },
     "why_checklist": [
@@ -394,17 +402,17 @@
     ],
     "risks": [
       "liq-data stale \u2014 cascade model disabled",
-      "no qualifying setup"
+      "data-quality 30/100 < 50"
     ],
     "cross_asset": {
-      "btc_leadership": 30.4,
+      "btc_leadership": 25.3,
       "beta_to_btc": null,
       "relative_strength": null,
       "suppressed_by_btc": false,
       "suppression_reason": null
     },
     "session": {
-      "name": "OVERLAP",
+      "name": "LONDON",
       "expectancy_bps": null,
       "n_obs": 0,
       "sharpe": null,
@@ -417,15 +425,15 @@
       "n_predictions": 0
     },
     "mtf_alignment": {
-      "score": 70,
+      "score": 0,
       "directions": [
         {
           "tf": "4H",
-          "dir": "bear"
+          "dir": "range"
         },
         {
           "tf": "1H",
-          "dir": "bear"
+          "dir": "range"
         },
         {
           "tf": "M15",
@@ -438,19 +446,19 @@
       ]
     },
     "derivatives": {
-      "oi_now": 4441046236.36952,
-      "oi_delta_15m_pct": 0.018,
-      "oi_delta_1h_pct": -0.017,
-      "oi_delta_4h_pct": -0.068,
+      "oi_now": 4465017364.034651,
+      "oi_delta_15m_pct": 0.04,
+      "oi_delta_1h_pct": 0.056,
+      "oi_delta_4h_pct": -0.182,
       "oi_classification": "NEUTRAL",
-      "funding_now": 2.989e-05,
-      "funding_annualized_pct": 3.2729550000000005,
-      "funding_zscore_30d": -0.44,
+      "funding_now": 2.02e-05,
+      "funding_annualized_pct": 2.2119,
+      "funding_zscore_30d": -0.4,
       "funding_tag": "NEUTRAL",
       "basis_bps": null
     },
     "orderflow": {
-      "cvd_now": 1.2856,
+      "cvd_now": 1.0856,
       "cvd_slope_15m": null,
       "cvd_divergence": "UNKNOWN",
       "taker_buy_sell_ratio": null,
@@ -483,57 +491,57 @@
   "cross_asset": {
     "beta_eth_to_btc": null,
     "lead_lag_btc_eth_hours": null,
-    "btc_leadership_score": 30.4,
+    "btc_leadership_score": 25.3,
     "eth_suppressed": false,
-    "as_of_iso": "2026-08-16T13:45:16.820150+00:00"
+    "as_of_iso": "2026-08-18T09:15:14.638389+00:00"
   },
   "macro": {
     "risk_state": "RISK_ON",
-    "macro_pressure": 15,
+    "macro_pressure": 17,
     "drivers": [
       {
         "asset": "DXY",
-        "corr_30d": 0.066,
-        "daily_change_pct": 0.369
+        "corr_30d": -0.276,
+        "daily_change_pct": 0.672
       },
       {
         "asset": "SPX",
-        "corr_30d": 0.055,
-        "daily_change_pct": 3.793
+        "corr_30d": -0.278,
+        "daily_change_pct": 4.543
       },
       {
         "asset": "NDX",
-        "corr_30d": 0.048,
-        "daily_change_pct": 0.353
+        "corr_30d": -0.19,
+        "daily_change_pct": 1.601
       },
       {
         "asset": "VIX",
-        "corr_30d": 0.107,
-        "daily_change_pct": -17.439
+        "corr_30d": -0.378,
+        "daily_change_pct": -11.055
       },
       {
         "asset": "US10Y",
-        "corr_30d": -0.325,
-        "daily_change_pct": 5.268
+        "corr_30d": 0.031,
+        "daily_change_pct": 2.807
       },
       {
         "asset": "GOLD",
-        "corr_30d": -0.075,
-        "daily_change_pct": -2.601
+        "corr_30d": -0.188,
+        "daily_change_pct": -2.284
       }
     ],
-    "as_of_iso": "2026-08-16T13:45:15.673341+00:00"
+    "as_of_iso": "2026-08-18T09:15:13.476135+00:00"
   },
   "event_risk": {
     "next_event_iso": "2026-09-04T12:30:00Z",
     "kind": "NFP",
     "impact": "HIGH",
-    "minutes_until": 27284,
+    "minutes_until": 24674,
     "in_window": false,
     "calendar_version": "2026-08-12-manual-v1"
   },
   "session_matrix": {
-    "as_of_iso": "2026-08-16T13:45:15.678639+00:00",
+    "as_of_iso": "2026-08-18T09:15:13.483782+00:00",
     "cells": [
       {
         "session": "ASIA",

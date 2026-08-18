@@ -12,6 +12,9 @@ import { lookupM15Status } from '@/lib/m15SetupStatus';
 export const DASH_DATA_ORIGIN = process.env.DASH_DATA_ORIGIN || 'http://187.124.38.41/dash-data';
 const M15_STALE_MS = 20 * 60 * 1000;
 const REGIME_STALE_MS = 26 * 60 * 60 * 1000;
+const FUNDING_STALE_MS = 5 * 60 * 1000;
+const FETCH_TIMEOUT_MS = 8_000;
+const HL_INFO_URL = 'https://api.hyperliquid.xyz/info';
 
 export interface M15SetupRow {
   name: string;
@@ -32,11 +35,30 @@ export interface DecisionEntry {
   regime_label: string | null;
 }
 
+export interface SourceStatus {
+  ok: boolean;
+  http_status: number | null;
+  age_ms: number | null;
+  stale: boolean;
+  error?: string;
+}
+
+export interface FundingState {
+  as_of: string;
+  source: string;
+  assets: Record<string, {
+    funding_hourly: number;
+    funding_apr_pct: number;
+    mark_px: number | null;
+  }>;
+}
+
 export interface AgentState {
   as_of: string;
   generated_at: string;
   stale: boolean;
   data_complete: boolean;
+  sources: Record<'regime' | 'm15' | 'decision' | 'orderflow' | 'funding', SourceStatus>;
   regime: {
     wf_regime: string | null;
     distribution: Record<string, number> | null;
@@ -49,7 +71,7 @@ export interface AgentState {
     decision: DecisionEntry[];
   };
   h4d1: Array<{ id: string; label: string; status: string; tradable: boolean; detail: string }>;
-  funding: unknown;
+  funding: FundingState | null;
   orderflow: unknown;
 }
 
@@ -75,6 +97,8 @@ export function buildAgentState(
   regimeStatus: Json,
   decision: Json,
   orderflow: Json,
+  funding: FundingState | null = null,
+  metas: Partial<Record<'regime' | 'm15' | 'decision' | 'orderflow' | 'funding', SourceStatus>> = {},
   now = Date.now(),
 ): AgentState {
   const nowIso = new Date(now).toISOString();
@@ -138,6 +162,38 @@ export function buildAgentState(
 
   const orderflowNode = orderflow as Record<string, unknown> | null;
 
+  const fundingNode = funding as FundingState | null;
+  const fundingAge = fundingNode ? ageMs(fundingNode.as_of, now) : null;
+
+  const mergeMeta = (
+    flux: 'regime' | 'm15' | 'decision' | 'orderflow' | 'funding',
+    dataOk: boolean,
+    age: number | null,
+    stale: boolean,
+  ): SourceStatus => {
+    const m = metas[flux];
+    return {
+      ok: m ? m.ok : dataOk,
+      http_status: m?.http_status ?? null,
+      age_ms: age,
+      stale: stale || (m ? !m.ok : !dataOk),
+      ...(m?.error ? { error: m.error } : {}),
+    };
+  };
+  const orderflowAge = ageMs(
+    typeof orderflowNode?.as_of === 'string' ? orderflowNode.as_of : undefined,
+    now,
+  );
+  const fundingStaleRaw = fundingNode === null || (fundingAge !== null && fundingAge > FUNDING_STALE_MS);
+  const sources: Record<'regime' | 'm15' | 'decision' | 'orderflow' | 'funding', SourceStatus> = {
+    regime: mergeMeta('regime', regimeStatus !== null, regimeAge, regimeStale),
+    m15: mergeMeta('m15', edgeM15 !== null, m15Age, m15Stale),
+    decision: mergeMeta('decision', decision !== null, decisionAge, decisionStale),
+    orderflow: mergeMeta('orderflow', orderflow !== null, orderflowAge, false),
+    funding: mergeMeta('funding', fundingNode !== null, fundingAge, fundingStaleRaw),
+  };
+  const fundingStale = sources.funding.stale;
+
   return {
     as_of: pickAsOf(
       (edgeM15 as Record<string, unknown>)?.as_of,
@@ -146,7 +202,8 @@ export function buildAgentState(
     ),
     generated_at: nowIso,
     stale: m15Stale || decisionStale,
-    data_complete: !(m15Stale || decisionStale || regimeStale || orderflow === null),
+    data_complete: !(m15Stale || decisionStale || regimeStale || orderflow === null || fundingStale),
+    sources,
     regime: {
       wf_regime: wfRegime,
       distribution: regimeDist,
@@ -167,27 +224,93 @@ export function buildAgentState(
       tradable: e.status === 'VALIDATED',
       detail: e.detail,
     })),
-    funding: null,
+    funding: fundingNode,
     orderflow: orderflowNode,
   };
 }
 
-async function fetchJson(origin: string, name: string): Promise<Json> {
+interface FetchedJson {
+  data: Json;
+  meta: { ok: boolean; http_status: number | null; error?: string };
+}
+
+async function fetchJsonLogged(origin: string, name: string): Promise<FetchedJson> {
+  const url = `${origin.replace(/\/$/, '')}/${name}`;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
+      if (res.ok) {
+        return { data: (await res.json()) as Record<string, unknown>, meta: { ok: true, http_status: res.status } };
+      }
+      // 5xx/transitoire → un retry; 4xx → pas la peine
+      if (res.status >= 500 && attempt === 0) continue;
+      return { data: null, meta: { ok: false, http_status: res.status } };
+    } catch (e) {
+      if (attempt === 1) {
+        return { data: null, meta: { ok: false, http_status: null, error: e instanceof Error ? e.message : String(e) } };
+      }
+    }
+  }
+  return { data: null, meta: { ok: false, http_status: null } };
+}
+
+async function fetchHlFunding(assets: string[] = ['BTC', 'ETH']): Promise<FundingState | null> {
   try {
-    const res = await fetch(`${origin.replace(/\/$/, '')}/${name}`, { cache: 'no-store' });
+    const res = await fetch(HL_INFO_URL, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ type: 'metaAndAssetCtxs' }),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (!res.ok) return null;
-    return (await res.json()) as Record<string, unknown>;
+    const [meta, ctxs] = (await res.json()) as [
+      { universe: Array<{ name: string }> },
+      Array<Record<string, string>>,
+    ];
+    const out: FundingState['assets'] = {};
+    meta.universe.forEach((asset, i) => {
+      if (!assets.includes(asset.name)) return;
+      const ctx = ctxs[i];
+      const f = ctx ? Number(ctx.funding) : NaN;
+      if (!Number.isFinite(f)) return;
+      out[asset.name] = {
+        funding_hourly: f,
+        funding_apr_pct: f * 24 * 365 * 100,
+        mark_px: ctx && Number.isFinite(Number(ctx.markPx)) ? Number(ctx.markPx) : null,
+      };
+    });
+    if (Object.keys(out).length === 0) return null;
+    return { as_of: new Date().toISOString(), source: 'hyperliquid:metaAndAssetCtxs', assets: out };
   } catch {
     return null;
   }
 }
 
 export async function fetchAgentState(origin = DASH_DATA_ORIGIN, now = Date.now()): Promise<AgentState> {
-  const [edgeM15, regimeStatus, decision, orderflow] = await Promise.all([
-    fetchJson(origin, 'edge_m15_status.json'),
-    fetchJson(origin, 'regime_status.json'),
-    fetchJson(origin, 'decision_btceth_status.json'),
-    fetchJson(origin, 'orderflow_status.json'),
+  const [edgeM15, regimeStatus, decision, orderflow, funding] = await Promise.all([
+    fetchJsonLogged(origin, 'edge_m15_status.json'),
+    fetchJsonLogged(origin, 'regime_status.json'),
+    fetchJsonLogged(origin, 'decision_btceth_status.json'),
+    fetchJsonLogged(origin, 'orderflow_status.json'),
+    fetchHlFunding(),
   ]);
-  return buildAgentState(edgeM15, regimeStatus, decision, orderflow, now);
+  return buildAgentState(
+    edgeM15.data,
+    regimeStatus.data,
+    decision.data,
+    orderflow.data,
+    funding,
+    {
+      m15: { ok: edgeM15.meta.ok, http_status: edgeM15.meta.http_status, ...(edgeM15.meta.error ? { error: edgeM15.meta.error } : {}), age_ms: null, stale: false },
+      regime: { ok: regimeStatus.meta.ok, http_status: regimeStatus.meta.http_status, ...(regimeStatus.meta.error ? { error: regimeStatus.meta.error } : {}), age_ms: null, stale: false },
+      decision: { ok: decision.meta.ok, http_status: decision.meta.http_status, ...(decision.meta.error ? { error: decision.meta.error } : {}), age_ms: null, stale: false },
+      orderflow: { ok: orderflow.meta.ok, http_status: orderflow.meta.http_status, ...(orderflow.meta.error ? { error: orderflow.meta.error } : {}), age_ms: null, stale: false },
+      funding: { ok: funding !== null, http_status: null, age_ms: null, stale: false },
+    },
+    now,
+  );
 }
