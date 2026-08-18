@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import PipelineHealthBadge from '@/components/PipelineHealthBadge';
 
 export default function Nav() {
   const path = usePathname();
@@ -9,6 +10,7 @@ export default function Nav() {
     { href: '/', label: 'DÉCISION', color: '#22c55e' },
     { href: '/markets', label: 'MARKETS', color: '#aa66ff' },
     { href: '/crypto', label: 'CRYPTO', color: '#00e5ff' },
+    { href: '/research', label: 'RESEARCH', color: '#8890a0' },
   ];
 
   return (
@@ -39,6 +41,7 @@ export default function Nav() {
           </Link>
         );
       })}
+      <PipelineHealthBadge />
     </nav>
   );
 }

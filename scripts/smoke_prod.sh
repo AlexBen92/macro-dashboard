@@ -50,11 +50,15 @@ except Exception: print(0)" 2>/dev/null || echo 0)
 done
 
 # --- Pages: 200 + contenu non-vide ---
-for page in "" crypto markets scalping; do
+for page in "" crypto markets research; do
   code=$(curl -s -m 20 -o /tmp/smoke_page.html -w "%{http_code}" "$BASE/$page")
   size=$(wc -c < /tmp/smoke_page.html)
   check "page /$page → 200 (>5KB)" "$([ "$code" = "200" ] && [ "$size" -gt 5000 ] && echo 1 || echo 0)"
 done
+
+# /scalping fusionné → doit rediriger (30x ou meta-refresh), pas servir l'ancien dashboard
+scalping_body=$(curl -s -m 20 "$BASE/scalping")
+check "page /scalping → redirection vers /" "$(echo "$scalping_body" | grep -q 'url=/\|http-equiv="refresh"' && echo 1 || echo 0)"
 
 # --- 404 assumés: pas de lien mort dans nav ---
 nav=$(curl -s -m 20 "$BASE/crypto" | grep -o 'href="/[a-z]*"' | sed 's/href="//;s/"//' | sort -u)

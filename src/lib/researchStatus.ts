@@ -7,9 +7,14 @@
 
 export type ResearchStatus =
   | 'VALIDATED'
+  | 'IN_VALIDATION'
   | 'RECONSTRUCTION'
   | 'SATELLITE'
+  | 'BORDERLINE'
+  | 'BLOCKED'
+  | 'NOT_TESTABLE'
   | 'NO_EDGE'
+  | 'NULL'
   | 'UNTESTED';
 
 export interface ResearchProgramEntry {
@@ -58,16 +63,39 @@ export const H4D1_PROGRAM: {
 
 export const RESEARCH_STATUS_COLOR: Record<ResearchStatus, string> = {
   VALIDATED: 'var(--bull)',
+  IN_VALIDATION: 'var(--caution)',
   RECONSTRUCTION: 'var(--caution)',
   SATELLITE: 'var(--info)',
+  BORDERLINE: 'var(--caution)',
+  BLOCKED: 'var(--muted)',
+  NOT_TESTABLE: 'var(--muted)',
   NO_EDGE: 'var(--muted)',
+  NULL: 'var(--muted)',
   UNTESTED: 'var(--dim)',
 };
 
 export const RESEARCH_STATUS_LABEL: Record<ResearchStatus, string> = {
   VALIDATED: 'validé',
+  IN_VALIDATION: 'en validation',
   RECONSTRUCTION: 'reconstruction',
   SATELLITE: 'satellite',
+  BORDERLINE: 'borderline',
+  BLOCKED: 'bloqué',
+  NOT_TESTABLE: 'non testable',
   NO_EDGE: 'no edge',
+  NULL: 'null',
   UNTESTED: 'non testé',
 };
+
+export const RESEARCH_STATUS_ORDER: ResearchStatus[] = [
+  'VALIDATED',
+  'IN_VALIDATION',
+  'RECONSTRUCTION',
+  'SATELLITE',
+  'BORDERLINE',
+  'BLOCKED',
+  'NOT_TESTABLE',
+  'NO_EDGE',
+  'NULL',
+  'UNTESTED',
+];
