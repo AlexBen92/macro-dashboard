@@ -215,7 +215,7 @@ export default function RegimeMatrixTable() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {isStale && (
+          {isStale && data && (
             <span className="px-1.5 py-0.5 rounded-[2px] text-[0.5rem] uppercase tracking-[1px] bg-[var(--bear)]/15 text-[var(--bear)] border border-[var(--bear)]/30">
               stale — export hs
             </span>
