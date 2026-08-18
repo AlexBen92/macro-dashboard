@@ -23,9 +23,12 @@ import OrderFlowImbalanceWidget from '@/components/crypto/orderflow/OrderFlowImb
 import AlphaTermStructureChart from '@/components/crypto/orderflow/AlphaTermStructureChart';
 import OfiSetupsPanel from '@/components/crypto/orderflow/OfiSetupsPanel';
 import Top50CryptoTable from '@/components/crypto/Top50CryptoTable';
+import FundingCarryPanel from '@/components/crypto/FundingCarryPanel';
+import ExploratorySection from '@/components/ui/ExploratorySection';
 import ResearchProgramStatus from '@/components/ResearchProgramStatus';
 
 import { useOptionsExposure } from '@/hooks/api/useOptionsExposure';
+import { useRegimeStatus } from '@/hooks/api/useRegimeStatus';
 import type { ExpiryBucket, SupportedCurrency, Timeframe } from '@/lib/options/types';
 
 export default function CryptoPage() {
@@ -37,6 +40,7 @@ export default function CryptoPage() {
   const [diagOpen, setDiagOpen] = useState(false);
 
   const { data, mutate, error, isLoading } = useOptionsExposure(symbol, expiryBucket);
+  const regimeStatus = useRegimeStatus();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -51,6 +55,12 @@ export default function CryptoPage() {
         dealerDelta={data?.regime.dealerDelta ?? 'unknown'}
         freshness={data?.freshness.status ?? 'unavailable'}
         freshnessTs={data?.freshness.sourceTs ?? null}
+        regime={{
+          label: regimeStatus.data?.current_regime ?? null,
+          daysInRegime: regimeStatus.data?.days_in_regime ?? null,
+          asOf: regimeStatus.data?.as_of ?? null,
+          loading: regimeStatus.isLoading,
+        }}
         onRefresh={() => mutate()}
         onOpenVolSurface={() => setVolOpen(true)}
         onOpenGuide={() => setGuideOpen(true)}
@@ -59,6 +69,8 @@ export default function CryptoPage() {
 
       <main className="flex-1 px-4 py-3 flex flex-col gap-3">
         <DailyBriefBar />
+
+        <FundingCarryPanel />
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
@@ -76,32 +88,28 @@ export default function CryptoPage() {
           <RegimeStrategyMatrix />
         </section>
 
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
-            Bloc 2 · Cockpit BTC M15 — Prix · Verdict · Vol Heatmap
-          </div>
-          <div className="lg:col-span-8 space-y-3">
-            <PriceLevelsM15Chart />
-          </div>
-          <div className="lg:col-span-4 space-y-3">
-            <EdgeM15BTCCard />
-            <VolHeatmapM15 />
-          </div>
-        </section>
-
-        <section className="flex flex-col gap-3">
-          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
-            Bloc 2b · Decision Engine — BTC + ETH terminal verdict (M15)
-          </div>
-          <DecisionEnginePanel />
-        </section>
-
         <section className="flex flex-col gap-3">
           <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
             Bloc 2c · Top 50 — market cap · performance · funding perp
           </div>
           <Top50CryptoTable />
         </section>
+
+        <ExploratorySection label="Bloc 2 · Cockpit BTC M15 — recherche intraday (directionnel NO_EDGE)">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+            <div className="lg:col-span-8 space-y-3">
+              <PriceLevelsM15Chart />
+            </div>
+            <div className="lg:col-span-4 space-y-3">
+              <EdgeM15BTCCard />
+              <VolHeatmapM15 />
+            </div>
+          </div>
+        </ExploratorySection>
+
+        <ExploratorySection label="Bloc 2b · Decision Engine BTC + ETH — verdict terminal M15">
+          <DecisionEnginePanel />
+        </ExploratorySection>
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
@@ -156,7 +164,7 @@ export default function CryptoPage() {
         <span>
           As of: {data?.asOf ?? '—'}
         </span>
-        <span>M15 cockpit — verdict-driven</span>
+        <span className="text-[var(--dim)]">educational · not investment advice</span>
       </footer>
 
       <VolSurfaceDrawer open={volOpen} onOpenChange={setVolOpen} />

@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useCorrMatrix } from '@/hooks/api/useCorrMatrix';
+import { useMemo, useState } from 'react';
+import { useCorrMatrix, type CorrWindowKey } from '@/hooks/api/useCorrMatrix';
 
 const ASSETS_A = ['BTC', 'ETH', 'SOL'];
 const ASSETS_B = ['DXY', 'SPX', 'GOLD', 'VIX', 'MSTR', 'NVDA', 'COIN'];
+
+const WINDOW_LABEL: Record<CorrWindowKey, string> = { '24h': '24h', '7d': '7j', '30d': '30j' };
 
 function corrColor(r: number): { bg: string; text: string } {
   if (!Number.isFinite(r)) return { bg: 'transparent', text: 'var(--dim)' };
@@ -15,7 +17,7 @@ function corrColor(r: number): { bg: string; text: string } {
   return { bg: 'rgba(140,140,160,0.08)', text: 'var(--muted)' };
 }
 
-function interpret(cells: { a: string; b: string; r: number }[]): string | null {
+function interpret(cells: { a: string; b: string; r: number }[], win: CorrWindowKey): string | null {
   const strong = cells.filter((c) => Math.abs(c.r) >= 0.5);
   if (strong.length === 0) return null;
   const top = strong.reduce((acc, c) => (Math.abs(c.r) > Math.abs(acc.r) ? c : acc));
@@ -23,11 +25,12 @@ function interpret(cells: { a: string; b: string; r: number }[]): string | null 
   const sense = top.r > 0
     ? 'mouvements conjoints'
     : 'rotation défensive';
-  return `BTC ${dir} à ${(Math.abs(top.r) * 100).toFixed(0)}% avec ${top.b} (7j) → ${sense}.`;
+  return `BTC ${dir} à ${(Math.abs(top.r) * 100).toFixed(0)}% avec ${top.b} (${WINDOW_LABEL[win]}) → ${sense}.`;
 }
 
 export default function CorrelationTable() {
-  const { cells, isLoading, error } = useCorrMatrix(['7d']);
+  const [win, setWin] = useState<CorrWindowKey>('7d');
+  const { cells, isLoading, error } = useCorrMatrix([win]);
 
   const matrix = useMemo(() => {
     const map = new Map<string, number>();
@@ -47,15 +50,30 @@ export default function CorrelationTable() {
     const btcCells = Array.from(matrix.entries())
       .filter(([k]) => k.startsWith('BTC|'))
       .map(([k, r]) => ({ a: 'BTC', b: k.split('|')[1], r }));
-    return interpret(btcCells);
+    return interpret(btcCells, win);
   }, [matrix]);
 
   return (
     <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-3">
       <div className="flex items-center justify-between pb-2">
         <span className="font-mono text-[0.55rem] text-[var(--label)] uppercase tracking-[2px]">
-          Corrélation 7j · BTC/ETH/SOL vs macro
+          Corrélation · BTC/ETH/SOL vs macro
         </span>
+        <div className="flex items-center gap-1">
+          {(Object.keys(WINDOW_LABEL) as CorrWindowKey[]).map((w) => (
+            <button
+              key={w}
+              onClick={() => setWin(w)}
+              className={`px-1.5 py-0.5 rounded-[2px] font-mono text-[0.5rem] uppercase tracking-[1px] border ${
+                win === w
+                  ? 'bg-[var(--bg3)] text-[var(--label)] border-[var(--border)]'
+                  : 'text-[var(--muted)] border-transparent hover:text-[var(--label)]'
+              }`}
+            >
+              {WINDOW_LABEL[w]}
+            </button>
+          ))}
+        </div>
         <span className="font-mono text-[0.5rem] text-[var(--muted)] uppercase tracking-[1px]">
           {error ? 'err' : isLoading ? 'load' : 'live'}
         </span>

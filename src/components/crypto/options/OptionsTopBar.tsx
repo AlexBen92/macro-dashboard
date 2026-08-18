@@ -15,6 +15,12 @@ interface OptionsTopBarProps {
   dealerDelta: DealerDeltaBias;
   freshness: DataFreshness;
   freshnessTs: string | null;
+  regime?: {
+    label: string | null;
+    daysInRegime: number | null;
+    asOf: string | null;
+    loading: boolean;
+  } | null;
   onRefresh: () => void;
   onOpenVolSurface: () => void;
   onOpenGuide: () => void;
@@ -26,6 +32,13 @@ const FRESHNESS_COLOR: Record<DataFreshness, string> = {
   delayed: 'var(--caution)',
   stale: 'var(--bear)',
   unavailable: 'var(--muted)',
+};
+
+const REGIME_COLOR: Record<string, string> = {
+  CALM: 'var(--bull)',
+  BUILDING: 'var(--accent)',
+  STRESS: 'var(--caution)',
+  CRISIS: 'var(--bear)',
 };
 
 const GAMMA_COLOR: Record<GammaRegime, string> = {
@@ -77,6 +90,7 @@ export default function OptionsTopBar(props: OptionsTopBarProps) {
     dealerDelta,
     freshness,
     freshnessTs,
+    regime,
     onRefresh,
     onOpenVolSurface,
     onOpenGuide,
@@ -148,21 +162,49 @@ export default function OptionsTopBar(props: OptionsTopBarProps) {
         </span>
       </div>
 
-      <Pill
-        label="γ"
-        value={gammaRegime}
-        color={GAMMA_COLOR[gammaRegime]}
-        title={`Provider gamma regime · rule v1 · ${gammaRegime}`}
-      />
-      <Pill
-        label="DEX"
-        value={dealerDelta}
-        color={DEX_COLOR[dealerDelta]}
-        title="Provider net DEX direction — raw aggregate, NOT dealer/client positioning"
-      />
+      {regime && (regime.loading || regime.label) && (
+        <Pill
+          label="RÉGIME"
+          value={
+            regime.loading && !regime.label
+              ? '…'
+              : `${regime.label ?? '?'}${regime.daysInRegime != null ? ` · ${regime.daysInRegime}j` : ''}`
+          }
+          color={REGIME_COLOR[regime.label ?? ''] ?? 'var(--muted)'}
+          title={
+            regime.asOf
+              ? `Régime WF (yf_BTC) · as_of ${regime.asOf}`
+              : 'Régime WF — indisponible'
+          }
+        />
+      )}
+      {gammaRegime === 'unknown' && dealerDelta === 'unknown' ? (
+        <span
+          title="GEX/DEX: collector en pré-test — premières données exploitable ~2026-08-26 (cron 04:17/16:17 UTC). Pas encore de snapshot."
+          className="px-2 py-1 rounded-[3px] border font-mono text-[0.55rem] uppercase tracking-[1.5px] text-[var(--muted)] opacity-60"
+          style={{ borderColor: 'var(--border)', background: 'var(--bg2)' }}
+        >
+          γ·DEX pré-test
+        </span>
+      ) : (
+        <>
+          <Pill
+            label="γ"
+            value={gammaRegime}
+            color={GAMMA_COLOR[gammaRegime]}
+            title={`Provider gamma regime · rule v1 · ${gammaRegime}`}
+          />
+          <Pill
+            label="DEX"
+            value={dealerDelta}
+            color={DEX_COLOR[dealerDelta]}
+            title="Provider net DEX direction — raw aggregate, NOT dealer/client positioning"
+          />
+        </>
+      )}
       <Pill
         label={freshness}
-        value={freshnessTs ? new Date(freshnessTs).toLocaleTimeString('en-GB') : '—'}
+        value={freshnessTs ? new Date(freshnessTs).toLocaleTimeString('en-GB') : 'indisponible'}
         color={FRESHNESS_COLOR[freshness]}
         title={
           freshnessTs

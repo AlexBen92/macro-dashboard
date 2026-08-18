@@ -37,9 +37,16 @@ function liquidityBadge(liq: string): React.CSSProperties {
 
 export default function EdgeWatchlist({ trends }: Props) {
   return (
-    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-4">
-      <div className="font-mono text-[0.72rem] text-[var(--label)] tracking-[3px] uppercase mb-3">
-        EDGE WATCHLIST <span className="text-[0.58rem] text-[var(--muted)] ml-2">14 niche markets · potential alpha</span>
+    <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-4 opacity-75">
+      <div className="font-mono text-[0.72rem] text-[var(--label)] tracking-[3px] uppercase mb-2">
+        EDGE WATCHLIST{' '}
+        <span className="text-[0.58rem] text-[var(--muted)] ml-2">14 niche markets</span>{' '}
+        <span
+          className="ml-2 inline-flex items-center rounded-[2px] border border-[var(--border)] px-1.5 py-px text-[0.5rem] tracking-[1px] text-[var(--muted)]"
+          title="Aucun edge validé sur cet univers (programme de recherche) — suivi exploratoire uniquement, pas actionnable"
+        >
+          exploratoire · aucun edge validé
+        </span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full font-mono text-[0.62rem] min-w-[800px]">

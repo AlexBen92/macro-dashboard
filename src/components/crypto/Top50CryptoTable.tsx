@@ -74,6 +74,7 @@ export default function Top50CryptoTable() {
   const [sortKey, setSortKey] = useState<SortKey>('market_cap');
   const [sortAsc, setSortAsc] = useState(false);
   const [sector, setSector] = useState<SectorFilter>('all');
+  const [extremeFunding, setExtremeFunding] = useState(false);
 
   const rows = useMemo(() => {
     let coins: Top50Coin[] = data?.coins ?? [];
@@ -84,15 +85,23 @@ export default function Top50CryptoTable() {
           : SECTOR_MAP[c.symbol] === sector,
       );
     }
+    if (extremeFunding) {
+      coins = coins.filter((c) => c.funding_apr != null && Math.abs(c.funding_apr) >= 15);
+    }
     const dir = sortAsc ? 1 : -1;
     return [...coins].sort((a, b) => {
       if (sortKey === 'name') return a.name.localeCompare(b.name) * dir;
       if (sortKey === 'rank') return (a.rank - b.rank) * dir;
+      if (sortKey === 'funding_apr') {
+        const va = Math.abs(a.funding_apr ?? -Infinity);
+        const vb = Math.abs(b.funding_apr ?? -Infinity);
+        return (va - vb) * dir;
+      }
       const va = (a[sortKey] as number | null) ?? -Infinity;
       const vb = (b[sortKey] as number | null) ?? -Infinity;
       return (va - vb) * dir;
     });
-  }, [data, sector, sortKey, sortAsc]);
+  }, [data, sector, sortKey, sortAsc, extremeFunding]);
 
   const toggleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -130,6 +139,17 @@ export default function Top50CryptoTable() {
               {s === 'all' ? `tous (${data?.coins.length ?? '—'})` : s}
             </button>
           ))}
+          <button
+            onClick={() => setExtremeFunding((v) => !v)}
+            title="Terrain de jeu de la stratégie validée funding carry — filtre |APR| ≥ 15%"
+            className={`px-2 py-0.5 rounded-[3px] font-mono text-[0.55rem] uppercase tracking-[2px] border ${
+              extremeFunding
+                ? 'bg-[var(--bull)]/15 text-[var(--bull)] border-[var(--bull)]/40'
+                : 'text-[var(--muted)] border-transparent hover:text-[var(--label)]'
+            }`}
+          >
+            ⚡ |funding| ≥ 15%
+          </button>
           <span className="font-mono text-[0.55rem] text-[var(--muted)] uppercase tracking-[2px]">
             {asOf ?? '—'}
           </span>
