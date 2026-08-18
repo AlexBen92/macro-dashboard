@@ -1,15 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import universe from '@/config/markets-universe.json';
 import type { TrendResult } from '@/lib/engines/trend';
-import {
-  correlationMatrix,
-  pricesToLogReturns,
-  type CorrCell,
-} from '@/lib/engines/correlation';
+import type { CorrCell, CorrWindow } from '@/lib/engines/correlation';
 import { flatClusters } from '@/lib/engines/clustering';
 import { useCotStatus } from '@/hooks/api/useCotStatus';
+import { useCorrBasket } from '@/hooks/api/useCorrBasket';
 import { CotHeader, CotTd } from '@/components/markets/CotCell';
 
 interface UniverseEntry {
@@ -57,53 +54,15 @@ function corrColor(r: number | null): string {
 
 export default function LiquidBasketTable({ trends }: Props) {
   const { data: cot } = useCotStatus();
-  const [series, setSeries] = useState<Record<string, number[]>>({});
-  const [loading, setLoading] = useState(true);
+  const { data: corr, isLoading: corrLoading, error: corrError, isStale: corrStale } = useCorrBasket();
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const results = await Promise.all(
-        liquid.map(async (it) => {
-          try {
-            const res = await fetch(
-              `/api/markets/ohlc?ticker=${encodeURIComponent(it.ticker)}&interval=1d&range=5y`,
-            );
-            if (!res.ok) return { ticker: it.ticker, closes: [] as number[] };
-            const json = await res.json();
-            const bars: Array<{ close: number }> = json.bars ?? [];
-            const closes = bars
-              .map((b) => b.close)
-              .filter((x) => typeof x === 'number' && isFinite(x));
-            return { ticker: it.ticker, closes };
-          } catch {
-            return { ticker: it.ticker, closes: [] as number[] };
-          }
-        }),
-      );
-      if (cancelled) return;
-      const map: Record<string, number[]> = {};
-      for (const r of results) map[r.ticker] = r.closes;
-      setSeries(map);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const returns = useMemo(() => {
-    const out: Record<string, number[]> = {};
-    for (const k of Object.keys(series)) {
-      out[k] = pricesToLogReturns(series[k]);
-    }
-    return out;
-  }, [series]);
-
-  const corr60 = useMemo(() => correlationMatrix(returns, 60), [returns]);
-  const corr120 = useMemo(() => correlationMatrix(returns, 120), [returns]);
-  const corr252 = useMemo(() => correlationMatrix(returns, 252), [returns]);
+  const cellsOf = useMemo(
+    () => (w: CorrWindow) => (corr?.cells ?? []).filter((c) => c.window === w),
+    [corr],
+  );
+  const corr60 = cellsOf('60d');
+  const corr120 = cellsOf('120d');
+  const corr252 = cellsOf('252d');
 
   const clusters = useMemo(() => {
     const tickers = liquid.map((x) => x.ticker);
@@ -185,9 +144,19 @@ export default function LiquidBasketTable({ trends }: Props) {
           </tbody>
         </table>
       </div>
-      {loading && (
+      {corrLoading && (
         <div className="mt-2 font-mono text-[0.55rem] text-[var(--muted)] uppercase tracking-[2px]">
-          loading 5y closes for correlation...
+          loading corr matrix · export quotidien 05:57 utc...
+        </div>
+      )}
+      {corrError && (
+        <div className="mt-2 font-mono text-[0.55rem] text-[var(--bear)] uppercase tracking-[2px]">
+          corr basket indisponible — {corrError.slice(0, 60)}
+        </div>
+      )}
+      {corrStale && corr && (
+        <div className="mt-2 font-mono text-[0.55rem] text-[var(--caution)] uppercase tracking-[2px]">
+          corr stale — export quotidien hs (as_of {corr.as_of})
         </div>
       )}
     </div>
