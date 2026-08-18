@@ -2,6 +2,8 @@
 
 import universe from '@/config/markets-universe.json';
 import type { TrendResult } from '@/lib/engines/trend';
+import { useCotStatus } from '@/hooks/api/useCotStatus';
+import { CotHeader, CotTd } from '@/components/markets/CotCell';
 
 interface UniverseEntry {
   ticker: string;
@@ -36,6 +38,7 @@ function liquidityBadge(liq: string): React.CSSProperties {
 }
 
 export default function EdgeWatchlist({ trends }: Props) {
+  const { data: cot } = useCotStatus();
   return (
     <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-4 opacity-75">
       <div className="font-mono text-[0.72rem] text-[var(--label)] tracking-[3px] uppercase mb-2">
@@ -49,13 +52,16 @@ export default function EdgeWatchlist({ trends }: Props) {
         </span>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full font-mono text-[0.62rem] min-w-[800px]">
+        <table className="w-full font-mono text-[0.62rem] min-w-[860px]">
           <thead>
             <tr className="text-[0.55rem] text-[var(--muted)] tracking-[2px] uppercase border-b border-[var(--border)]">
               <th className="text-left py-2 pr-3">Ticker</th>
               <th className="text-left py-2 px-2">Sector</th>
               <th className="text-left py-2 px-2">Trend D</th>
               <th className="text-left py-2 px-2">Trend 4H</th>
+              <th className="text-right py-2 px-2">
+                <CotHeader data={cot} />
+              </th>
               <th className="text-left py-2 px-2">Liquidity</th>
               <th className="text-left py-2 pl-2">Catalyst</th>
             </tr>
@@ -78,6 +84,7 @@ export default function EdgeWatchlist({ trends }: Props) {
                   <td className="py-1.5 px-2 uppercase tracking-[1px] font-semibold" style={{ color: trendColor(t?.h4 ?? null) }}>
                     {t?.h4 ? t.h4.direction : '—'}
                   </td>
+                  <CotTd ticker={it.ticker} data={cot} />
                   <td className="py-1.5 px-2">
                     <span
                       className="px-1.5 py-0.5 rounded-[2px] text-[0.5rem] uppercase tracking-[1px] border"

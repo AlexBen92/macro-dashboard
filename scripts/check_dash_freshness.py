@@ -28,6 +28,9 @@ FLUXES = [
     ("decision", "decision_btceth_status.json", ("last_export_success", "as_of"), 20),
     ("orderflow", "orderflow_status.json", ("last_export_success", "as_of"), 20),
     ("regime_matrix", "regime_matrix.json", ("as_of",), 26 * 60),
+    # as_of = mardi du rapport CFTC (publication vendredi J+3) — âge pire-cas
+    # 11j à cadence hebdo, seuil 12j = semaine manquée
+    ("cot", "cot_status.json", ("as_of",), 12 * 24 * 60),
 ]
 
 

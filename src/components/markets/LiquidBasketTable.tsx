@@ -9,6 +9,8 @@ import {
   type CorrCell,
 } from '@/lib/engines/correlation';
 import { flatClusters } from '@/lib/engines/clustering';
+import { useCotStatus } from '@/hooks/api/useCotStatus';
+import { CotHeader, CotTd } from '@/components/markets/CotCell';
 
 interface UniverseEntry {
   ticker: string;
@@ -54,6 +56,7 @@ function corrColor(r: number | null): string {
 }
 
 export default function LiquidBasketTable({ trends }: Props) {
+  const { data: cot } = useCotStatus();
   const [series, setSeries] = useState<Record<string, number[]>>({});
   const [loading, setLoading] = useState(true);
 
@@ -115,13 +118,16 @@ export default function LiquidBasketTable({ trends }: Props) {
         LIQUID BASKET <span className="text-[0.58rem] text-[var(--muted)] ml-2">9 majors · corr vs ES=F · cluster flag |r|&gt;0.4</span>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full font-mono text-[0.62rem] min-w-[900px]">
+        <table className="w-full font-mono text-[0.62rem] min-w-[960px]">
           <thead>
             <tr className="text-[0.55rem] text-[var(--muted)] tracking-[2px] uppercase border-b border-[var(--border)]">
               <th className="text-left py-2 pr-3">Asset</th>
               <th className="text-left py-2 px-2">Trend D</th>
               <th className="text-left py-2 px-2">Trend 4H</th>
               <th className="text-right py-2 px-2">ADX D</th>
+              <th className="text-right py-2 px-2">
+                <CotHeader data={cot} />
+              </th>
               <th className="text-right py-2 px-2">Corr 60d</th>
               <th className="text-right py-2 px-2">Corr 120d</th>
               <th className="text-right py-2 px-2">Corr 252d</th>
@@ -154,6 +160,7 @@ export default function LiquidBasketTable({ trends }: Props) {
                   <td className="py-1.5 px-2 text-right text-[var(--dim)]">
                     {t?.daily ? t.daily.adx.toFixed(0) : '—'}
                   </td>
+                  <CotTd ticker={it.ticker} data={cot} />
                   <td className="py-1.5 px-2 text-right" style={{ color: corrColor(r60) }}>
                     {r60 == null ? '—' : r60.toFixed(2)}
                   </td>
