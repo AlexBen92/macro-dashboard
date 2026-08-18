@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import universe from '@/config/markets-universe.json';
 import type { TrendResult } from '@/lib/engines/trend';
+import { computeGlobalRotation } from '@/lib/marketRotation';
 
 interface UniverseEntry {
   ticker: string;
@@ -90,11 +91,38 @@ export default function RotationScoreboard({ trends }: Props) {
     }).filter((r) => r.n > 0);
   }, [all, trends]);
 
+  const global = useMemo(() => computeGlobalRotation(rows), [rows]);
+
   return (
     <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[4px] p-4">
-      <div className="font-mono text-[0.72rem] text-[var(--label)] tracking-[3px] uppercase mb-3">
+      <div className="font-mono text-[0.72rem] text-[var(--label)] tracking-[3px] uppercase mb-2">
         ROTATION SCOREBOARD <span className="text-[0.58rem] text-[var(--muted)] ml-2">% bull - % bear</span>
       </div>
+      {global && (
+        <div className="mb-3 border border-[var(--border)] rounded-[3px] px-2.5 py-1.5 bg-[var(--bg)]">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-mono">
+            <span className="text-[0.5rem] uppercase tracking-[2px] text-[var(--muted)]">Régime global</span>
+            <span className="text-[0.7rem] font-semibold tracking-[2px]" style={{ color: global.color }}>
+              {global.label}
+            </span>
+            <span className="text-[0.55rem] text-[var(--muted)]" title="Moyenne des scores daily des secteurs avec données">
+              moy {global.avg > 0 ? '+' : ''}
+              {global.avg.toFixed(1)} · {global.nPos}▲ / {global.nNeg}▼ / {global.nNeutral}—
+            </span>
+          </div>
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-[0.55rem]">
+            {global.scored.map((r) => {
+              const arrow = r.daily > 20 ? '▲' : r.daily < -20 ? '▼' : '—';
+              return (
+                <span key={r.sector} title={`${SECTOR_LABELS[r.sector] ?? r.sector} : ${r.daily > 0 ? '+' : ''}${r.daily}`}>
+                  <span className="text-[var(--dim)]">{SECTOR_LABELS[r.sector] ?? r.sector}</span>{' '}
+                  <span style={{ color: colorFor(r.daily) }}>{arrow}</span>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-[1fr_120px_120px] gap-x-3 font-mono text-[0.55rem] text-[var(--muted)] tracking-[2px] uppercase pb-2 border-b border-[var(--border)]">
         <div>Sector</div>
         <div className="text-right">Daily</div>

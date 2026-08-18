@@ -107,6 +107,22 @@ export function hurstDivergenceState(
   return { label: 'divergence', arrow: d > 0 ? '↗' : '↘', strong: true };
 }
 
+export type TrendVerdict = 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+
+/** Direction (SuperTrend) gated by strength: trend_score est une force 0-100
+ * non signée — un score élevé sans direction stable reste NEUTRAL. */
+export function trendVerdict(a: RegimeMatrixAsset): TrendVerdict | null {
+  if (a.status !== 'ok' || a.trend_score == null || !a.supertrend_dir) return null;
+  if (a.trend_score < 60) return 'NEUTRAL';
+  return a.supertrend_dir === 'bull' ? 'BULLISH' : 'BEARISH';
+}
+
+export function verdictColor(v: TrendVerdict | null): string {
+  if (v === 'BULLISH') return 'var(--bull)';
+  if (v === 'BEARISH') return 'var(--bear)';
+  return 'var(--muted)';
+}
+
 export function assetsBySource(
   payload: RegimeMatrixPayload | null,
   source: 'yahoo' | 'hyperliquid',

@@ -11,6 +11,8 @@ import {
   stationarityColor,
   superTrendColor,
   trendScoreColor,
+  trendVerdict,
+  verdictColor,
   type RegimeMatrixAsset,
 } from '@/lib/regimeMatrix';
 
@@ -98,6 +100,57 @@ function AssetDetail({ a, onClose }: { a: RegimeMatrixAsset; onClose: () => void
   );
 }
 
+function VerdictPill({ a }: { a: RegimeMatrixAsset }) {
+  const v = trendVerdict(a);
+  if (!v) return <span className="text-[var(--dim)]">—</span>;
+  const arrow = v === 'BULLISH' ? '▲' : v === 'BEARISH' ? '▼' : '—';
+  return (
+    <span
+      className={`inline-flex items-center gap-1 uppercase tracking-[1px] font-semibold ${
+        v === 'NEUTRAL' ? 'text-[0.55rem]' : 'text-[0.58rem]'
+      }`}
+      style={{ color: verdictColor(v) }}
+      title={`Verdict : force (score ${a.trend_score?.toFixed(0) ?? '—'} ≥ 60) + direction SuperTrend`}
+    >
+      {arrow} {v.toLowerCase()}
+    </span>
+  );
+}
+
+function CalloutList({
+  title,
+  assets,
+  onSelect,
+}: {
+  title: string;
+  assets: RegimeMatrixAsset[];
+  onSelect: (a: RegimeMatrixAsset) => void;
+}) {
+  return (
+    <div className="flex-1 min-w-0 border border-[var(--border)] rounded-[3px] px-2.5 py-1.5">
+      <div className="font-mono text-[0.5rem] uppercase tracking-[2px] text-[var(--muted)] mb-1">{title}</div>
+      {assets.length === 0 && (
+        <div className="font-mono text-[0.55rem] text-[var(--dim)]">aucun</div>
+      )}
+      {assets.map((a) => (
+        <button
+          key={`${a.source}:${a.id}`}
+          onClick={() => onSelect(a)}
+          className="flex w-full items-center justify-between gap-2 py-0.5 font-mono text-[0.62rem] hover:bg-[var(--bg3)] rounded-[2px] px-1 -mx-1"
+          title="Cliquer pour le détail complet"
+        >
+          <span className="text-[var(--label)] truncate">{a.name}</span>
+          <span className="flex items-center gap-2 shrink-0">
+            <span className="text-[0.55rem] text-[var(--dim)] uppercase">{a.id}</span>
+            <span style={{ color: trendScoreColor(a.trend_score) }}>{a.trend_score?.toFixed(0)}</span>
+            <VerdictPill a={a} />
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function AssetRow({ a, selected, onSelect }: { a: RegimeMatrixAsset; selected: boolean; onSelect: () => void }) {
   const ok = a.status === 'ok';
   const div = hurstDivergenceState(a);
@@ -133,6 +186,7 @@ function AssetRow({ a, selected, onSelect }: { a: RegimeMatrixAsset; selected: b
       <td className="py-1.5 pl-2 text-right" style={{ color: trendScoreColor(a.trend_score) }}>
         {ok ? a.trend_score?.toFixed(0) ?? '—' : '—'}
       </td>
+      <td className="py-1.5 pl-2">{ok ? <VerdictPill a={a} /> : '—'}</td>
     </tr>
   );
 }
@@ -191,8 +245,21 @@ export default function RegimeMatrixTable() {
         ))}
       </div>
 
+      <div className="flex flex-col sm:flex-row gap-2 mb-3">
+        <CalloutList
+          title="▲ top 3 haussier"
+          assets={sorted.filter((a) => trendVerdict(a) === 'BULLISH').slice(0, 3)}
+          onSelect={(a) => setSelectedId(`${a.source}:${a.id}`)}
+        />
+        <CalloutList
+          title="▼ top 3 baissier"
+          assets={sorted.filter((a) => trendVerdict(a) === 'BEARISH').slice(0, 3)}
+          onSelect={(a) => setSelectedId(`${a.source}:${a.id}`)}
+        />
+      </div>
+
       <div className="overflow-x-auto">
-        <table className="w-full font-mono text-[0.62rem] min-w-[560px]">
+        <table className="w-full font-mono text-[0.62rem] min-w-[640px]">
           <thead>
             <tr className="text-[0.55rem] text-[var(--muted)] tracking-[2px] uppercase border-b border-[var(--border)]">
               <th className="text-left py-2 pr-3">Asset</th>
@@ -200,6 +267,7 @@ export default function RegimeMatrixTable() {
               <th className="text-left py-2 px-2" title="Direction SuperTrend 10/3">ST</th>
               <th className="text-right py-2 px-2" title="Inversions SuperTrend 30j — élevé = range/bruit">Flips 30d</th>
               <th className="text-right py-2 pl-2" title="Score composite de tendance">Score</th>
+              <th className="text-left py-2 pl-2" title="Direction SuperTrend validée par la force du score (≥60)">Verdict</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)]">

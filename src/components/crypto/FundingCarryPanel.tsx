@@ -42,6 +42,44 @@ const fetcher = (u: string) =>
     return r.json() as Promise<FundingCarryPayload>;
   });
 
+const TRAIL_SCALE_MAX_BP = 2;
+
+function TrailBar({ trailBpDay, open }: { trailBpDay: number | null; open: boolean }) {
+  const pct =
+    trailBpDay == null ? null : Math.min(Math.abs(trailBpDay) / TRAIL_SCALE_MAX_BP, 1) * 100;
+  return (
+    <div
+      className="mt-0.5 basis-full"
+      title={`Trail 3j actuel : ${trailBpDay == null ? '—' : `${trailBpDay.toFixed(2)} bp/j`} — entrée |trail| > 1 bp/j, sortie hystérésis < 0,5 bp/j`}
+    >
+      <div className="relative h-1 bg-[var(--bg3)] rounded-[1px]">
+        {[25, 50].map((t) => (
+          <div
+            key={t}
+            className="absolute top-[-2px] bottom-[-2px] w-px bg-[var(--border)]"
+            style={{ left: `${t}%` }}
+          />
+        ))}
+        {pct != null && (
+          <div
+            className="absolute top-[-2px] h-2 w-2 rounded-full"
+            style={{
+              left: `calc(${pct}% - 4px)`,
+              background: open ? 'var(--bull)' : 'var(--muted)',
+            }}
+          />
+        )}
+      </div>
+      <div className="flex justify-between font-mono text-[0.45rem] text-[var(--dim)] mt-0.5">
+        <span>0</span>
+        <span className={open ? 'text-[var(--muted)]' : ''}>0,5 · sortie</span>
+        <span>1 · entrée</span>
+        <span>2 bp/j</span>
+      </div>
+    </div>
+  );
+}
+
 export default function FundingCarryPanel() {
   const { data, isLoading, error } = useSWR<FundingCarryPayload>('/api/funding-carry', fetcher, {
     refreshInterval: 300_000,
@@ -76,6 +114,14 @@ export default function FundingCarryPanel() {
       <div className="mt-1.5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 font-mono text-[0.62rem]">
         {(['BTC', 'ETH'] as const).map((coin) => {
           const f = data?.funding[coin];
+          const trailFrac = ps?.latest_trail_day_frac[coin];
+          const trailBpDay = trailFrac == null ? null : trailFrac * 1e4;
+          const pos = ps?.positions[coin];
+          const openLeg = pos != null && pos.side_perp != null;
+          const days =
+            openLeg && pos?.entry_ts
+              ? (Date.now() - Date.parse(pos.entry_ts)) / 86_400_000
+              : null;
           return (
             <div key={coin} className="flex flex-wrap items-baseline gap-x-2">
               <span className="text-[var(--label)] uppercase tracking-[1px] w-9">{coin}</span>
@@ -90,10 +136,12 @@ export default function FundingCarryPanel() {
                 className="text-[0.55rem]"
               />
               {(() => {
-                const pos = ps?.positions[coin];
-                if (!pos || pos.side_perp == null) {
+                if (!openLeg) {
                   return (
-                    <span className="text-[0.55rem] text-[var(--muted)]" title="Aucune jambe ouverte — trail sous seuil d'entrée (1bp/j)">
+                    <span
+                      className="text-[0.55rem] text-[var(--muted)]"
+                      title="Aucune jambe ouverte — trail sous seuil d'entrée (1bp/j)"
+                    >
                       flat
                     </span>
                   );
@@ -102,13 +150,15 @@ export default function FundingCarryPanel() {
                   <span
                     className="text-[0.55rem]"
                     style={{ color: 'var(--bull)' }}
-                    title={`Ouvert ${pos.entry_ts} · perp ${pos.entry_perp} / spot ${pos.entry_spot}`}
+                    title={`Ouvert ${pos?.entry_ts} · perp ${pos?.entry_perp} / spot ${pos?.entry_spot}`}
                   >
-                    {pos.side_perp < 0 ? 'short perp + spot' : 'long perp + short spot'} ·{' '}
-                    {pos.accrued_funding_bps != null ? `${pos.accrued_funding_bps.toFixed(1)}bps collectés` : ''}
+                    {pos!.side_perp! < 0 ? 'short perp + spot' : 'long perp + short spot'} ·{' '}
+                    {pos!.accrued_funding_bps != null ? `${pos!.accrued_funding_bps.toFixed(1)}bps collectés` : ''}
+                    {days != null ? ` · ${days < 1 ? '<1' : days.toFixed(0)}j` : ''}
                   </span>
                 );
               })()}
+              <TrailBar trailBpDay={trailBpDay} open={openLeg} />
             </div>
           );
         })}
