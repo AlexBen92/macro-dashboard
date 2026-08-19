@@ -7,7 +7,15 @@ import RegimeMatrixTable from '@/components/markets/RegimeMatrixTable';
 import ImpactWindow from '@/components/markets/ImpactWindow';
 import LiquidBasketTable from '@/components/markets/LiquidBasketTable';
 import EdgeWatchlist from '@/components/markets/EdgeWatchlist';
+import GoldDonchianPanel from '@/components/markets/GoldDonchianPanel';
 import ResearchProgramStatus from '@/components/ResearchProgramStatus';
+import ResearchCatalog from '@/components/ResearchCatalog';
+import ExploratorySection from '@/components/ui/ExploratorySection';
+import MacroContext from '@/components/MacroContext';
+import MacroAdvancedPanel from '@/components/MacroAdvancedPanel';
+import MacroCorrelationsPanel from '@/components/MacroCorrelationsPanel';
+import QuantRegimesPanel from '@/components/QuantRegimesPanel';
+import CompositeSignalsPanel from '@/components/CompositeSignalsPanel';
 import { useMarketSectors } from '@/hooks/api/useMarketSectors';
 
 const stagger = {
@@ -49,7 +57,7 @@ export default function MarketsPage() {
       </div>
 
       <motion.div
-        className="max-w-[96rem] mx-auto p-4 space-y-4"
+        className="max-w-[96rem] mx-auto p-4 space-y-6"
         variants={stagger}
         initial="hidden"
         animate="show"
@@ -62,6 +70,12 @@ export default function MarketsPage() {
           </motion.div>
         )}
 
+        {/* NIVEAU 1 — stratégies systématiques réelles */}
+        <motion.div variants={fadeUp}>
+          <GoldDonchianPanel />
+        </motion.div>
+
+        {/* NIVEAU 2 — contexte macro */}
         <motion.div variants={fadeUp}>
           <RotationScoreboard trends={trends} />
         </motion.div>
@@ -75,10 +89,6 @@ export default function MarketsPage() {
         </motion.div>
 
         <motion.div variants={fadeUp}>
-          <ResearchProgramStatus variant="markets" />
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
           <ImpactWindow />
         </motion.div>
 
@@ -87,8 +97,37 @@ export default function MarketsPage() {
         </motion.div>
 
         <motion.div variants={fadeUp}>
-          <EdgeWatchlist trends={trends} />
+          <MacroContext />
         </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <MacroAdvancedPanel />
+        </motion.div>
+
+        <motion.div variants={fadeUp}>
+          <QuantRegimesPanel />
+        </motion.div>
+
+        {/* NIVEAU 3 — recherche / veille, replié */}
+        <ExploratorySection label="Corrélations crypto ↔ macro — à fusionner avec le moteur corrélation">
+          <MacroCorrelationsPanel />
+        </ExploratorySection>
+
+        <ExploratorySection label="Signaux composites · vw-tsmom / funding / macd">
+          <CompositeSignalsPanel />
+        </ExploratorySection>
+
+        <ExploratorySection label="Edge watchlist niche — softs / dairy / fx EM (aucun edge validé)">
+          <EdgeWatchlist trends={trends} />
+        </ExploratorySection>
+
+        <motion.div variants={fadeUp}>
+          <ResearchProgramStatus variant="markets" />
+        </motion.div>
+
+        <ExploratorySection label="Catalogue de recherche complet — 36 familles · 163 configs WF · filtrable par statut">
+          <ResearchCatalog />
+        </ExploratorySection>
 
         <motion.div variants={fadeUp}>
           <div className="flex items-center justify-between px-2 pt-2 pb-4 font-mono text-[0.55rem] text-[var(--muted)] uppercase tracking-[2px]">

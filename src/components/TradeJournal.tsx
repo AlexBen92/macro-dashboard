@@ -1,14 +1,15 @@
 /**
- * TRADE JOURNAL v8.0
- * Log rapide de trades M15 directement depuis le dashboard.
+ * TRADE JOURNAL v8.1
+ * Log rapide de trades directement depuis le dashboard.
  * Calcule automatiquement PnL, win rate session, daily summary.
- * Données persistées dans localStorage.
+ * Données persistées dans localStorage — clé distincte par timeframe
+ * (M15 scalping vs H1/H4 swing) pour éviter la dérive des règles de risk.
  */
 'use client';
 
 import { useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'hermes_trade_journal_v2';
+const DEFAULT_STORAGE_KEY = 'hermes_trade_journal_v2';
 
 interface TradeForm {
   symbol: string;
@@ -58,7 +59,13 @@ function computePnL(trade: Trade): string | null {
   return (pnl - fees).toFixed(2);
 }
 
-export default function TradeJournal() {
+export default function TradeJournal({
+  storageKey = DEFAULT_STORAGE_KEY,
+  scopeLabel = 'M15',
+}: {
+  storageKey?: string;
+  scopeLabel?: string;
+}) {
   const [trades, setTrades]   = useState<Trade[]>([]);
   const [form, setForm]       = useState<TradeForm>(emptyForm);
   const [closing, setClosing] = useState<number | null>(null);
@@ -68,15 +75,15 @@ export default function TradeJournal() {
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = localStorage.getItem(storageKey);
         if (saved) setTrades(JSON.parse(saved));
       }
     } catch {}
-  }, []);
+  }, [storageKey]);
 
   const save = (t: Trade[]) => {
     setTrades(t);
-    try { if (typeof window !== 'undefined') localStorage.setItem(STORAGE_KEY, JSON.stringify(t)); } catch {}
+    try { if (typeof window !== 'undefined') localStorage.setItem(storageKey, JSON.stringify(t)); } catch {}
   };
 
   const addTrade = () => {
@@ -117,7 +124,7 @@ export default function TradeJournal() {
   return (
     <div style={{ background: '#0a0f1a', border: '1px solid #1e3a5f', borderRadius: 12, padding: 16, fontFamily: 'monospace' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 style={{ color: '#60a5fa', margin: 0, fontSize: 15, fontWeight: 700 }}>📔 TRADE JOURNAL</h3>
+        <h3 style={{ color: '#60a5fa', margin: 0, fontSize: 15, fontWeight: 700 }}>📔 TRADE JOURNAL · {scopeLabel}</h3>
         <button onClick={clearAll} style={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 4, color: '#64748b', padding: '3px 8px', fontSize: 11, cursor: 'pointer' }}>🗑 Clear</button>
       </div>
 

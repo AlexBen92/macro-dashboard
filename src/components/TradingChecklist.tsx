@@ -12,13 +12,35 @@ type ChecklistItem = {
 
 type SessionPhase = 'pre-session' | 'window-open' | 'trading' | 'post-session' | 'off';
 
-export default function TradingChecklist() {
+export type ChecklistVariant = 'M15' | 'H1H4';
+
+export default function TradingChecklist({ variant = 'M15' }: { variant?: ChecklistVariant }) {
   const [phase, setPhase] = useState<SessionPhase>('off');
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
   const [sessionName, setSessionName] = useState('');
   const [sessionScore, setSessionScore] = useState(0);
 
   useEffect(() => {
+    if (variant === 'H1H4') {
+      // H1/H4 swing: pas de gating session dure — l'overlap EU/US (13h-17h UTC)
+      // reste la meilleure fenêtre d'entrée, mais les setups se valident sur
+      // clôture H4, pas sur l'heure d'entrée.
+      const h = new Date().getUTCHours();
+      const overlap = h >= 13 && h < 17;
+      setPhase('window-open');
+      setSessionName(overlap ? 'Overlap EU/US — meilleure fenêtre' : 'Hors overlap — setups sur clôture H4');
+      setSessionScore(overlap ? 0.8 : 0.5);
+      setChecklist([
+        { id: '1', label: '✅ Trend H4 identifié (structure + EMA), pas de range', done: false, critical: true },
+        { id: '2', label: '✅ Zone H1 S/R marquée (S/R flip, liquidité, OB)', done: false, critical: true },
+        { id: '3', label: '✅ Confluence: funding extrême OU corr BTC alignée', done: false, critical: false },
+        { id: '4', label: '⏳ Attendre confirmation H1 (clôture, pas intrabar)', done: false, critical: true },
+        { id: '5', label: '⏳ SL = max(1.5%, 1.0×ATR H4) placé', done: false, critical: true },
+        { id: '6', label: '⏳ TP1 (1.5R) + TP2 (3R) définis', done: false, critical: true },
+        { id: '7', label: '⏳ Taille ≤1% equity — risque hebdo 2% non entamé', done: false, critical: true },
+      ]);
+      return;
+    }
     const h = new Date().getUTCHours();
     const win = VOL_WINDOWS.find(w => h >= w.start && h < w.end);
 
@@ -62,7 +84,7 @@ export default function TradingChecklist() {
         { id: '2', label: '⏳ Prochaine fenêtre: EU Open 7h UTC', done: false, critical: false },
       ]);
     }
-  }, []);
+  }, [variant]);
 
   const toggle = (id: string) => {
     setChecklist(prev => prev.map(item =>
@@ -83,10 +105,12 @@ export default function TradingChecklist() {
       <div className="flex items-center justify-between mb-3">
         <div>
           <h2 className="text-lg font-bold text-white tracking-widest uppercase">
-            📋 Trading Checklist
+            📋 Trading Checklist {variant === 'H1H4' ? '· H1/H4' : '· M15'}
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Routine M15 scalping · {sessionName} · Score {(sessionScore * 100).toFixed(0)}/100
+            {variant === 'H1H4'
+              ? `Routine swing ETH/SOL/alts · ${sessionName}`
+              : `Routine M15 scalping · ${sessionName} · Score ${(sessionScore * 100).toFixed(0)}/100`}
           </p>
         </div>
         <button
@@ -111,7 +135,9 @@ export default function TradingChecklist() {
           <span>✅ Fenêtre active — Critiques: {criticalDone}/{criticalTotal} validés</span>
         )}
         {phase === 'window-open' && sessionScore < 0.7 && (
-          <span>⚠️ Vol sous-optimale — Attendre fenêtre EU/US Core</span>
+          variant === 'H1H4'
+            ? <span>ⓘ Hors overlap — setups H1/H4 restent valides sur clôture</span>
+            : <span>⚠️ Vol sous-optimale — Attendre fenêtre EU/US Core</span>
         )}
         {phase === 'pre-session' && (
           <span>🔵 Pré-session — Prépare tes niveaux</span>
@@ -164,20 +190,33 @@ export default function TradingChecklist() {
             <span>READY TO TRADE</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            Tous les critères sont validés. Tu peux chercher ton setup M15.
+            {variant === 'H1H4'
+              ? 'Tous les critères sont validés. Tu peux chercher ton setup H1/H4.'
+              : 'Tous les critères sont validés. Tu peux chercher ton setup M15.'}
           </p>
         </div>
       )}
 
       {/* Quick rules */}
       <div className="mt-4 p-3 rounded-lg bg-gray-900/40 border border-gray-800">
-        <div className="text-xs text-gray-500 mb-2">Règles de risk M15:</div>
-        <div className="space-y-1 text-xs text-gray-400">
-          <div>• SL = max(0.4%, 0.75×ATR) — stop journalier 0.5%</div>
-          <div>• TP1 = 1R (sortir 50%) · TP2 = 2R (reste)</div>
-          <div>• Taille = 0.15–0.20% equity par trade</div>
-          <div>• Max 3–5 setups/jour — Pas de revenge trade</div>
+        <div className="text-xs text-gray-500 mb-2">
+          Règles de risk {variant === 'H1H4' ? 'H1/H4 (calibrage initial — ajuster selon ton plan)' : 'M15'}:
         </div>
+        {variant === 'H1H4' ? (
+          <div className="space-y-1 text-xs text-gray-400">
+            <div>• SL = max(1.5%, 1.0×ATR H4) — stop hebdo 2%</div>
+            <div>• TP1 = 1.5R (sortir 50%) · TP2 = 3R (reste)</div>
+            <div>• Taille = 0.5–1% equity par trade</div>
+            <div>• Max 2–3 setups/actif/semaine — Entrée sur clôture H1 confirmée</div>
+          </div>
+        ) : (
+          <div className="space-y-1 text-xs text-gray-400">
+            <div>• SL = max(0.4%, 0.75×ATR) — stop journalier 0.5%</div>
+            <div>• TP1 = 1R (sortir 50%) · TP2 = 2R (reste)</div>
+            <div>• Taille = 0.15–0.20% equity par trade</div>
+            <div>• Max 3–5 setups/jour — Pas de revenge trade</div>
+          </div>
+        )}
       </div>
     </section>
   );

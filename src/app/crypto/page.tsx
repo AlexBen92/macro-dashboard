@@ -15,7 +15,6 @@ import DailyBriefBar from '@/components/crypto/m15/DailyBriefBar';
 import PriceLevelsM15Chart from '@/components/crypto/m15/PriceLevelsM15Chart';
 import EdgeM15BTCCard from '@/components/crypto/m15/EdgeM15BTCCard';
 import VolHeatmapM15 from '@/components/crypto/m15/VolHeatmapM15';
-import DecisionEnginePanel from '@/components/crypto/decision/DecisionEnginePanel';
 import CorrelationTable from '@/components/crypto/m15/CorrelationTable';
 import SessionPlanCard from '@/components/crypto/m15/SessionPlanCard';
 import SetupsPanel from '@/components/crypto/m15/SetupsPanel';
@@ -26,12 +25,16 @@ import Top50CryptoTable from '@/components/crypto/Top50CryptoTable';
 import FundingCarryPanel from '@/components/crypto/FundingCarryPanel';
 import ExploratorySection from '@/components/ui/ExploratorySection';
 import ResearchProgramStatus from '@/components/ResearchProgramStatus';
+import ResearchCatalog from '@/components/ResearchCatalog';
+import ExecutionPanel from '@/components/execution/ExecutionPanel';
+import { useTelegramAlerts } from '@/components/TelegramAlerts';
 
 import { useOptionsExposure } from '@/hooks/api/useOptionsExposure';
 import { useRegimeStatus } from '@/hooks/api/useRegimeStatus';
 import type { ExpiryBucket, SupportedCurrency, Timeframe } from '@/lib/options/types';
 
 export default function CryptoPage() {
+  useTelegramAlerts();
   const [symbol, setSymbol] = useState<SupportedCurrency>('BTC');
   const [timeframe, setTimeframe] = useState<Timeframe>('M15');
   const [expiryBucket, setExpiryBucket] = useState<ExpiryBucket>('all');
@@ -67,11 +70,17 @@ export default function CryptoPage() {
         onOpenDiagnostics={() => setDiagOpen(true)}
       />
 
-      <main className="flex-1 px-4 py-3 flex flex-col gap-3">
+      <main className="flex-1 px-4 py-3 flex flex-col gap-6">
         <DailyBriefBar />
+
+        {/* NIVEAU 1 — exécution réelle, jamais replié */}
+        <ExecutionPanel timeframe="M15" />
+
+        <ExecutionPanel timeframe="H1H4" />
 
         <FundingCarryPanel />
 
+        {/* NIVEAU 2 — contexte */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
             Bloc 1 · Synthèse — Régime · Macro · Edge M15
@@ -95,7 +104,7 @@ export default function CryptoPage() {
           <Top50CryptoTable />
         </section>
 
-        <ExploratorySection label="Bloc 2 · Cockpit BTC M15 — recherche intraday (directionnel NO_EDGE)">
+        <ExploratorySection label="Bloc 2 · Cockpit BTC M15 — prix + niveaux (aide visuelle manuelle, directionnel NO_EDGE)">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
             <div className="lg:col-span-8 space-y-3">
               <PriceLevelsM15Chart />
@@ -105,10 +114,6 @@ export default function CryptoPage() {
               <VolHeatmapM15 />
             </div>
           </div>
-        </ExploratorySection>
-
-        <ExploratorySection label="Bloc 2b · Decision Engine BTC + ETH — verdict terminal M15">
-          <DecisionEnginePanel />
         </ExploratorySection>
 
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -149,6 +154,11 @@ export default function CryptoPage() {
         )}
 
         <ResearchProgramStatus variant="crypto" />
+
+        {/* NIVEAU 3 — recherche repliée */}
+        <ExploratorySection label="Catalogue de recherche complet — 36 familles · 163 configs WF · filtrable par statut">
+          <ResearchCatalog />
+        </ExploratorySection>
 
         {!error && !data && !isLoading && (
           <div className="bg-[var(--bg2)] border border-[var(--border)] rounded-[3px] px-3 py-2 font-mono text-[0.55rem] text-[var(--muted)]">

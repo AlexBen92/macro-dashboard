@@ -7,10 +7,8 @@ import PipelineHealthBadge from '@/components/PipelineHealthBadge';
 export default function Nav() {
   const path = usePathname();
   const links = [
-    { href: '/', label: 'DÉCISION', color: '#22c55e' },
-    { href: '/markets', label: 'MARKETS', color: '#aa66ff' },
-    { href: '/crypto', label: 'CRYPTO', color: '#00e5ff' },
-    { href: '/research', label: 'RESEARCH', color: '#8890a0' },
+    { href: '/crypto', label: 'CRYPTO', color: '#22c55e' },
+    { href: '/markets', label: 'MARKETS', color: '#22c55e' },
   ];
 
   return (
