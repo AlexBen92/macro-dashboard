@@ -28,7 +28,7 @@ describe('isCorrBasketStale', () => {
     ).toBe(true);
     // as_of J-1 mais export récent → frais (données daily, pas pipeline hs)
     expect(
-      isCorrBasketStale(payload({ as_of: '2026-08-16', last_export_success: '2026-08-18T05:57:00Z' })),
+      isCorrBasketStale(payload({ as_of: '2026-08-16', last_export_success: '2026-08-18T05:57:00Z' }), now),
       ).toBe(false);
   });
 
