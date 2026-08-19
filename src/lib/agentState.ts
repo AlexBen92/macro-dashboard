@@ -46,6 +46,7 @@ export interface SourceStatus {
 export interface FundingState {
   as_of: string;
   source: string;
+  divergence_zscore?: Record<string, number>;
   assets: Record<string, {
     funding_hourly: number;
     funding_apr_pct: number;
@@ -291,19 +292,25 @@ async function fetchHlFunding(assets: string[] = ['BTC', 'ETH']): Promise<Fundin
 }
 
 export async function fetchAgentState(origin = DASH_DATA_ORIGIN, now = Date.now()): Promise<AgentState> {
-  const [edgeM15, regimeStatus, decision, orderflow, funding] = await Promise.all([
+  const [edgeM15, regimeStatus, decision, orderflow, funding, carryState] = await Promise.all([
     fetchJsonLogged(origin, 'edge_m15_status.json'),
     fetchJsonLogged(origin, 'regime_status.json'),
     fetchJsonLogged(origin, 'decision_btceth_status.json'),
     fetchJsonLogged(origin, 'orderflow_status.json'),
     fetchHlFunding(),
+    fetchJsonLogged(origin, 'funding_carry_state.json'),
   ]);
+  // z(div) calculé côté VPS par l'exporter carry (def. V40 S8b) — badge dashboard
+  const divZ = (carryState.data as Record<string, unknown> | null)?.divergence_zscore;
+  const fundingWithDiv: FundingState | null = funding && divZ && typeof divZ === 'object'
+    ? { ...funding, divergence_zscore: divZ as Record<string, number> }
+    : funding;
   return buildAgentState(
     edgeM15.data,
     regimeStatus.data,
     decision.data,
     orderflow.data,
-    funding,
+    fundingWithDiv,
     {
       m15: { ok: edgeM15.meta.ok, http_status: edgeM15.meta.http_status, ...(edgeM15.meta.error ? { error: edgeM15.meta.error } : {}), age_ms: null, stale: false },
       regime: { ok: regimeStatus.meta.ok, http_status: regimeStatus.meta.http_status, ...(regimeStatus.meta.error ? { error: regimeStatus.meta.error } : {}), age_ms: null, stale: false },

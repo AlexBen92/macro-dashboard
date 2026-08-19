@@ -38,7 +38,7 @@ export function usePerformance() {
   const addTrade = useCallback((trade: Omit<TradeRecord, 'id'>) => {
     const newTrade: TradeRecord = {
       ...trade,
-      id: `trade-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: `trade-${crypto.randomUUID().slice(0, 8)}`,
     };
     setTrades(prev => {
       const updated = [...prev, newTrade];

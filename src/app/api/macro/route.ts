@@ -109,7 +109,7 @@ export async function GET() {
     } catch { /* skip */ }
 
     // CPI Inflation Rate (CORRIGÉ: utilise CPALAES01CTM189N - déjà en pourcentage)
-    let cpiInflation: { v: number | null; src: string } = { v: null, src: 'Placeholder' };
+    let cpiInflation: { v: number | null; src: string } = { v: null, src: 'N/A' };
     try {
       const fredKey = process.env.FRED_API_KEY;
       if (fredKey) {
@@ -128,9 +128,9 @@ export async function GET() {
       }
     } catch { /* skip */ }
 
-    // Fallback: placeholder réaliste
+    // Pas de fallback fabriqué: FRED indisponible → null, l'UI affiche l'absence
     if (cpiInflation.v == null) {
-      cpiInflation = { v: 2.8, src: 'Estimate' };
+      cpiInflation = { v: null, src: 'N/A' };
     }
 
     // Calculate upcoming US high impact events

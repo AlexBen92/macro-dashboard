@@ -94,7 +94,7 @@ export function useVirtualAccount(type: AccountType, livePrices: Record<string, 
       // Deduct entry fee from balance immediately
       const feeExitEstimated = qty * params.tp * 0.0004; // estimated at TP price
       const newTrade: VirtualTrade = {
-        id: `vt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        id: `vt-${crypto.randomUUID().slice(0, 8)}`,
         account: type,
         instrument: params.instrument,
         direction: params.direction,
