@@ -13,7 +13,6 @@ import ResearchCatalog from '@/components/ResearchCatalog';
 import ExploratorySection from '@/components/ui/ExploratorySection';
 import MacroContext from '@/components/MacroContext';
 import MacroAdvancedPanel from '@/components/MacroAdvancedPanel';
-import MacroCorrelationsPanel from '@/components/MacroCorrelationsPanel';
 import QuantRegimesPanel from '@/components/QuantRegimesPanel';
 import CompositeSignalsPanel from '@/components/CompositeSignalsPanel';
 import { useMarketSectors } from '@/hooks/api/useMarketSectors';
@@ -109,10 +108,6 @@ export default function MarketsPage() {
         </motion.div>
 
         {/* NIVEAU 3 — recherche / veille, replié */}
-        <ExploratorySection label="Corrélations crypto ↔ macro — à fusionner avec le moteur corrélation">
-          <MacroCorrelationsPanel />
-        </ExploratorySection>
-
         <ExploratorySection label="Signaux composites · vw-tsmom / funding / macd">
           <CompositeSignalsPanel />
         </ExploratorySection>

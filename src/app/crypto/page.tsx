@@ -8,7 +8,6 @@ import OptionsGuideDrawer from '@/components/crypto/options/OptionsGuideDrawer';
 import DiagnosticsDrawer from '@/components/crypto/options/DiagnosticsDrawer';
 
 import RegimeSummaryCard from '@/components/crypto/m15/RegimeSummaryCard';
-import MacroSentimentCard from '@/components/crypto/m15/MacroSentimentCard';
 import EdgeM15GlobalCard from '@/components/crypto/m15/EdgeM15GlobalCard';
 import RegimeStrategyMatrix from '@/components/crypto/m15/RegimeStrategyMatrix';
 import DailyBriefBar from '@/components/crypto/m15/DailyBriefBar';
@@ -86,7 +85,6 @@ export default function CryptoPage() {
             Bloc 1 · Synthèse — Régime · Macro · Edge M15
           </div>
           <RegimeSummaryCard />
-          <MacroSentimentCard />
           <EdgeM15GlobalCard />
         </section>
 
