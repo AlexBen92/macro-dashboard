@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import catalog from '@/config/research-catalog.json';
 import {
   RESEARCH_STATUS_COLOR,
@@ -33,6 +33,27 @@ interface M15Setup {
   pf_range: [number, number] | null;
   permutation_p_upper: number | null;
   ref: string | null;
+}
+
+interface OrderflowRun {
+  name: string;
+  symbol: string;
+  horizon: string;
+  fee_scenario: string;
+  status: string;
+  verdict: string;
+  alpha_decay_flag: boolean;
+  metrics: { sh_oos: number; mc_p5_bps: number; n_trades: number };
+}
+
+interface OrderflowAgg {
+  name: string;
+  n_runs: number;
+  n_on: number;
+  n_borderline: number;
+  n_alpha_decay: number;
+  worst_real_sh: number;
+  registry: ResearchStatus;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -77,6 +98,45 @@ export default function ResearchCatalog() {
   const [catFilter, setCatFilter] = useState<string>('ALL');
   const [tfFilter, setTfFilter] = useState<string>('ALL');
   const [hideNull, setHideNull] = useState(false);
+
+  const [orderflow, setOrderflow] = useState<OrderflowAgg[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/agent/state')
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((d: { orderflow?: { strategies?: OrderflowRun[] } }) => {
+        if (cancelled || !d.orderflow?.strategies) return;
+        const byName = new Map<string, OrderflowRun[]>();
+        for (const r of d.orderflow.strategies) {
+          const list = byName.get(r.name) ?? [];
+          list.push(r);
+          byName.set(r.name, list);
+        }
+        const aggs: OrderflowAgg[] = [...byName.entries()].map(([name, runs]) => {
+          const nOn = runs.filter((r) => r.status === 'ON').length;
+          const nBorderline = runs.filter((r) => r.verdict === 'BORDERLINE').length;
+          const nDecay = runs.filter((r) => r.alpha_decay_flag).length;
+          const realRuns = runs.filter((r) => r.fee_scenario === 'alphax_real');
+          const worstRealSh = realRuns.length
+            ? Math.min(...realRuns.map((r) => r.metrics.sh_oos))
+            : Math.min(...runs.map((r) => r.metrics.sh_oos));
+          const registry: ResearchStatus =
+            nOn > 0 && nDecay < runs.length && nBorderline > 0
+              ? 'BORDERLINE'
+              : 'NULL';
+          return { name, n_runs: runs.length, n_on: nOn, n_borderline: nBorderline, n_alpha_decay: nDecay, worst_real_sh: worstRealSh, registry };
+        });
+        aggs.sort((a, b) => b.n_on - a.n_on || a.name.localeCompare(b.name));
+        if (!cancelled) setOrderflow(aggs);
+      })
+      .catch(() => {
+        if (!cancelled) setOrderflow([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const statuses = useMemo(
     () =>
@@ -229,6 +289,51 @@ export default function ResearchCatalog() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* ORDERFLOW INTRADAY — rattaché au même registre (source /api/agent/state, WF quotidien 06:23 UTC) */}
+      <div className="flex flex-col gap-2">
+        <div className="font-mono text-[0.65rem] text-[var(--label)] tracking-[3px] uppercase">
+          orderflow intraday · 4 stratégies × 16 combos wf (1m–1h, frais zéro vs réels)
+        </div>
+        {orderflow === null ? (
+          <div className="py-4 text-center font-mono text-[0.6rem] text-[var(--muted)]">chargement orderflow ···</div>
+        ) : (
+          <div className="overflow-x-auto bg-[var(--bg2)] border border-[var(--border)] rounded-[4px]">
+            <table className="w-full font-mono text-[0.62rem] min-w-[700px]">
+              <thead>
+                <tr className="text-[0.55rem] text-[var(--muted)] tracking-[2px] uppercase border-b border-[var(--border)]">
+                  <th className="text-left py-2 pl-3 pr-2">stratégie</th>
+                  <th className="text-left py-2 px-2">statut registre</th>
+                  <th className="text-right py-2 px-2">combos ON</th>
+                  <th className="text-right py-2 px-2" title="Runs verdict BORDERLINE (16 combos)">borderline</th>
+                  <th className="text-right py-2 px-2" title="Runs flaggés alpha decay par le moniteur CUSUM">α-decay</th>
+                  <th className="text-right py-2 px-2 pr-3" title="Pire Sharpe OOS sous scénario frais réels (alphax)">pire Sh OOS réels</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {orderflow.map((o) => (
+                  <tr key={o.name} className="hover:bg-[var(--bg3)]" style={{ opacity: o.registry === 'NULL' ? 0.5 : 1 }}>
+                    <td className="py-1.5 pl-3 pr-2 text-[var(--label)]">{o.name}</td>
+                    <td className="py-1.5 px-2"><StatusPill status={o.registry} /></td>
+                    <td className="py-1.5 px-2 text-right text-[var(--text)]">{o.n_on}/{o.n_runs}</td>
+                    <td className="py-1.5 px-2 text-right text-[var(--text)]">{o.n_borderline}</td>
+                    <td className="py-1.5 px-2 text-right text-[var(--dim)]">{o.n_alpha_decay}</td>
+                    <td className="py-1.5 px-2 pr-3 text-right" style={{ color: o.worst_real_sh > 0 ? 'var(--bull)' : 'var(--dim)' }}>
+                      {o.worst_real_sh.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+                {orderflow.length === 0 && (
+                  <tr><td colSpan={6} className="py-6 text-center text-[var(--muted)]">orderflow indisponible — /api/agent/state injoignable</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <div className="font-mono text-[0.55rem] text-[var(--muted)]">
+          0/64 gates de validation passés — aucune combo tradable. Mapping registre: BORDERLINE si ≥1 combo ON sans alpha decay, sinon NULL (INCONCLUSIVE). Fres réels détruisent la plupart des edges 1m–15m (ex. Alpha2Scalp BTC 1m: Sh −5.12 → −276).
         </div>
       </div>
     </div>
