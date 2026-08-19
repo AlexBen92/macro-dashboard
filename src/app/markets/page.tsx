@@ -8,6 +8,7 @@ import ImpactWindow from '@/components/markets/ImpactWindow';
 import LiquidBasketTable from '@/components/markets/LiquidBasketTable';
 import EdgeWatchlist from '@/components/markets/EdgeWatchlist';
 import GoldDonchianPanel from '@/components/markets/GoldDonchianPanel';
+import FundingCarryPanel from '@/components/crypto/FundingCarryPanel';
 import ResearchProgramStatus from '@/components/ResearchProgramStatus';
 import ResearchCatalog from '@/components/ResearchCatalog';
 import ExploratorySection from '@/components/ui/ExploratorySection';
@@ -70,6 +71,10 @@ export default function MarketsPage() {
         )}
 
         {/* NIVEAU 1 — stratégies systématiques réelles */}
+        <motion.div variants={fadeUp}>
+          <FundingCarryPanel />
+        </motion.div>
+
         <motion.div variants={fadeUp}>
           <GoldDonchianPanel />
         </motion.div>
