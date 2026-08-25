@@ -36,7 +36,7 @@ export default function VolSurfaceRegimeCard() {
           <div className="font-mono text-[0.45rem] text-[var(--dim)] leading-relaxed">
             Méthode: H par scaling du skew ATM (τ^(H−0.5), Bayer-Friz-Gatheral) · fit
             Markov 1-facteur vs power-law sur variance ATM · H realized par scaling
-            log-RV. Source Deribit public — SOL realized only.
+            log-RV. Source Deribit public — BTC/ETH, alts realized only.
           </div>
         </div>
       )}
