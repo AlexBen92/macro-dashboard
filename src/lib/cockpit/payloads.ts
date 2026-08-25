@@ -11,6 +11,7 @@ export type Compliance = 'OK' | 'EN_TEST' | 'REJETÉ';
 export interface GateM15Gating {
   state: GateStrategyState;
   reasons: string[];
+  statistical_status?: string;
 }
 
 export interface GateCounters {
@@ -50,6 +51,7 @@ export interface ContractRow {
   leg_template: string;
   compliance: Compliance;
   gate_state: GateStrategyState;
+  statistical_status?: string;
   rejection_reason: string | null;
   recent_contract_rejects: number;
 }

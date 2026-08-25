@@ -28,7 +28,7 @@ export default function StrategyContractsTable() {
         <table className="w-full border-collapse font-mono text-[0.5rem]">
           <thead>
             <tr className="text-[var(--label)] text-[0.42rem] uppercase tracking-[1.5px]">
-              {['Stratégie', 'Template de jambes requis', 'Conformité', 'Gate', 'Motif rejet', 'Rejets 7j'].map((h) => (
+              {['Stratégie', 'Template de jambes requis', 'Conformité', 'Gate', 'Statut stat.', 'Motif rejet', 'Rejets 7j'].map((h) => (
                 <th key={h} className="text-left py-1 pr-2 border-b border-[var(--border)]">
                   {h}
                 </th>
@@ -53,6 +53,18 @@ export default function StrategyContractsTable() {
                   <td className="py-1.5 pr-2" style={{ color: badge.color }}>
                     {badge.text}
                   </td>
+                  <td
+                    className="py-1.5 pr-2"
+                    style={{
+                      color: r.statistical_status === 'VALIDATED'
+                        ? 'var(--bull)'
+                        : r.statistical_status === 'UNTESTED'
+                          ? 'var(--dim)'
+                          : 'var(--caution)',
+                    }}
+                  >
+                    {r.statistical_status ?? '—'}
+                  </td>
                   <td className="py-1.5 pr-2 text-[var(--caution)]">{r.rejection_reason ?? '—'}</td>
                   <td className="py-1.5">{r.recent_contract_rejects}</td>
                 </tr>
@@ -63,7 +75,8 @@ export default function StrategyContractsTable() {
       )}
       <div className="mt-1.5 font-mono text-[0.42rem] text-[var(--dim)] leading-relaxed">
         Règle moteur M15: signal dont la stratégie associée est REJETÉ ou EN_TEST → refus, quel que
-        soit le score d'edge.
+        soit le score d'edge. Règle tradable: ALLOWED exige statut statistique VALIDATED au
+        registre — les contraintes de risque (H rough, STRESS, feu, carry) retirent seulement.
       </div>
     </div>
   );

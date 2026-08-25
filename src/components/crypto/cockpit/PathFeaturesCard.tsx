@@ -27,6 +27,10 @@ export default function PathFeaturesCard() {
         </span>
         <span className="font-mono text-[0.45rem] text-[var(--dim)]">fenêtre 96 barres M15</span>
       </div>
+      <div className="mb-2 rounded-[3px] border border-dashed border-[var(--caution)]/40 px-2 py-1 font-mono text-[0.45rem] leading-relaxed text-[var(--caution)]">
+        EXPÉRIMENTAL — non validé (WF/permutation/PBO), affiché à titre de R&amp;D.
+        N&apos;influence aucun gate, aucun sizing, aucune décision.
+      </div>
       {isLoading && <div className="font-mono text-[0.55rem] text-[var(--muted)]">chargement…</div>}
       {error && <div className="font-mono text-[0.55rem] text-[var(--caution)]">indisponible</div>}
       {paths.length === 0 && !isLoading && !error && (

@@ -115,6 +115,14 @@ export default function CryptoPage() {
           </div>
         </section>
 
+        {/* Séparateur T2/T3 — anti association visuelle recherche → signal (audit §6) */}
+        <div className="rounded-[3px] border border-dashed border-[var(--border)] bg-[var(--bg2)] px-3 py-1.5 font-mono text-[0.5rem] leading-relaxed text-[var(--muted)]">
+          ⤓ Limite recherche / trading — ce qui précède (Tier 2) informe le pricing/hedging S1
+          et le dimensionnement du risque. Aucun élément ci-dessus ne constitue un signal
+          directionnel pour les setups M15 ci-dessous. Les seuls éléments tradable du Tier 3
+          proviennent du statut VALIDATED du registre statistique.
+        </div>
+
         {/* TIER 3 — signaux M15 + journal + skills */}
         <section className="flex flex-col gap-3">
           <TierLabel>Tier 3 · Signaux M15 · journal · skills agent</TierLabel>

@@ -133,7 +133,10 @@ function AssetCard({
         value={volAsset?.regime_label ?? '—'}
         color={volAsset?.regime_label === 'REGIME_VOL_ROUGH' ? 'var(--bear)' : undefined}
       />
-      <KV label="Chemin" value={path ? `${path.path_label} (chaos ${path.chaos_score.toFixed(2)})` : '—'} />
+      <KV
+        label="Chemin (expérim.)"
+        value={path ? `${path.path_label} (chaos ${path.chaos_score.toFixed(2)}) — non validé, hors gates` : '—'}
+      />
       <KV
         label="Basis / funding"
         value={
