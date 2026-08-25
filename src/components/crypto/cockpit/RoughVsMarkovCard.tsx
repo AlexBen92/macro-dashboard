@@ -29,6 +29,12 @@ export default function RoughVsMarkovCard() {
           ))}
         </div>
       )}
+      {data?.assets.some((a) => !(a.hurst.H_iv_skew_scaling?.H ?? null)) && (
+        <div className="font-mono text-[0.42rem] leading-relaxed text-[var(--dim)]">
+          † H realized (scaling log-RV, cluster ~0.2 universel) — estimateur limité,
+          pas comparable au H skew IV (BTC/ETH). Label mémoire indicatif seulement.
+        </div>
+      )}
       {btc && <Summary a={btc} />}
     </div>
   );
@@ -43,14 +49,23 @@ function memoryRepresentation(a: VolAssetState): { label: string; color: string;
 }
 
 function MemoryRow({ a }: { a: VolAssetState }) {
-  const h = a.hurst.H_iv_skew_scaling?.H ?? a.hurst.H_realized_vol;
+  const hIv = a.hurst.H_iv_skew_scaling?.H ?? null;
+  const h = hIv ?? a.hurst.H_realized_vol;
+  const realizedOnly = hIv === null;
   const mem = memoryRepresentation(a);
   const pct = h !== null ? Math.min(100, Math.max(0, h * 100)) : 0;
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between font-mono text-[0.55rem]">
         <span className="font-bold">{a.asset}</span>
-        <span style={{ color: mem.color }}>{mem.label} <span className="text-[var(--dim)]">({mem.factors})</span></span>
+        <span style={{ color: mem.color }}>
+          {mem.label} <span className="text-[var(--dim)]">({mem.factors})</span>
+          {realizedOnly && (
+            <span className="text-[var(--dim)]" title="H realized (scaling log-RV) — estimateur limité, cluster ~0.2; pas comparable au H skew IV">
+              {' '}· H realized†
+            </span>
+          )}
+        </span>
       </div>
       <div className="flex items-center gap-2">
         <span className="font-mono text-[0.42rem] text-[var(--label)] w-12">rough</span>

@@ -41,7 +41,6 @@ function freshGate(): CockpitState['gate'] {
       trades_remaining: 4,
     },
     m15_gating: {
-      Carry_D1: { state: 'ALLOWED', reasons: [] },
       M15_MeanReversion: { state: 'ALLOWED', reasons: [] },
       M15_Breakout: { state: 'SHADOW_ONLY', reasons: ['STRESS'] },
       MicroMM_Stoikov: { state: 'EN_TEST', reasons: ['gates zero-fee'] },
@@ -135,7 +134,7 @@ describe('payload shapes (contract exporteur VPS)', () => {
   it('gate shape complet', () => {
     const gate = freshGate();
     expect(Object.keys(gate.m15_gating)).toEqual(
-      expect.arrayContaining(['Carry_D1', 'M15_MeanReversion', 'M15_Breakout', 'MicroMM_Stoikov']),
+      expect.arrayContaining(['M15_MeanReversion', 'M15_Breakout', 'MicroMM_Stoikov']),
     );
     expect(gate.counters.trades_remaining).toBe(4);
     expect(gate.vol_regime.rough_extreme).toBe(false);

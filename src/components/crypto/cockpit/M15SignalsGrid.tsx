@@ -109,7 +109,6 @@ function AssetCard({
   const strat = strategyType(edgeGlobal);
   const meanRev = gate?.m15_gating.M15_MeanReversion;
   const breakout = gate?.m15_gating.M15_Breakout;
-  const carryGate = gate?.m15_gating.Carry_D1;
   const roughExtreme = gate?.vol_regime.rough_extreme ?? false;
   const regime = gate?.regime.current ?? '—';
 
@@ -149,7 +148,6 @@ function AssetCard({
       <div className="mt-0.5 flex flex-wrap gap-1 font-mono text-[0.42rem]">
         {meanRev && <GatingChip name="MR" g={meanRev} />}
         {breakout && <GatingChip name="BREAK" g={breakout} />}
-        {carryGate && <GatingChip name="CARRY" g={carryGate} />}
       </div>
       <div className="mt-0.5 font-mono text-[0.42rem] text-[var(--dim)]">
         Risk: taille max {kellyFraction !== null ? `${(kellyFraction * 100).toFixed(1)}% équité` : 'sizing setups'} · SL/TP1/TP2 définis avant ENTER · stop journalier{' '}

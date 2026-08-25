@@ -15,7 +15,6 @@ const SOURCES = [
   ['all', 'Tous'],
   ['hl-agent', 'HL-agent'],
   ['m15-agent', 'M15-agent'],
-  ['carry-d1', 'Carry D1'],
   ['alerts', 'Rejets & alertes'],
 ] as const;
 
