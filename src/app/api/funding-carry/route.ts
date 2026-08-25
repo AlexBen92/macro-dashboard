@@ -45,13 +45,32 @@ export async function GET() {
   const startTime = Date.now() - HISTORY_DAYS * 24 * 3600 * 1000;
   const origin = DASH_DATA_ORIGIN.replace(/\/$/, '');
 
-  const [stateRes, btcHist, ethHist] = await Promise.all([
+  // Univers piloté par le paper trader VPS (11 instruments depuis 2026-08-25),
+  // fallback majors si l'état est indisponible.
+  let coins: string[] = ['BTC', 'ETH'];
+  try {
+    const probe = await fetch(`${origin}/funding_carry_state.json`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    }).catch(() => null);
+    if (probe && probe.ok) {
+      const st = (await probe.json().catch(() => null)) as
+        | { assets_universe?: string[] }
+        | null;
+      if (Array.isArray(st?.assets_universe) && st.assets_universe.length) {
+        coins = st.assets_universe;
+      }
+    }
+  } catch {
+    // garde fallback majors
+  }
+
+  const [stateRes, ...hists] = await Promise.all([
     fetch(`${origin}/funding_carry_state.json`, {
       cache: 'no-store',
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     }).catch(() => null),
-    hlFundingHistory('BTC', startTime).catch(() => [] as HlFundingEvent[]),
-    hlFundingHistory('ETH', startTime).catch(() => [] as HlFundingEvent[]),
+    ...coins.map((c) => hlFundingHistory(c, startTime).catch(() => [] as HlFundingEvent[])),
   ]);
 
   let paperState: Record<string, unknown> | null = null;
@@ -60,7 +79,8 @@ export async function GET() {
   }
 
   const assets: Record<string, unknown> = {};
-  for (const [coin, hist] of [['BTC', btcHist], ['ETH', ethHist]] as const) {
+  for (const [i, coin] of coins.entries()) {
+    const hist = hists[i];
     const rates = hist.map((e) => Number(e.fundingRate)).filter((x) => Number.isFinite(x));
     if (rates.length === 0) continue;
     const sorted = [...rates].sort((a, b) => a - b);
