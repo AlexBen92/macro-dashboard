@@ -95,7 +95,6 @@ export default function CryptoPage() {
         <section className="flex flex-col gap-3">
           <TierLabel>Tier 1 · État global du système — gate principal (jamais trader si rouge)</TierLabel>
           <GlobalSystemGateBar />
-          <ExecutionPanel timeframe="M15" />
         </section>
 
         {/* TIER 2 — vol & risk: surface, rough/markovien, path, carry, attribution, contrats */}

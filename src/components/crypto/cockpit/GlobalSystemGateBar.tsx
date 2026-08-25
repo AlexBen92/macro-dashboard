@@ -72,16 +72,6 @@ export default function GlobalSystemGateBar() {
               warn={gate.counters.stop_hit}
             />
             <Metric
-              label="Carry D1"
-              value={
-                gate.carry_universe
-                  ? Object.entries(gate.carry_universe)
-                      .map(([a, s]) => `${a}:${s === 'ACTIF' ? 'ON' : 'OFF'}`)
-                      .join(' ')
-                  : '—'
-              }
-            />
-            <Metric
               label="Vol BTC"
               value={`H ${gate.vol_regime.H_btc ?? '—'}`}
               sub={gate.vol_regime.label}
