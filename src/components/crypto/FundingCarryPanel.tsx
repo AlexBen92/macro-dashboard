@@ -43,7 +43,13 @@ interface FundingCarryPayload {
     positions: Record<string, CarryPosition>;
     mark_to_market?: Record<string, MTMLegs>;
     mark_to_market_total_bps?: number | null;
-    thresholds: { entry_trail_day: number; exit_hysteresis_day: number; cost_rt_bps_leg: number };
+    thresholds: {
+      entry_trail_day?: number;
+      entry_trail_day_per_asset?: Record<string, number>;
+      exit_hysteresis_day?: number;
+      exit_hysteresis_day_per_asset?: Record<string, number>;
+      cost_rt_bps_leg: number;
+    };
   } | null;
   funding: Record<string, FundingAsset>;
   sources: { paper_state_ok: boolean; hl_history_ok: boolean };
@@ -55,12 +61,19 @@ const fetcher = (u: string) =>
     return r.json() as Promise<FundingCarryPayload>;
   });
 
-const TRAIL_SCALE_MAX_BP = 2; // 2× seuil entrée (1 bp/j)
 const fmt = (x: number, d = 1) => `${x >= 0 ? '+' : ''}${x.toFixed(d)}`;
 
-function TrailBar({ trailBpDay, open }: { trailBpDay: number | null; open: boolean }) {
-  const pct =
-    trailBpDay == null ? null : Math.min(Math.abs(trailBpDay) / TRAIL_SCALE_MAX_BP, 1) * 100;
+function TrailBar({
+  trailBpDay,
+  open,
+  entryBp,
+}: {
+  trailBpDay: number | null;
+  open: boolean;
+  entryBp: number;
+}) {
+  const scale = Math.max(entryBp * 2, 1); // 2× seuil entrée, min 1 bp/j
+  const pct = trailBpDay == null ? null : Math.min(Math.abs(trailBpDay) / scale, 1) * 100;
   return (
     <div
       className="mt-0.5 basis-full"
@@ -117,7 +130,15 @@ export default function FundingCarryPanel() {
   const universe = ps?.assets_universe ?? ['BTC', 'ETH'];
   const assets = Array.from(new Set([...universe, ...Object.keys(ps?.positions ?? {})]));
   const zMax = ps?.divergence_z_max ?? 2;
-  const entryBp = (ps?.thresholds.entry_trail_day ?? 1e-4) * 1e4;
+  const entryBpFor = (coin: string) =>
+    (ps?.thresholds.entry_trail_day_per_asset?.[coin] ??
+      ps?.thresholds.entry_trail_day ??
+      1e-4) * 1e4;
+  const entryBps = assets.map((a) => entryBpFor(a));
+  const entryRange =
+    entryBps.length && Math.min(...entryBps) !== Math.max(...entryBps)
+      ? `${Math.min(...entryBps).toFixed(0)}-${Math.max(...entryBps).toFixed(0)}`
+      : `${(entryBps[0] ?? 1).toFixed(1)}`;
   const today = new Date().toISOString().slice(0, 10);
 
   return (
@@ -157,6 +178,7 @@ export default function FundingCarryPanel() {
             openLeg && pos?.entry_ts
               ? (Date.now() - Date.parse(pos.entry_ts)) / 86_400_000
               : null;
+          const entryBp = entryBpFor(coin);
           const underThreshold =
             !openLeg && trailBpDay != null && Math.abs(trailBpDay) < entryBp;
           return (
@@ -206,7 +228,7 @@ export default function FundingCarryPanel() {
                 </span>
               )}
 
-              <TrailBar trailBpDay={trailBpDay} open={openLeg} />
+              <TrailBar trailBpDay={trailBpDay} open={openLeg} entryBp={entryBp} />
             </div>
           );
         })}
@@ -214,8 +236,8 @@ export default function FundingCarryPanel() {
 
       <div className="mt-1 font-mono text-[0.5rem] text-[var(--muted)] flex flex-wrap gap-x-4">
         <span>
-          entrée |trail 3j| &gt; {entryBp.toFixed(1)}bp/j · sortie hystérésis{' '}
-          {(entryBp / 2).toFixed(1)}bp/j · coûts {ps?.thresholds.cost_rt_bps_leg ?? 2.5}bps/leg RT
+          entrée |trail 3j| &gt; {entryRange}bp/j (par instrument, cal-block V36) · sortie
+          hystérésis ÷2 · coûts {ps?.thresholds.cost_rt_bps_leg ?? 2.5}bps/leg RT
         </span>
         {ps?.mark_to_market_total_bps != null && (
           <span>

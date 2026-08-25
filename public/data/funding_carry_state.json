@@ -1,28 +1,219 @@
 {
-  "as_of": "2026-08-18T09:07:08.112610+00:00",
+  "as_of": "2026-08-25T20:50:35.838581+00:00",
   "strategy": "Funding_Carry_Systematic_D1",
   "validation": "VALIDATED 6/6 gates WF (valSh 13.6, hoSh 12.3, perm p 0.005)",
   "paper_since": "2026-08-15",
+  "cron": "00:25 UTC",
+  "assets_universe": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "XRP",
+    "DOGE",
+    "NEAR",
+    "WLD",
+    "SUI",
+    "AAVE",
+    "ADA",
+    "BNB"
+  ],
   "thresholds": {
-    "entry_trail_day": 0.0001,
-    "exit_hysteresis_day": 5e-05,
+    "entry_trail_day_per_asset": {
+      "BTC": 0.0001,
+      "ETH": 0.0001,
+      "SOL": 0.0001,
+      "XRP": 0.0002,
+      "DOGE": 0.0001,
+      "NEAR": 0.0002,
+      "WLD": 0.0002,
+      "SUI": 0.0002,
+      "AAVE": 0.0001,
+      "ADA": 0.0002,
+      "BNB": 0.0001
+    },
+    "exit_hysteresis_day_per_asset": {
+      "BTC": 5e-05,
+      "ETH": 5e-05,
+      "SOL": 5e-05,
+      "XRP": 0.0001,
+      "DOGE": 5e-05,
+      "NEAR": 0.0001,
+      "WLD": 0.0001,
+      "SUI": 0.0001,
+      "AAVE": 5e-05,
+      "ADA": 0.0001,
+      "BNB": 5e-05
+    },
     "cost_rt_bps_leg": 2.5
   },
   "latest_trail_day_frac": {
-    "BTC": 0.0001103999999999,
-    "ETH": 8.684666666666666e-05,
-    "SOL": -2.4703333333333328e-05
+    "BTC": 0.00028606,
+    "ETH": 0.00027812,
+    "SOL": 0.0003,
+    "XRP": 0.00026944,
+    "DOGE": 0.0003,
+    "NEAR": 0.0002674333333333,
+    "WLD": 0.0002371633333333,
+    "SUI": 0.0003046,
+    "AAVE": 0.0003,
+    "ADA": 0.0002826333333333,
+    "BNB": 0.0001871633333333
   },
+  "divergence_zscore": {
+    "BTC": -0.44179093331174923,
+    "ETH": -0.37623466101402875,
+    "SOL": -0.5367754654697717
+  },
+  "divergence_z_max": 2.0,
   "positions": {
     "BTC": {
       "side_perp": -1.0,
       "entry_ts": "2026-08-15T05:25:23.460863+00:00",
       "entry_perp": 63099.95252899,
       "entry_spot": 63130.28,
-      "accrued_funding_bps": 4.4954
+      "accrued_funding_bps": 23.472900000000003
+    },
+    "ETH": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-19T00:25:02.581336+00:00",
+      "entry_perp": 1916.29928682,
+      "entry_spot": 1917.02,
+      "accrued_funding_bps": 18.5107
+    },
+    "SOL": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-20T00:25:02.789839+00:00",
+      "entry_perp": 85.55940117,
+      "entry_spot": 85.57,
+      "accrued_funding_bps": 17.0
+    },
+    "XRP": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 1.44612715,
+      "entry_spot": 1.4472,
+      "accrued_funding_bps": 0.0
+    },
+    "DOGE": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 0.08622145,
+      "entry_spot": 0.08625,
+      "accrued_funding_bps": 0.0
+    },
+    "NEAR": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 1.854,
+      "entry_spot": 1.855,
+      "accrued_funding_bps": 0.0
+    },
+    "WLD": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 0.38266404,
+      "entry_spot": 0.3828,
+      "accrued_funding_bps": 0.0
+    },
+    "SUI": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 0.75868561,
+      "entry_spot": 0.7586,
+      "accrued_funding_bps": 0.0
+    },
+    "AAVE": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 126.12504721,
+      "entry_spot": 126.19,
+      "accrued_funding_bps": 0.0
+    },
+    "ADA": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 0.2105,
+      "entry_spot": 0.2106,
+      "accrued_funding_bps": 0.0
+    },
+    "BNB": {
+      "side_perp": -1.0,
+      "entry_ts": "2026-08-25T20:50:19.354872+00:00",
+      "entry_perp": 693.54,
+      "entry_spot": 693.22,
+      "accrued_funding_bps": 0.0
     }
   },
-  "n_open": 1,
+  "n_open": 11,
   "n_closed": 0,
-  "cum_net_bps": 0.0
+  "cum_net_bps": 0.0,
+  "mark_to_market": {
+    "BTC": {
+      "spot_bps": 2411.4751273081647,
+      "perp_bps": -2412.7034745415353,
+      "funding_bps": 23.472900000000003,
+      "net_bps": 22.24455276662936
+    },
+    "ETH": {
+      "spot_bps": 2738.4169179246956,
+      "perp_bps": -2739.3427419216487,
+      "funding_bps": 18.5107,
+      "net_bps": 17.584876003046887
+    },
+    "SOL": {
+      "spot_bps": 1332.2426083907924,
+      "perp_bps": -1329.9763759905713,
+      "funding_bps": 17.0,
+      "net_bps": 19.266232400221043
+    },
+    "XRP": {
+      "spot_bps": 16.583747927030323,
+      "perp_bps": -19.86581885278893,
+      "funding_bps": 0.0,
+      "net_bps": -3.2820709257586067
+    },
+    "DOGE": {
+      "spot_bps": 19.71014492753609,
+      "perp_bps": -18.13933771700693,
+      "funding_bps": 0.0,
+      "net_bps": 1.570807210529157
+    },
+    "NEAR": {
+      "spot_bps": 5.390835579515141,
+      "perp_bps": -5.3937432578199385,
+      "funding_bps": 0.0,
+      "net_bps": -0.002907678304797656
+    },
+    "WLD": {
+      "spot_bps": 10.449320794148065,
+      "perp_bps": -8.779502772198189,
+      "funding_bps": 0.0,
+      "net_bps": 1.669818021949876
+    },
+    "SUI": {
+      "spot_bps": 23.72791985235878,
+      "perp_bps": -21.44261046416851,
+      "funding_bps": 0.0,
+      "net_bps": 2.285309388190271
+    },
+    "AAVE": {
+      "spot_bps": 8.717014026466963,
+      "perp_bps": -11.525713029700846,
+      "funding_bps": 0.0,
+      "net_bps": -2.808699003233883
+    },
+    "ADA": {
+      "spot_bps": 28.49002849002691,
+      "perp_bps": -23.75296912114022,
+      "funding_bps": 0.0,
+      "net_bps": 4.737059368886687
+    },
+    "BNB": {
+      "spot_bps": 7.068463114163759,
+      "perp_bps": -7.952122444272458,
+      "funding_bps": 0.0,
+      "net_bps": -0.8836593301086992
+    }
+  },
+  "mark_to_market_total_bps": 62.3813182220473
 }
