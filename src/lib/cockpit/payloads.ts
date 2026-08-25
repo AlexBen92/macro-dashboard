@@ -231,6 +231,8 @@ export interface CarryHealthRow {
   carry_position: string;
   accrued_funding_bps: number | null;
   divergence_zscore: number | null;
+  divergence_z_max?: number;
+  div_z_alert?: boolean;
   basis_drift_bps: number | null;
   contract: {
     status: string;
@@ -246,5 +248,12 @@ export interface CarryHealthState {
   universe_status: Record<string, string>;
   rows: CarryHealthRow[];
   health: 'OK' | 'DEGRADED';
-  alerts: Array<{ type: string; asset: string; drift_bps: number; threshold_bps: number }>;
+  alerts: Array<{
+    type: string;
+    asset: string;
+    drift_bps?: number;
+    threshold_bps?: number;
+    z?: number;
+    z_max?: number;
+  }>;
 }

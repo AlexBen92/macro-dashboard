@@ -59,7 +59,14 @@ export default function CarryBasisHealthPanel() {
                     '—'
                   )}
                 </td>
-                <td className="py-1 pr-2">{r.divergence_zscore?.toFixed(2) ?? '—'}</td>
+                <td
+                  className="py-1 pr-2"
+                  style={{ color: r.div_z_alert ? 'var(--bear)' : 'var(--text)' }}
+                  title={r.div_z_alert ? 'z(div) ≥ seuil — signal fin de vie carry (annexe S8b)' : undefined}
+                >
+                  {r.divergence_zscore?.toFixed(2) ?? '—'}
+                  {r.div_z_alert && <span title="alerte TG envoyée"> ⚠️</span>}
+                </td>
                 <td className="py-1 pr-2">
                   <span
                     style={{
@@ -92,8 +99,12 @@ export default function CarryBasisHealthPanel() {
       )}
       {data && data.alerts.length > 0 && (
         <div className="mt-1.5 font-mono text-[0.45rem]" style={{ color: 'var(--bear)' }}>
-          Alerte(s) basis drift envoyée(s) TG ce cycle:{' '}
-          {data.alerts.map((a) => `${a.asset} ${formatBps(a.drift_bps)}`).join(' · ')}
+          Alerte(s) envoyée(s) TG ce cycle:{' '}
+          {data.alerts.map((a) =>
+            a.type === 'funding_div_zscore'
+              ? `z(div) ${a.asset} ${a.z?.toFixed(2)}`
+              : `drift ${a.asset} ${formatBps(a.drift_bps)}`,
+          ).join(' · ')}
         </div>
       )}
       <div className="mt-1.5 font-mono text-[0.42rem] text-[var(--dim)] leading-relaxed">
