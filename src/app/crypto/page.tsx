@@ -7,6 +7,17 @@ import VolSurfaceDrawer from '@/components/crypto/options/VolSurfaceDrawer';
 import OptionsGuideDrawer from '@/components/crypto/options/OptionsGuideDrawer';
 import DiagnosticsDrawer from '@/components/crypto/options/DiagnosticsDrawer';
 
+import GlobalSystemGateBar from '@/components/crypto/cockpit/GlobalSystemGateBar';
+import VolSurfaceRegimeCard from '@/components/crypto/cockpit/VolSurfaceRegimeCard';
+import RoughVsMarkovCard from '@/components/crypto/cockpit/RoughVsMarkovCard';
+import CarryBasisHealthPanel from '@/components/crypto/cockpit/CarryBasisHealthPanel';
+import PnlAttributionPanel from '@/components/crypto/cockpit/PnlAttributionPanel';
+import StrategyContractsTable from '@/components/crypto/cockpit/StrategyContractsTable';
+import AgentSkillsDashboard from '@/components/crypto/cockpit/AgentSkillsDashboard';
+import M15SignalsGrid from '@/components/crypto/cockpit/M15SignalsGrid';
+import PathFeaturesCard from '@/components/crypto/cockpit/PathFeaturesCard';
+import JournalTimeline from '@/components/crypto/cockpit/JournalTimeline';
+
 import RegimeSummaryCard from '@/components/crypto/m15/RegimeSummaryCard';
 import EdgeM15GlobalCard from '@/components/crypto/m15/EdgeM15GlobalCard';
 import RegimeStrategyMatrix from '@/components/crypto/m15/RegimeStrategyMatrix';
@@ -31,6 +42,14 @@ import { useTelegramAlerts } from '@/components/TelegramAlerts';
 import { useOptionsExposure } from '@/hooks/api/useOptionsExposure';
 import { useRegimeStatus } from '@/hooks/api/useRegimeStatus';
 import type { ExpiryBucket, SupportedCurrency, Timeframe } from '@/lib/options/types';
+
+function TierLabel({ children }: { children: string }) {
+  return (
+    <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
+      {children}
+    </div>
+  );
+}
 
 export default function CryptoPage() {
   useTelegramAlerts();
@@ -72,37 +91,60 @@ export default function CryptoPage() {
       <main className="flex-1 px-4 py-3 flex flex-col gap-6">
         <DailyBriefBar />
 
-        {/* NIVEAU 1 — exécution réelle, jamais replié */}
-        <ExecutionPanel timeframe="M15" />
-
-        <ExecutionPanel timeframe="H1H4" />
-
-        <FundingCarryPanel />
-
-        {/* NIVEAU 2 — contexte */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
-            Bloc 1 · Synthèse — Régime · Macro · Edge M15
-          </div>
-          <RegimeSummaryCard />
-          <EdgeM15GlobalCard />
-        </section>
-
-        <section className="grid grid-cols-1 gap-3">
-          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
-            Bloc 1b · Régime × Stratégie — Heatmap perf
-          </div>
-          <RegimeStrategyMatrix />
-        </section>
-
+        {/* TIER 1 — état global: gate principal, jamais replié */}
         <section className="flex flex-col gap-3">
-          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
-            Bloc 2c · Top 50 — market cap · performance · funding perp
-          </div>
-          <Top50CryptoTable />
+          <TierLabel>Tier 1 · État global du système — gate principal (jamais trader si rouge)</TierLabel>
+          <GlobalSystemGateBar />
+          <ExecutionPanel timeframe="M15" />
         </section>
 
-        <ExploratorySection label="Bloc 2 · Cockpit BTC M15 — prix + niveaux (aide visuelle manuelle, directionnel NO_EDGE)">
+        {/* TIER 2 — vol & risk: surface, rough/markovien, path, carry, attribution, contrats */}
+        <section className="flex flex-col gap-3">
+          <TierLabel>Tier 2 · Volatilité & risque — surface · rough vs markovien · carry · attribution</TierLabel>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <VolSurfaceRegimeCard />
+            <RoughVsMarkovCard />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <PathFeaturesCard />
+            <CarryBasisHealthPanel />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <PnlAttributionPanel />
+            <StrategyContractsTable />
+          </div>
+        </section>
+
+        {/* TIER 3 — signaux M15 + journal + skills */}
+        <section className="flex flex-col gap-3">
+          <TierLabel>Tier 3 · Signaux M15 · journal · skills agent</TierLabel>
+          <M15SignalsGrid />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <JournalTimeline />
+            <AgentSkillsDashboard />
+          </div>
+        </section>
+
+        {error && (
+          <div className="bg-[var(--bg2)] border border-[var(--caution)]/30 rounded-[3px] px-3 py-2 font-mono text-[0.55rem] text-[var(--muted)]">
+            Options snapshot secondaire indisponible (cron GEX/DEX 4h17/16h17). Cockpit M15
+            reste opérationnel via Hyperliquid live.
+          </div>
+        )}
+
+        {/* NIVEAU 4 — contexte existant replié */}
+        <ExploratorySection label="Bloc 1 · Synthèse — Régime · Macro · Edge M15">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <RegimeSummaryCard />
+            <EdgeM15GlobalCard />
+          </div>
+        </ExploratorySection>
+
+        <ExploratorySection label="Bloc 1b · Régime × Stratégie — heatmap perf">
+          <RegimeStrategyMatrix />
+        </ExploratorySection>
+
+        <ExploratorySection label="Bloc 2 · Cockpit BTC M15 — prix + niveaux (directionnel NO_EDGE)">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
             <div className="lg:col-span-8 space-y-3">
               <PriceLevelsM15Chart />
@@ -114,46 +156,47 @@ export default function CryptoPage() {
           </div>
         </ExploratorySection>
 
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
-            Bloc 3 · Corrélation · Session Plan · Setups
+        <ExploratorySection label="Bloc 3 · Corrélation · Session plan · Setups edge">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div className="lg:col-span-3">
+              <CorrelationTable />
+            </div>
+            <div className="lg:col-span-1">
+              <SessionPlanCard />
+            </div>
+            <div className="lg:col-span-2">
+              <SetupsPanel />
+            </div>
           </div>
-          <div className="lg:col-span-3">
-            <CorrelationTable />
-          </div>
-          <div className="lg:col-span-1">
-            <SessionPlanCard />
-          </div>
-          <div className="lg:col-span-2">
-            <SetupsPanel />
-          </div>
-        </section>
+        </ExploratorySection>
 
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-          <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] col-span-full">
-            Bloc 4 · Order Flow · OFI live · Alpha Term Structure · Setups microstructure
+        <ExploratorySection label="Bloc 4 · Order flow · OFI live · alpha term structure">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+            <div className="lg:col-span-4">
+              <OrderFlowImbalanceWidget />
+            </div>
+            <div className="lg:col-span-8">
+              <AlphaTermStructureChart />
+            </div>
+            <div className="lg:col-span-12">
+              <OfiSetupsPanel />
+            </div>
           </div>
-          <div className="lg:col-span-4">
-            <OrderFlowImbalanceWidget />
-          </div>
-          <div className="lg:col-span-8">
-            <AlphaTermStructureChart />
-          </div>
-          <div className="lg:col-span-12">
-            <OfiSetupsPanel />
-          </div>
-        </section>
+        </ExploratorySection>
 
-        {error && (
-          <div className="bg-[var(--bg2)] border border-[var(--caution)]/30 rounded-[3px] px-3 py-2 font-mono text-[0.55rem] text-[var(--muted)]">
-            Options snapshot secondaire indisponible (cron GEX/DEX 4h17/16h17). Cockpit M15
-            reste opérationnel via Hyperliquid live.
+        <ExploratorySection label="Bloc 5 · Carry D1 paper trader (état complet) · Execution H1H4">
+          <div className="flex flex-col gap-3">
+            <FundingCarryPanel />
+            <ExecutionPanel timeframe="H1H4" />
           </div>
-        )}
+        </ExploratorySection>
+
+        <ExploratorySection label="Bloc 6 · Top 50 — market cap · performance · funding perp">
+          <Top50CryptoTable />
+        </ExploratorySection>
 
         <ResearchProgramStatus variant="crypto" />
 
-        {/* NIVEAU 3 — recherche repliée */}
         <ExploratorySection label="Catalogue de recherche complet — 36 familles · 163 configs WF · filtrable par statut">
           <ResearchCatalog />
         </ExploratorySection>
@@ -167,7 +210,7 @@ export default function CryptoPage() {
 
       <footer className="px-4 py-2 border-t border-[var(--border)] bg-[var(--bg2)] flex items-center justify-between font-mono text-[0.55rem] text-[var(--muted)] uppercase tracking-[1.5px]">
         <span>
-          Source M15: Hyperliquid · Régime WF: yf_BTC 3130j · Cron export: */15min
+          Cockpit M15: gate VPS 2,17,32,47 · vol rough 23 */2 · Source M15: Hyperliquid
         </span>
         <span>
           As of: {data?.asOf ?? '—'}
