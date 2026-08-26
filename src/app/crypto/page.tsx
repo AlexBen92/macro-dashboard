@@ -14,6 +14,7 @@ import CarryBasisHealthPanel from '@/components/crypto/cockpit/CarryBasisHealthP
 import PnlAttributionPanel from '@/components/crypto/cockpit/PnlAttributionPanel';
 import StrategyContractsTable from '@/components/crypto/cockpit/StrategyContractsTable';
 import AgentSkillsDashboard from '@/components/crypto/cockpit/AgentSkillsDashboard';
+import LawsOfTheGameCard from '@/components/crypto/cockpit/LawsOfTheGameCard';
 import M15SignalsGrid from '@/components/crypto/cockpit/M15SignalsGrid';
 import PathFeaturesCard from '@/components/crypto/cockpit/PathFeaturesCard';
 import JournalTimeline from '@/components/crypto/cockpit/JournalTimeline';
@@ -130,6 +131,7 @@ export default function CryptoPage() {
             <JournalTimeline />
             <AgentSkillsDashboard />
           </div>
+          <LawsOfTheGameCard />
         </section>
 
         {error && (

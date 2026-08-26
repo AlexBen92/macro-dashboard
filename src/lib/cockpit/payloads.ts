@@ -44,6 +44,10 @@ export interface CockpitGate {
   carry_universe: Record<string, string> | null;
   counters: GateCounters;
   m15_gating: Record<string, GateM15Gating>;
+  registry?: {
+    tradable_rule?: string;
+    statistical_status?: Record<string, string>;
+  } | null;
 }
 
 export interface ContractRow {
