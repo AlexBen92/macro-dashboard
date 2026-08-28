@@ -152,10 +152,43 @@ export interface CockpitSkills {
   commits: Record<string, string[]>;
 }
 
+export interface BankMetrics {
+  worst_fold_bps?: number;
+  holdout_mean_bps?: number;
+  holdout_n_trades?: number;
+  n_configs?: number;
+  backtest_verdict?: string;
+}
+
+export interface BankStrategy {
+  id: string;
+  family: string | null;
+  name: string | null;
+  registry_key: string | null;
+  status_live: string;
+  status_label: string;
+  status_doc: string | null;
+  blocked: boolean;
+  retest_policy: string | null;
+  revisit: string | null;
+  evidence: { path: string | null; date: string | null; verdict: string | null };
+  metrics: BankMetrics;
+  engine: { module: string; function: string } | null;
+}
+
+export interface M15StrategiesBank {
+  spec_dir: string;
+  n_strategies: number;
+  n_validated: number;
+  rule: string;
+  strategies: BankStrategy[];
+}
+
 export interface CockpitState {
   as_of: string;
   gate: CockpitGate;
   contracts: { as_of: string | null; rows: ContractRow[] };
+  m15_strategies_bank?: M15StrategiesBank | null;
   attribution: CockpitAttribution;
   skills: CockpitSkills;
   journal: { as_of: string; events: JournalEvent[]; n_events_total: number };

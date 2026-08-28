@@ -16,6 +16,7 @@ import StrategyContractsTable from '@/components/crypto/cockpit/StrategyContract
 import AgentSkillsDashboard from '@/components/crypto/cockpit/AgentSkillsDashboard';
 import LawsOfTheGameCard from '@/components/crypto/cockpit/LawsOfTheGameCard';
 import M15SignalsGrid from '@/components/crypto/cockpit/M15SignalsGrid';
+import M15StrategiesBankCard from '@/components/crypto/cockpit/M15StrategiesBankCard';
 import PathFeaturesCard from '@/components/crypto/cockpit/PathFeaturesCard';
 import JournalTimeline from '@/components/crypto/cockpit/JournalTimeline';
 
@@ -127,6 +128,7 @@ export default function CryptoPage() {
         <section className="flex flex-col gap-3">
           <TierLabel>Tier 3 · Signaux M15 · journal · skills agent</TierLabel>
           <M15SignalsGrid />
+          <M15StrategiesBankCard />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <JournalTimeline />
             <AgentSkillsDashboard />
