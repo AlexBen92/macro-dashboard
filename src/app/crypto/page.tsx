@@ -18,6 +18,7 @@ import LawsOfTheGameCard from '@/components/crypto/cockpit/LawsOfTheGameCard';
 import M15SignalsGrid from '@/components/crypto/cockpit/M15SignalsGrid';
 import M15StrategiesBankCard from '@/components/crypto/cockpit/M15StrategiesBankCard';
 import PathFeaturesCard from '@/components/crypto/cockpit/PathFeaturesCard';
+import M15StationarityCard from '@/components/crypto/cockpit/M15StationarityCard';
 import JournalTimeline from '@/components/crypto/cockpit/JournalTimeline';
 
 import RegimeSummaryCard from '@/components/crypto/m15/RegimeSummaryCard';
@@ -110,6 +111,7 @@ export default function CryptoPage() {
             <PathFeaturesCard />
             <CarryBasisHealthPanel />
           </div>
+          <M15StationarityCard />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <PnlAttributionPanel />
             <StrategyContractsTable />
