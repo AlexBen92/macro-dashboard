@@ -52,7 +52,15 @@ function AssetRow({ a }: { a: VolAssetState }) {
   return (
     <div className="rounded-[3px] border border-[var(--border)] bg-[var(--bg)] px-2.5 py-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[0.65rem] font-bold">{a.asset}</span>
+        <span className="font-mono text-[0.65rem] font-bold">
+          {a.asset}
+          {a.iv_source === 'binance_eapi' && (
+            <span className="ml-1.5 font-mono text-[0.42rem] text-[var(--dim)]">BN eapi</span>
+          )}
+          {a.iv_source === 'deribit_public' && (
+            <span className="ml-1.5 font-mono text-[0.42rem] text-[var(--dim)]">Deribit</span>
+          )}
+        </span>
         <span
           className="font-mono text-[0.5rem] px-1.5 py-0.5 rounded-[2px] border"
           style={{ color: style.color, borderColor: style.color }}
