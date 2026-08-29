@@ -1,0 +1,28 @@
+{
+  "SPX": {
+    "multiplier": 100,
+    "scale": 1,
+    "exchange": "CBOE",
+    "settlement": "cash, AM/PM settlement selon expiry",
+    "note": "Contrat standard SPX, notional = level × 100"
+  },
+  "XSP": {
+    "multiplier": 100,
+    "scale": 0.1,
+    "exchange": "CBOE",
+    "settlement": "cash",
+    "note": "Mini-SPX ~ SPX/10, notional = level_XSP × 100 (~ SPX × 10)"
+  },
+  "NANO": {
+    "multiplier": 1,
+    "scale": 0.01,
+    "exchange": "CBOE",
+    "settlement": "cash",
+    "note": "Nanos ~ SPX/100, notional = level_nano × 1"
+  },
+  "market_data": {
+    "source": null,
+    "status": "interface prévue — brancher une source externe (CBOE/Deribit proxy) plus tard",
+    "refresh_cron": null
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "symbol": "US500.cash",
+  "alternative_symbol": "US500.sim",
+  "contract_size": 1,
+  "min_volume": 0.1,
+  "volume_step": 0.1,
+  "leverage_standard": 50,
+  "leverage_swing": 15,
+  "margin_currency": "USD",
+  "swap_model": {
+    "charged_at": "00:00 server (CE(S)T)",
+    "unit": "USD par contrat par jour",
+    "swap_long": -1.5,
+    "swap_short": -0.8,
+    "triple_day": "vendredi (weekend carry)",
+    "holidays": "Pas de swap les jours de marché fermé (Thanksgiving, Christmas)"
+  },
+  "trading_hours": "Lun-Ven 00:05-23:55 (server), cash pause 23:00-23:05",
+  "limits_reference": {
+    "account_size": 100000,
+    "account_key": "100k",
+    "max_daily_loss": 0.05,
+    "max_total_loss": 0.10
+  }
+}

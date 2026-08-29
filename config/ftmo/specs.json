@@ -1,0 +1,60 @@
+{
+  "provider": "FTMO",
+  "currency": "EUR",
+  "accounts": {
+    "10k": { "size": 10000 },
+    "25k": { "size": 25000 },
+    "50k": { "size": 50000 },
+    "100k": { "size": 100000 },
+    "200k": { "size": 200000 }
+  },
+  "models": {
+    "two_step": {
+      "phases": ["Challenge", "Verification"],
+      "fee_refundable": true,
+      "profit_target_phase1": 0.10,
+      "profit_target_phase2": 0.05,
+      "max_daily_loss": 0.05,
+      "max_total_loss": 0.10,
+      "min_trading_days_phase": 4,
+      "profit_split_initial": 0.80,
+      "profit_split_max": 0.90
+    },
+    "one_step": {
+      "phases": ["Evaluation"],
+      "fee_refundable": false,
+      "profit_target_one_step": 0.10,
+      "max_daily_loss": 0.03,
+      "max_total_loss": 0.10,
+      "min_trading_days_phase": 4,
+      "profit_split_initial": 0.90,
+      "profit_split_max": 0.90
+    }
+  },
+  "account_types": {
+    "standard": {
+      "news_restrictions": "Trading 2 min avant/après news macro majeures interdit (NFP, CPI, FOMC). Positions swing autorisées mais PnL figé pendant la news si >2h hold.",
+      "leverage_by_asset": {
+        "forex": 100,
+        "indices": 50,
+        "crypto": 2
+      }
+    },
+    "swing": {
+      "news_restrictions": "News trading libre — pas de restriction horaire sur les macro news majeures (compte Swing).",
+      "leverage_by_asset": {
+        "forex": 30,
+        "indices": 15,
+        "crypto": 2
+      }
+    }
+  },
+  "fees": {
+    "10k": { "two_step": 155, "one_step": 145 },
+    "25k": { "two_step": 270, "one_step": 255 },
+    "50k": { "two_step": 345, "one_step": 325 },
+    "100k": { "two_step": 540, "one_step": 510 },
+    "200k": { "two_step": 1080, "one_step": 1020 }
+  },
+  "notes": "Fees EUR, plateforme FTMO (Prop Firm). one_step = paramétrage interne (FTMO historique = two_step). Profit split max atteint via scaling plan."
+}

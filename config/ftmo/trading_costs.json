@@ -1,0 +1,83 @@
+{
+  "commissions": {
+    "forex_lot_round": 4.0,
+    "indices": 0,
+    "crypto_pct": 0.03
+  },
+  "spreads": {
+    "EURUSD": 0.1,
+    "GBPUSD": 0.3,
+    "USDJPY": 0.2,
+    "XAUUSD": 20,
+    "US500": 0.4,
+    "US100": 1.5,
+    "DE40": 1.0,
+    "BTCUSD": 30
+  },
+  "swaps": {
+    "rule": "Swap débité/crédité à 00:00 server (CE(S)T), triple le mercredi (forex) ou vendredi (indices CFD).",
+    "notes": "Indices US: swap long généralement négatif (cost of carry). Valeurs par contrat/jour ci-dessous."
+  },
+  "symbols": {
+    "EURUSD": {
+      "class": "forex",
+      "contract_size": 100000,
+      "min_lot": 0.01,
+      "swap_long": -7.0,
+      "swap_short": 3.0,
+      "trading_hours": "24/5"
+    },
+    "US500.cash": {
+      "class": "indices",
+      "is_symbol": "US500.sim",
+      "contract_size": 1,
+      "min_lot": 0.1,
+      "swap_long": -1.5,
+      "swap_short": -0.8,
+      "trading_hours": "Lun-Ven 00:05-23:55 (server), pause 23:00-23:05 côté cash"
+    },
+    "US500.sim": {
+      "class": "indices",
+      "is_symbol": "US500.sim",
+      "contract_size": 1,
+      "min_lot": 0.1,
+      "swap_long": -1.5,
+      "swap_short": -0.8,
+      "trading_hours": "Lun-Ven 00:05-23:55 (server)"
+    },
+    "US100": {
+      "class": "indices",
+      "is_symbol": "US100.sim",
+      "contract_size": 1,
+      "min_lot": 0.1,
+      "swap_long": -2.5,
+      "swap_short": -1.2,
+      "trading_hours": "Lun-Ven 00:05-23:55 (server)"
+    },
+    "DE40": {
+      "class": "indices",
+      "is_symbol": "DE40.sim",
+      "contract_size": 1,
+      "min_lot": 0.1,
+      "swap_long": -1.0,
+      "swap_short": -0.5,
+      "trading_hours": "Lun-Ven 08:00-22:00 (server)"
+    },
+    "XAUUSD": {
+      "class": "commodities",
+      "contract_size": 100,
+      "min_lot": 0.01,
+      "swap_long": -15.0,
+      "swap_short": 5.0,
+      "trading_hours": "24/5"
+    },
+    "BTCUSD": {
+      "class": "crypto",
+      "contract_size": 1,
+      "min_lot": 0.01,
+      "swap_long": -0.05,
+      "swap_short": -0.05,
+      "trading_hours": "24/7"
+    }
+  }
+}

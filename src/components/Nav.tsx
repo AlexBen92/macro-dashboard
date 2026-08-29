@@ -9,6 +9,7 @@ export default function Nav() {
   const links = [
     { href: '/crypto', label: 'CRYPTO', color: '#22c55e' },
     { href: '/markets', label: 'MARKETS', color: '#22c55e' },
+    { href: '/ftmo', label: 'FTMO', color: '#aa66ff' },
   ];
 
   return (
