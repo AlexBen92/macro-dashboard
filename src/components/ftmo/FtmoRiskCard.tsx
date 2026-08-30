@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell, ReferenceLine } from 'recharts';
 import type { McResult } from '@/lib/ftmo-pricer/monte-carlo';
+import type { FtmoSpec } from '@/lib/ftmo';
 import { analyzePayoffs } from '@/lib/ftmo-pricer/payoff-distribution';
 
 const OUTCOME_LABEL: Record<string, string> = {
@@ -25,7 +26,8 @@ const OUTCOME_COLOR: Record<string, string> = {
   funded_alive_end: 'var(--green)',
 };
 
-export default function FtmoRiskCard({ mc, accountSize, measureLabel }: { mc: McResult; accountSize: number; measureLabel?: string }) {
+export default function FtmoRiskCard({ mc, spec, measureLabel }: { mc: McResult; spec: FtmoSpec; measureLabel?: string }) {
+  const accountSize = spec.accountSize;
   const dist = useMemo(() => analyzePayoffs(mc.payoffs), [mc.payoffs]);
   const pathData = useMemo(() => {
     const entries = Object.entries(mc.representativePaths).slice(0, 7);
@@ -65,9 +67,12 @@ export default function FtmoRiskCard({ mc, accountSize, measureLabel }: { mc: Mc
                 <XAxis dataKey="d" tick={{ fontSize: 8, fill: 'var(--dim)' }} stroke="var(--border)" />
                 <YAxis tick={{ fontSize: 8, fill: 'var(--dim)' }} stroke="var(--border)" domain={[0.85, 1.15]} />
                 <Tooltip contentStyle={{ fontSize: 9, background: 'var(--bg)', border: '1px solid var(--border)' }} />
-                <ReferenceLine y={0.9} stroke="var(--red)" strokeDasharray="4 2" label={{ value: 'floor max loss 10%', position: 'insideBottomLeft', fontSize: 8, fill: 'var(--red)' }} />
-                <ReferenceLine y={0.95} stroke="var(--orange)" strokeDasharray="4 2" label={{ value: 'daily −5% (rel. veille)', position: 'insideTopLeft', fontSize: 8, fill: 'var(--orange)' }} />
-                <Line type="monotone" dataKey="1.1" stroke="var(--dim)" strokeDasharray="3 3" dot={false} strokeWidth={0.5} />
+                <ReferenceLine y={1 - spec.maxTotalLoss} stroke="var(--red)" strokeDasharray="4 2" label={{ value: `floor max loss −${(spec.maxTotalLoss * 100).toFixed(0)}%${spec.maxLossMode === 'trailing_eod' ? ' (trailing, initial)' : ''}`, position: 'insideBottomLeft', fontSize: 8, fill: 'var(--red)' }} />
+                <ReferenceLine y={1 - spec.maxDailyLoss} stroke="var(--orange)" strokeDasharray="4 2" label={{ value: `daily −${(spec.maxDailyLoss * 100).toFixed(0)}% (rel. veille)`, position: 'insideTopLeft', fontSize: 8, fill: 'var(--orange)' }} />
+                <ReferenceLine y={1 + spec.profitTargetPhase1} stroke="var(--green)" strokeDasharray="3 3" label={{ value: `target P1 +${(spec.profitTargetPhase1 * 100).toFixed(0)}%`, position: 'insideTopRight', fontSize: 8, fill: 'var(--green)' }} />
+                {spec.model === 'two_step' ? (
+                  <ReferenceLine y={1 + spec.profitTargetPhase2} stroke="var(--green)" strokeDasharray="1 3" label={{ value: `target P2 +${(spec.profitTargetPhase2 * 100).toFixed(0)}%`, position: 'insideTopRight', fontSize: 8, fill: 'var(--green)' }} />
+                ) : null}
                 {pathData.keys.map((k) => (
                   <Line key={k} type="monotone" dataKey={k} name={OUTCOME_LABEL[k] ?? k} stroke={OUTCOME_COLOR[k] ?? 'var(--purple)'} dot={false} strokeWidth={1.2} connectNulls={false} />
                 ))}

@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
 import FtmoSpecCard from '@/components/ftmo/FtmoSpecCard';
+import FtmoFloorsCard from '@/components/ftmo/FtmoFloorsCard';
 import FtmoCalibrationCard from '@/components/ftmo/FtmoCalibrationCard';
 import FtmoOptimizationCard from '@/components/ftmo/FtmoOptimizationCard';
-import FtmoDecisionCard from '@/components/ftmo/FtmoDecisionCard';
+import FtmoDecisionCard, { type LadderRow } from '@/components/ftmo/FtmoDecisionCard';
 import FtmoRiskCard from '@/components/ftmo/FtmoRiskCard';
 import FtmoBankrollCard from '@/components/ftmo/FtmoBankrollCard';
 
@@ -23,7 +24,7 @@ import {
   sensitivityGrid,
   type LeverageObjective,
 } from '@/lib/ftmo-pricer/leverage-optimizer';
-import { DEFAULT_COSTS, type MarketCalib, type McResult } from '@/lib/ftmo-pricer/monte-carlo';
+import { DEFAULT_COSTS, simulateChallenge, type MarketCalib, type McResult } from '@/lib/ftmo-pricer/monte-carlo';
 import { kellyFromPayoffs } from '@/lib/ftmo-pricer/kelly-sizing';
 import { analyzeRuin, type RuinAnalysisResult } from '@/lib/ftmo-pricer/ruin-analysis';
 
@@ -57,6 +58,7 @@ interface PersistedSettings {
   quality: 'standard' | 'deep';
   measure: 'q' | 'p';
   tab: 'pricer' | 'bankroll';
+  riskPerTrade: number;
 }
 
 function readInitialSettings(): PersistedSettings {
@@ -85,6 +87,7 @@ const DEFAULT_SETTINGS: PersistedSettings = {
   quality: 'standard',
   measure: 'q',
   tab: 'pricer',
+  riskPerTrade: 0.005,
 };
 
 export default function FtmoPage() {
@@ -106,6 +109,7 @@ export default function FtmoPage() {
   const [opt, setOpt] = useState<ReturnType<typeof optimizeLeverages> | null>(null);
   const [optLoading, setOptLoading] = useState(false);
   const [sens, setSens] = useState<{ costBps: number; erp: number; edge: number }[] | null>(null);
+  const [ladder, setLadder] = useState<LadderRow[] | null>(null);
   const [surface, setSurface] = useState<{ lambdaEval: number; lambdaFunded: number; edge: number }[] | null>(null);
   const [surfaceLoading, setSurfaceLoading] = useState(false);
   const [ruin, setRuin] = useState<RuinAnalysisResult | null>(null);
@@ -159,6 +163,7 @@ export default function FtmoPage() {
     if (!marketCalib) return;
     setOptLoading(true);
     setSurface(null);
+    setLadder(null);
     const t = setTimeout(() => {
       try {
         const nSims = quality === 'deep' ? 3000 : 800;
@@ -171,6 +176,25 @@ export default function FtmoPage() {
         setOpt(r);
         setSens(
           sensitivityGrid(spec, marketCalib, r.lambdaEvalStar, r.lambdaFundedStar, { nSims: 600 })
+        );
+        // échelle de risque: λ éval × {0.5..2} autour de λ* (proxy risk/jour)
+        const sigmaDay = Math.sqrt(marketCalib.bates.V0 / 252);
+        setLadder(
+          [0.5, 0.75, 1, 1.5, 2].map((m) => {
+            const lam = +(r.lambdaEvalStar * m).toFixed(2);
+            const mcL = simulateChallenge(spec, marketCalib, lam, r.lambdaFundedStar, {
+              nSims: 600,
+              seed: 42,
+            });
+            return {
+              lambdaEval: lam,
+              riskDayPct: lam * sigmaDay * 100,
+              pPass1: mcL.pPassPhase1,
+              pFunded: mcL.pReachFunded,
+              edgeNet: mcL.fairValue - spec.feeUsd,
+              isStar: m === 1,
+            };
+          })
         );
       } finally {
         setOptLoading(false);
@@ -281,6 +305,11 @@ export default function FtmoPage() {
                 onModelChange={(m) => set({ model: m })}
                 onAccountTypeChange={(t) => set({ accountType: t })}
               />
+              <FtmoFloorsCard
+                spec={spec}
+                riskPerTrade={settings.riskPerTrade}
+                onRiskPerTradeChange={(r) => set({ riskPerTrade: r })}
+              />
               <div className="flex flex-wrap items-center gap-2 font-mono text-[0.55rem]">
                 <span className="text-[var(--label)] uppercase tracking-[1px]">objectif optimisation:</span>
                 {(Object.keys(OBJECTIVE_LABEL) as LeverageObjective[]).map((o) => (
@@ -369,8 +398,10 @@ export default function FtmoPage() {
                   kelly={kelly}
                   fee={spec.fee}
                   feeUsd={spec.feeUsd}
+                  feeRefundable={spec.feeRefundable}
                   frictionAnnual={frictionAnnual}
                   sensitivity={sens}
+                  ladder={ladder}
                   measureLabel={measureLabel}
                   label={`${accountKey.toUpperCase()} ${model === 'two_step' ? '2-step' : '1-step'} ${accountType}`}
                 />
@@ -384,7 +415,7 @@ export default function FtmoPage() {
             {/* TIER risque */}
             <section className="flex flex-col gap-3">
               <TierLabel>Tier 4 · Risque — trajectoires stratifiées · payoffs (log)</TierLabel>
-              {mc ? <FtmoRiskCard mc={mc} accountSize={spec.accountSize} measureLabel={measureLabel} /> : null}
+              {mc ? <FtmoRiskCard mc={mc} spec={spec} measureLabel={measureLabel} /> : null}
             </section>
           </>
         ) : (
