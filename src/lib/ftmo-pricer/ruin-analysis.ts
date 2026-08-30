@@ -79,9 +79,9 @@ function runBankrollPath(
   let payoutsMinusFees = 0;
   let breakevenDay: number | null = null;
   const navPath: number[] = [bank];
-  while (day < totalDays && challenges < opts.maxChallenges && bank >= spec.fee) {
+  while (day < totalDays && challenges < opts.maxChallenges && bank >= spec.feeUsd) {
     challenges++;
-    // PV net simulé (payouts non actualisés ici: NAV en cash)
+    // NAV en cash: payouts NON actualisés, fee payé cash
     const res = simulateChallenge(spec, calib, lambdaEval, lambdaFunded, {
       nSims: 1,
       seed: Math.floor(rng() * 2 ** 31),
@@ -89,24 +89,16 @@ function runBankrollPath(
       maxDaysFunded: opts.maxDaysFunded,
       payoutDays: opts.payoutDays,
       costs: opts.costs,
+      intradayBarrier: opts.intradayBarrier,
     });
-    const net = res.payoffs[0];
-    // durée approx du challenge: si funded atteint, compte jours éval+funded
+    const net = res.payoutsCash[0] - spec.feeUsd;
     bank += net;
     payoutsMinusFees += net;
     if (res.pReachFunded > 0) fundedCount++;
-    // approximation durée: chemins courts si échec tôt
-    const outcome = res.outcomes[0];
-    const approxDays =
-      outcome === 'fail_phase1' || outcome === 'timeout_phase1'
-        ? 20
-        : outcome === 'fail_phase2' || outcome === 'timeout_phase2'
-          ? 45
-          : 90;
-    day += approxDays;
+    day += Math.max(1, res.simDays[0] ?? 1);
     navPath.push(bank);
     if (breakevenDay === null && bank > initialCapital) breakevenDay = day;
-    if (bank < spec.fee) break;
+    if (bank < spec.feeUsd) break;
   }
   while (navPath.length < 2) navPath.push(bank);
   return {
@@ -140,6 +132,7 @@ export function analyzeRuin(
     maxDaysFunded: opts.maxDaysFunded,
     payoutDays: opts.payoutDays,
     costs: opts.costs,
+    intradayBarrier: opts.intradayBarrier,
   };
   const scenarios: RuinScenarioResult[] = [];
   let best: RuinScenarioResult | null = null;

@@ -41,8 +41,9 @@ export function kellyFromPayoffs(payoffs: number[], fee: number): KellyResult {
   };
 }
 
-/** Kelly discret: f* = p − q/b avec p = P(net>0), b = gain moyen/gain... via moments. */
-function discreteKellyFromPayoffs(payoffs: number[], fee: number): number | null {
+/** Kelly discret: f* = p − q/b avec p = P(net>0), b = avgWin/avgLoss (payoffs déjà nets). */
+function discreteKellyFromPayoffs(payoffs: number[], _fee: number): number | null {
+  void _fee;
   const wins = payoffs.filter((p) => p > 0);
   const losses = payoffs.filter((p) => p <= 0);
   if (wins.length === 0 || losses.length === 0) return null;
@@ -51,7 +52,7 @@ function discreteKellyFromPayoffs(payoffs: number[], fee: number): number | null
   const avgWin = wins.reduce((s, x) => s + x, 0) / wins.length;
   const avgLoss = Math.abs(losses.reduce((s, x) => s + x, 0) / losses.length);
   if (avgLoss <= 0) return null;
-  const b = (avgWin + fee) / avgLoss; // gain net moyen par unité perdue
+  const b = avgWin / avgLoss;
   const f = p - q / b;
   return Math.max(0, Math.min(f, 1));
 }

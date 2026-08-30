@@ -13,13 +13,18 @@ export type FtmoModel = 'two_step' | 'one_step';
 export type FtmoAccountType = 'standard' | 'swing';
 export type AccountKey = '10k' | '25k' | '50k' | '100k' | '200k';
 
+export type FtmoMaxLossMode = 'static' | 'trailing_eod';
+
 export interface FtmoSpec {
   accountKey: AccountKey;
   accountSize: number;
   currency: string;
   model: FtmoModel;
   accountType: FtmoAccountType;
+  /** fee en EUR (devise de facturation FTMO) */
   fee: number;
+  /** fee convertie en USD (comptes FTMO en USD, payouts en USD) */
+  feeUsd: number;
   feeRefundable: boolean;
   phases: string[];
   profitTargetPhase1: number;
@@ -27,6 +32,9 @@ export interface FtmoSpec {
   profitTarget: number;
   maxDailyLoss: number;
   maxTotalLoss: number;
+  maxLossMode: FtmoMaxLossMode;
+  /** 1-step: part max du meilleur jour dans le profit total au pass */
+  bestDayMaxShare?: number;
   minTradingDaysPhase: number;
   profitSplitInitial: number;
   profitSplitMax: number;
@@ -104,6 +112,8 @@ interface FtmoModelSpec {
   profit_target_one_step?: number;
   max_daily_loss: number;
   max_total_loss: number;
+  max_loss_mode?: 'static' | 'trailing_eod';
+  best_day_max_share?: number;
   min_trading_days_phase: number;
   profit_split_initial: number;
   profit_split_max: number;
@@ -112,6 +122,8 @@ interface FtmoModelSpec {
 interface FtmoSpecsFile {
   provider: string;
   currency: string;
+  fee_currency?: string;
+  eurusd?: number;
   accounts: Record<string, { size: number }>;
   models: Record<FtmoModel, FtmoModelSpec>;
   account_types: Record<
@@ -149,6 +161,7 @@ export function getFtmoSpec(
     model,
     accountType: type,
     fee: SPECS.fees[key][model],
+    feeUsd: SPECS.fees[key][model] * (SPECS.eurusd ?? 1),
     feeRefundable: m.fee_refundable,
     phases: m.phases,
     profitTargetPhase1: m.profit_target_phase1 ?? profitTarget,
@@ -156,6 +169,8 @@ export function getFtmoSpec(
     profitTarget,
     maxDailyLoss: m.max_daily_loss,
     maxTotalLoss: m.max_total_loss,
+    maxLossMode: m.max_loss_mode ?? 'static',
+    bestDayMaxShare: m.best_day_max_share,
     minTradingDaysPhase: m.min_trading_days_phase,
     profitSplitInitial: m.profit_split_initial,
     profitSplitMax: m.profit_split_max,

@@ -1,6 +1,8 @@
 {
   "provider": "FTMO",
-  "currency": "EUR",
+  "currency": "USD",
+  "fee_currency": "EUR",
+  "eurusd": 1.1,
   "accounts": {
     "10k": { "size": 10000 },
     "25k": { "size": 25000 },
@@ -16,6 +18,7 @@
       "profit_target_phase2": 0.05,
       "max_daily_loss": 0.05,
       "max_total_loss": 0.10,
+      "max_loss_mode": "static",
       "min_trading_days_phase": 4,
       "profit_split_initial": 0.80,
       "profit_split_max": 0.90
@@ -26,6 +29,8 @@
       "profit_target_one_step": 0.10,
       "max_daily_loss": 0.03,
       "max_total_loss": 0.10,
+      "max_loss_mode": "trailing_eod",
+      "best_day_max_share": 0.5,
       "min_trading_days_phase": 4,
       "profit_split_initial": 0.90,
       "profit_split_max": 0.90
@@ -33,7 +38,7 @@
   },
   "account_types": {
     "standard": {
-      "news_restrictions": "Trading 2 min avant/après news macro majeures interdit (NFP, CPI, FOMC). Positions swing autorisées mais PnL figé pendant la news si >2h hold.",
+      "news_restrictions": "Restrictions news/weekend uniquement sur le compte FUNDED (pas pendant l'évaluation): pas d'ouverture/clôture (ordres inclus) ±2 min autour des news majeures (NFP, CPI, FOMC); positions >2 min autorisées à travers la news. Standard funded doit fermer avant le week-end.",
       "leverage_by_asset": {
         "forex": 100,
         "indices": 50,
@@ -41,7 +46,7 @@
       }
     },
     "swing": {
-      "news_restrictions": "News trading libre — pas de restriction horaire sur les macro news majeures (compte Swing).",
+      "news_restrictions": "News trading libre — pas de restriction horaire sur les macro news majeures; week-end autorisé (compte Swing).",
       "leverage_by_asset": {
         "forex": 30,
         "indices": 15,
@@ -50,11 +55,11 @@
     }
   },
   "fees": {
-    "10k": { "two_step": 155, "one_step": 145 },
-    "25k": { "two_step": 270, "one_step": 255 },
-    "50k": { "two_step": 345, "one_step": 325 },
-    "100k": { "two_step": 540, "one_step": 510 },
-    "200k": { "two_step": 1080, "one_step": 1020 }
+    "10k": { "two_step": 89, "one_step": 680 },
+    "25k": { "two_step": 250, "one_step": 1431 },
+    "50k": { "two_step": 345, "one_step": 2805 },
+    "100k": { "two_step": 439, "one_step": 5957 },
+    "200k": { "two_step": 1080, "one_step": 12234 }
   },
-  "notes": "Fees EUR, plateforme FTMO (Prop Firm). one_step = paramétrage interne (FTMO historique = two_step). Profit split max atteint via scaling plan."
+  "notes": "Fees EUR 2026 (pricing officiel 2-step; promos fréquentes — vérifier au checkout). one_step = FTMO 1-Step Evaluation (max loss TRAILING EOD + Best Day ≤50% + split 90%). Pas de limite de temps sur les phases. Accounts USD, fees EUR."
 }

@@ -293,12 +293,15 @@ export function calibrateBates(ssvi: SsviParams): BatesFitResult {
     if (!ivs) return 1e9;
     let sse = 0;
     for (let i = 0; i < grid.length; i++) sse += (ivs[i] - grid[i].ivSsvi) ** 2;
-    return sse / grid.length;
+    // pénalité Feller: éviter les minima dégénérés (2κθ/σv² < 1.2 ⇒ variance CIR
+    // peut toucher 0 ⇒ queues mal pricées). Calibration instable run-to-run sans ça.
+    const fellerRatio = (2 * p.kappa * p.theta) / (p.sigmaV * p.sigmaV);
+    return (sse / grid.length) * (1 + Math.max(0, 1.2 - fellerRatio) * 5);
   };
   const res = nelderMead(
     objective,
     toFree({ kappa: 2, theta: 0.04, sigmaV: 0.5, rho: -0.75, V0: 0.03, lambdaJ: 0.3, nuJ: -0.08, deltaJ: 0.1 }),
-    { maxIter: 500, restarts: 1, seed: 31 }
+    { maxIter: 500, restarts: 3, seed: 31 }
   );
   const params = fromFree(res.x);
   const ivs = ivByT(params)!;

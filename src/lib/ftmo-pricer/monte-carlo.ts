@@ -1,7 +1,22 @@
 /**
  * Monte Carlo risque-neutre (Q) du challenge FTMO sous dynamique Bates calibrée.
  * Schéma Andersen QE pour la variance CIR, sauts Poisson composés, pas quotidien.
- * Toutes les probabilités produites sont des valorisations Q (étiquette UI obligatoire).
+ * Toutes les probabilités produites sont des valorisations Q (étiquette UI obligatoire),
+ * sauf si equityRiskPremium > 0 (mesure P approximée par shift de drift).
+ *
+ * Règles FTMO 2026 modélisées:
+ *   - Max Daily Loss = 5% (2-step) / 3% (1-step) du solde INITIAL, ancré sur la
+ *     balance 00:00 CE(S)T. Hypothèse: positions clôturées chaque jour ⇒
+ *     balance 00:00 = equity close veille (dayStart). Floating inclus dans le check.
+ *   - Max Loss 2-step: STATIQUE 10% du solde initial (toutes phases, funded inclus).
+ *   - Max Loss 1-step: TRAILING EOD (floor = max(solde initial, plus haut solde
+ *     minuit) × 0.90), reset à 90% du solde initial après chaque payout.
+ *   - Aucune limite de temps sur les phases (maxDaysEval = garde-fou technique).
+ *   - Best Day (1-step): le meilleur jour ne doit pas dépasser 50% du profit total
+ *     au moment du pass ⇒ pass différé sinon.
+ *   - Barrière intraday: pont brownien P(toucher le floor avant close) —
+ *     P = exp(−2·(o−b)(c−b)/(v·dt)) avec v = variance instantanée de début de jour.
+ *
  * RNG: mulberry32 seedé (déterministe, garde-fou anti-fabrication).
  */
 import type { BatesParams } from './bates';
@@ -70,6 +85,8 @@ export interface MarketCalib {
   bates: BatesParams;
   /** drift log quotidien sous Q tiré du forward (par an, ex 0.04) */
   fwdDriftAnn: number;
+  /** prime de risque actions (mesure P), par an. 0 = Q pur. */
+  equityRiskPremium?: number;
   /** taux d'actualisation des payouts (annuel) */
   rate: number;
   asOf: string;
@@ -78,15 +95,17 @@ export interface MarketCalib {
 }
 
 export interface CostModel {
-  /** bps/jour sur notionnel (spread+commissions amortis) */
+  /** bps/jour sur notionnel (spread+commissions amortis) — COÛT POSITIF */
   dailyCostBps: number;
-  /** swap bps/jour sur notionnel (position longue US500) */
+  /** bps/jour sur notionnel (swap/financement long US500) — COÛT POSITIF,
+   *  ≈ fwdDriftAnn/252 en bps (carry forward) + markup */
   swapBps: number;
 }
 
+/** Coûts totaux = 2.3 bps/j ≈ 0.8 spread + 1.5 carry (fwdDrift ~3.8%/an). */
 export const DEFAULT_COSTS: CostModel = {
   dailyCostBps: 0.8,
-  swapBps: -2.5,
+  swapBps: 1.5,
 };
 
 export type Outcome =
@@ -101,11 +120,14 @@ export type Outcome =
 export interface McOptions {
   nSims?: number;
   seed?: number;
+  /** garde-fou technique, PAS une règle FTMO (aucune limite officielle). Défaut 600. */
   maxDaysEval?: number;
   maxDaysFunded?: number;
   payoutDays?: number;
   fundedMonths?: number;
   costs?: CostModel;
+  /** correction barrière intraday (pont brownien). Défaut true. */
+  intradayBarrier?: boolean;
 }
 
 export interface McResult {
@@ -120,11 +142,24 @@ export interface McResult {
   pTimeoutP2: number;
   pKoFunded: number;
   pKoAfterPayout: number;
+  pFundedAliveEnd: number;
+  pFailDailyP1: number;
+  pFailTotalP1: number;
+  pFailDailyP2: number;
+  pFailTotalP2: number;
   outcomes: Outcome[];
-  /** PV par chemin: payouts actualisés − fee, USD (fee refund inclus si applicable) */
+  /** PV par chemin: payouts actualisés − feeUsd, USD (fee refund inclus si applicable) */
   payoffs: number[];
+  /** somme des payouts NON actualisés par chemin (cash, pour la bankroll) */
+  payoutsCash: number[];
+  /** jours de trading consommés par chemin (éval + funded) */
+  simDays: number[];
   /** valeur juste du challenge = E^Q[PV] */
   fairValue: number;
+  /** erreur standard MC du fairValue */
+  fairValueSe: number;
+  /** IC 95% du fairValue */
+  fairValueCI95: [number, number];
   /** chemins d'équité représentatifs par issue (pour graphes) */
   representativePaths: Record<string, number[]>;
 }
@@ -138,9 +173,10 @@ interface SimContext {
   maxDaysFunded: number;
   payoutDays: number;
   costs: CostModel;
+  intradayBarrier: boolean;
 }
 
-/** Un jour d'équité: PnL = λ·(r_S&P sous Q) − coûts. Retourne nouveau log-return équité. */
+/** Un jour d'équité: PnL = λ·(r_S&P) − coûts. Retourne nouveau log-return équité. */
 function simDay(
   v: number,
   rng: () => number,
@@ -152,8 +188,9 @@ function simDay(
   const dt = 1 / 252;
   const zv = znorm();
   const vNext = qeStep(v, dt, p, zv);
-  // log-return sous-jacent: drift forward + −v/2 − λE[J] + diffusion corrélée + sauts
+  // log-return sous-jacent: drift forward (+ERP si P) + −v/2 − λE[J] + diffusion corrélée + sauts
   const mJump = Math.exp(p.nuJ + 0.5 * p.deltaJ * p.deltaJ) - 1;
+  const erp = ctx.calib.equityRiskPremium ?? 0;
   const zx = znorm();
   const diffCorr = Math.sqrt(v * dt) * (p.rho * zv + Math.sqrt(1 - p.rho * p.rho) * zx);
   let jumps = 0;
@@ -164,11 +201,25 @@ function simDay(
     jumps += p.nuJ + p.deltaJ * znorm();
   }
   const sLogRet =
-    (ctx.calib.fwdDriftAnn - 0.5 * v - p.lambdaJ * mJump) * dt + diffCorr + jumps;
-  // équité: λ × return sous-jacent − coûts (bps du notionnel λ)
+    (ctx.calib.fwdDriftAnn + erp - 0.5 * v - p.lambdaJ * mJump) * dt + diffCorr + jumps;
+  // équité: λ × return sous-jacent − coûts (bps du notionnel λ, coûts positifs)
   const costBps = ctx.costs.dailyCostBps + ctx.costs.swapBps;
   const eqLogRet = Math.log(1 + lambda * (Math.exp(sLogRet) - 1) - (costBps / 10000) * lambda);
   return { vNext, eqLogRet };
+}
+
+interface PhaseOutcome {
+  outcome: 'pass' | 'fail_daily' | 'fail_total' | 'timeout';
+  days: number;
+  equityPath: number[];
+}
+
+/** Floor max loss du jour: statique (2-step) ou trailing EOD (1-step). */
+export function totalFloorToday(spec: FtmoSpec, initBalance: number, peakEodBalance: number): number {
+  if (spec.maxLossMode === 'trailing_eod') {
+    return Math.max(initBalance, peakEodBalance) * (1 - spec.maxTotalLoss);
+  }
+  return initBalance * (1 - spec.maxTotalLoss);
 }
 
 function runPhaseQ(
@@ -178,27 +229,58 @@ function runPhaseQ(
   lambda: number,
   target: number,
   initBalance: number
-): { outcome: 'pass' | 'fail_daily' | 'fail_total' | 'timeout'; days: number; equityPath: number[] } {
+): PhaseOutcome {
   const { spec } = ctx;
+  const dt = 1 / 252;
   const dailyLimit = spec.maxDailyLoss * initBalance;
-  const totalFloor = initBalance * (1 - spec.maxTotalLoss);
   let v = ctx.calib.bates.V0;
   let eq = initBalance;
+  let peakEod = initBalance;
+  let bestDayPnl = 0;
   const equityPath: number[] = [];
   for (let d = 0; d < ctx.maxDaysEval; d++) {
     const dayStart = eq;
+    const vDay = v;
     const { vNext, eqLogRet } = simDay(v, rng, znorm, ctx, lambda);
     v = vNext;
     eq = eq * Math.exp(eqLogRet);
     equityPath.push(eq);
-    if (eq <= totalFloor || dayStart - eq >= dailyLimit) {
+    const floorTotal = totalFloorToday(spec, initBalance, peakEod);
+    const floorDaily = dayStart - dailyLimit;
+    if (eq <= floorTotal) {
+      return { outcome: 'fail_total', days: d + 1, equityPath };
+    }
+    if (eq <= floorDaily) {
       return { outcome: 'fail_daily', days: d + 1, equityPath };
     }
-    if (eq >= initBalance * (1 + target) && d + 1 >= spec.minTradingDaysPhase) {
+    // barrière intraday (pont brownien): toucher le floor daily avant la clôture
+    if (ctx.intradayBarrier && vDay > 0) {
+      const pTouch = Math.exp((-2 * (dayStart - floorDaily) * (eq - floorDaily)) / (vDay * dt));
+      if (rng() < pTouch) {
+        return { outcome: 'fail_daily', days: d + 1, equityPath };
+      }
+    }
+    const dayPnl = eq - dayStart;
+    if (dayPnl > bestDayPnl) bestDayPnl = dayPnl;
+    peakEod = Math.max(peakEod, eq);
+    const cumProfit = eq - initBalance;
+    if (
+      eq >= initBalance * (1 + target) &&
+      d + 1 >= spec.minTradingDaysPhase &&
+      // Best Day (1-step): meilleur jour ≤ share du profit total au pass
+      (spec.bestDayMaxShare === undefined || cumProfit <= 0 || bestDayPnl <= spec.bestDayMaxShare * cumProfit)
+    ) {
       return { outcome: 'pass', days: d + 1, equityPath };
     }
   }
   return { outcome: 'timeout', days: ctx.maxDaysEval, equityPath };
+}
+
+interface FundedOutcome {
+  outcome: 'ko_funded' | 'ko_after_payout' | 'funded_alive_end';
+  days: number;
+  payouts: { day: number; amount: number }[];
+  equityPath: number[];
 }
 
 function runFundedQ(
@@ -206,34 +288,53 @@ function runFundedQ(
   znorm: () => number,
   ctx: SimContext,
   split: number
-): { outcome: 'ko_funded' | 'ko_after_payout' | 'funded_alive_end'; payouts: { day: number; amount: number }[]; equityPath: number[] } {
+): FundedOutcome {
   const { spec } = ctx;
+  const dt = 1 / 252;
   const initBalance = spec.accountSize;
   const dailyLimit = spec.maxDailyLoss * initBalance;
-  const totalFloor = initBalance * (1 - spec.maxTotalLoss);
   let v = ctx.calib.bates.V0;
   let eq = initBalance;
+  let peakEod = initBalance;
   const payouts: { day: number; amount: number }[] = [];
   const equityPath: number[] = [];
   for (let d = 1; d <= ctx.maxDaysFunded; d++) {
     const dayStart = eq;
+    const vDay = v;
     const { vNext, eqLogRet } = simDay(v, rng, znorm, ctx, ctx.lambdaFunded);
     v = vNext;
     eq = eq * Math.exp(eqLogRet);
     equityPath.push(eq);
-    if (eq <= totalFloor || dayStart - eq >= dailyLimit) {
-      return { outcome: payouts.length > 0 ? 'ko_after_payout' : 'ko_funded', payouts, equityPath };
+    const floorTotal = totalFloorToday(spec, initBalance, peakEod);
+    const floorDaily = dayStart - dailyLimit;
+    if (eq <= floorTotal || eq <= floorDaily) {
+      return { outcome: payouts.length > 0 ? 'ko_after_payout' : 'ko_funded', days: d, payouts, equityPath };
     }
+    if (ctx.intradayBarrier && vDay > 0) {
+      const pTouch = Math.exp((-2 * (dayStart - floorDaily) * (eq - floorDaily)) / (vDay * dt));
+      if (rng() < pTouch) {
+        return { outcome: payouts.length > 0 ? 'ko_after_payout' : 'ko_funded', days: d, payouts, equityPath };
+      }
+    }
+    peakEod = Math.max(peakEod, eq);
     if (d % ctx.payoutDays === 0) {
       const profit = eq - initBalance;
       if (profit > 0) {
         const pay = profit * split;
         payouts.push({ day: d, amount: pay });
         eq -= pay;
+        equityPath[equityPath.length - 1] = eq;
+        // 1-step: le floor trailing reset à 90% du solde initial après payout
+        if (spec.maxLossMode === 'trailing_eod') peakEod = initBalance;
       }
     }
   }
-  return { outcome: 'funded_alive_end', payouts, equityPath };
+  // vivant à l'horizon: payer le profit résiduel au split (plus de biais conservateur)
+  const residual = eq - initBalance;
+  if (residual > 0) {
+    payouts.push({ day: ctx.maxDaysFunded, amount: residual * split });
+  }
+  return { outcome: 'funded_alive_end', days: ctx.maxDaysFunded, payouts, equityPath };
 }
 
 /** Monte Carlo complet d'un challenge (phases éval + funded). */
@@ -251,81 +352,85 @@ export function simulateChallenge(
     calib,
     lambdaEval,
     lambdaFunded,
-    maxDaysEval: opts.maxDaysEval ?? 120,
+    maxDaysEval: opts.maxDaysEval ?? 600,
     maxDaysFunded: opts.maxDaysFunded ?? 252,
     payoutDays: opts.payoutDays ?? 14,
     costs: opts.costs ?? DEFAULT_COSTS,
+    intradayBarrier: opts.intradayBarrier ?? true,
   };
+  const feeUsd = spec.feeUsd;
   const rng = mulberry32(seed);
   const znorm = makeNormals(rng);
   const outcomes: Outcome[] = [];
   const payoffs: number[] = [];
-  let pass1 = 0, pass2 = 0, koF = 0, koAP = 0, t1 = 0, t2 = 0, f1 = 0, f2 = 0;
+  const payoutsCash: number[] = [];
+  const simDays: number[] = [];
+  let pass1 = 0, pass2 = 0, koF = 0, koAP = 0, aliveEnd = 0, t1 = 0, t2 = 0;
+  let f1 = 0, f2 = 0, f1d = 0, f1t = 0, f2d = 0, f2t = 0;
   const pathsByOutcome = new Map<Outcome, number[]>();
 
   for (let i = 0; i < nSims; i++) {
     const target1 = spec.model === 'two_step' ? spec.profitTargetPhase1 : spec.profitTarget;
     const p1 = runPhaseQ(rng, znorm, ctx, ctx.lambdaEval, target1, spec.accountSize);
     let pv = 0;
-    let outcome: Outcome;
-    if (p1.outcome === 'fail_daily') {
+    let cash = 0;
+    let days = p1.days;
+    let outcome!: Outcome;
+    let path = p1.equityPath;
+    if (p1.outcome === 'fail_daily' || p1.outcome === 'fail_total') {
       outcome = 'fail_phase1';
       f1++;
+      if (p1.outcome === 'fail_daily') f1d++;
+      else f1t++;
     } else if (p1.outcome === 'timeout') {
       outcome = 'timeout_phase1';
       t1++;
-    } else if (p1.outcome === 'fail_total') {
-      outcome = 'fail_phase1';
-      f1++;
     } else {
       pass1++;
+      let p2: PhaseOutcome | null = null;
       if (spec.model === 'two_step') {
-        const p2 = runPhaseQ(rng, znorm, ctx, ctx.lambdaEval, spec.profitTargetPhase2, spec.accountSize);
+        p2 = runPhaseQ(rng, znorm, ctx, ctx.lambdaEval, spec.profitTargetPhase2, spec.accountSize);
+        days += p2.days;
         if (p2.outcome === 'fail_daily' || p2.outcome === 'fail_total') {
           outcome = 'fail_phase2';
           f2++;
+          if (p2.outcome === 'fail_daily') f2d++;
+          else f2t++;
         } else if (p2.outcome === 'timeout') {
           outcome = 'timeout_phase2';
           t2++;
-        } else {
-          pass2++;
-          outcome = runFundedOutcome();
         }
-      } else {
+      }
+      if (p2 === null || p2.outcome === 'pass') {
         pass2++;
-        outcome = runFundedOutcome();
+        const f = runFundedQ(rng, znorm, ctx, spec.profitSplitInitial);
+        days += f.days;
+        for (const pay of f.payouts) {
+          pv += pay.amount * Math.exp(-calib.rate * (pay.day / 252));
+          cash += pay.amount;
+        }
+        outcome = f.outcome;
+        if (f.outcome === 'ko_funded') koF++;
+        else if (f.outcome === 'ko_after_payout') koAP++;
+        else aliveEnd++;
+        path = f.equityPath;
       }
-    }
-    function runFundedOutcome(): Outcome {
-      const f = runFundedQ(rng, znorm, ctx, spec.profitSplitInitial);
-      let pvF = 0;
-      for (const pay of f.payouts) {
-        pvF += pay.amount * Math.exp(-calib.rate * (pay.day / 252));
-      }
-      pv = pvF;
-      if (f.outcome === 'ko_funded') koF++;
-      if (f.outcome === 'ko_after_payout') koAP++;
-      if (f.outcome === 'funded_alive_end') {
-        // payout final au split si profit au-dessus du solde initial
-        // (chemin encore vivant à l'horizon: valorisé comme payout)
-      }
-      const lastPath = f.equityPath;
-      if (!pathsByOutcome.has(f.outcome) && lastPath.length > 0) {
-        pathsByOutcome.set(f.outcome, lastPath.slice(0, 120));
-      }
-      return f.outcome;
     }
     // net du fee: payouts − fee, avec refund du premier fee au 1er payout
-    const fee = spec.fee;
-    const refund = spec.feeRefundable && pv > 0 ? fee : 0;
-    const net = pv - fee + refund;
+    const refund = spec.feeRefundable && pv > 0 ? feeUsd : 0;
+    const net = pv - feeUsd + refund;
     payoffs.push(net);
+    payoutsCash.push(cash);
+    simDays.push(days);
     outcomes.push(outcome);
-    const path = p1.equityPath;
     if (!pathsByOutcome.has(outcome) && path.length > 0) {
       pathsByOutcome.set(outcome, path.slice(0, 120));
     }
   }
+
+  const fairValue = payoffs.reduce((s, x) => s + x, 0) / nSims;
+  const varr = payoffs.reduce((s, x) => s + (x - fairValue) ** 2, 0) / Math.max(1, nSims - 1);
+  const se = Math.sqrt(varr / nSims);
 
   return {
     nSims,
@@ -338,9 +443,18 @@ export function simulateChallenge(
     pTimeoutP2: t2 / nSims,
     pKoFunded: koF / nSims,
     pKoAfterPayout: koAP / nSims,
+    pFundedAliveEnd: aliveEnd / nSims,
+    pFailDailyP1: f1d / nSims,
+    pFailTotalP1: f1t / nSims,
+    pFailDailyP2: f2d / nSims,
+    pFailTotalP2: f2t / nSims,
     outcomes,
     payoffs,
-    fairValue: payoffs.reduce((s, x) => s + x, 0) / nSims,
+    payoutsCash,
+    simDays,
+    fairValue,
+    fairValueSe: se,
+    fairValueCI95: [fairValue - 1.96 * se, fairValue + 1.96 * se],
     representativePaths: Object.fromEntries(pathsByOutcome),
   };
 }
