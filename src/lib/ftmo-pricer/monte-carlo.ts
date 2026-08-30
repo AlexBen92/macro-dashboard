@@ -225,6 +225,18 @@ export function totalFloorToday(spec: FtmoSpec, initBalance: number, peakEodBala
   return initBalance * (1 - spec.maxTotalLoss);
 }
 
+/** P(toucher le floor daily avant la clôture) par pont brownien, connaissant
+ *  open (start du jour) et close (fin du jour), tous deux > floor.
+ *  Distances en LOG (ln(o/b)·ln(c/b)), sinon l'exposant explose en unités $:
+ *  P = exp(−2·ln(o/b)·ln(c/b)/(v·dt)), v = variance instantanée, dt = 1/252. */
+export function intradayTouchProb(open: number, close: number, floor: number, v: number): number {
+  if (v <= 0 || open <= floor || close <= floor) return 0;
+  const dt = 1 / 252;
+  const lo = Math.log(open / floor);
+  const lc = Math.log(close / floor);
+  return Math.exp((-2 * lo * lc) / (v * dt));
+}
+
 function runPhaseQ(
   rng: () => number,
   znorm: () => number,
@@ -258,7 +270,7 @@ function runPhaseQ(
     }
     // barrière intraday (pont brownien): toucher le floor daily avant la clôture
     if (ctx.intradayBarrier && vDay > 0) {
-      const pTouch = Math.exp((-2 * (dayStart - floorDaily) * (eq - floorDaily)) / (vDay * dt));
+      const pTouch = intradayTouchProb(dayStart, eq, floorDaily, vDay);
       if (rng() < pTouch) {
         return { outcome: 'fail_daily', days: d + 1, equityPath };
       }
@@ -314,7 +326,7 @@ function runFundedQ(
       return { outcome: payouts.length > 0 ? 'ko_after_payout' : 'ko_funded', days: d, payouts, equityPath };
     }
     if (ctx.intradayBarrier && vDay > 0) {
-      const pTouch = Math.exp((-2 * (dayStart - floorDaily) * (eq - floorDaily)) / (vDay * dt));
+      const pTouch = intradayTouchProb(dayStart, eq, floorDaily, vDay);
       if (rng() < pTouch) {
         return { outcome: payouts.length > 0 ? 'ko_after_payout' : 'ko_funded', days: d, payouts, equityPath };
       }

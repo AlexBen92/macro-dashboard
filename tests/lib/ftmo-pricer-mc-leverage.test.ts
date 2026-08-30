@@ -76,10 +76,27 @@ describe('Monte Carlo FTMO (Q)', () => {
     expect(r.pTimeoutP1).toBeGreaterThan(0.9);
   });
 
-  it('barrière intraday (pont brownien) ajoute des KO daily', () => {
+  it('barrière intraday: pont brownien — 3 cas analytiques', async () => {
+    const { intradayTouchProb } = await import('../../src/lib/ftmo-pricer/monte-carlo');
+    const v = 0.03;
+    // open/close collés au floor → toucher quasi certain
+    expect(intradayTouchProb(95010, 95010, 95000, v)).toBeGreaterThan(0.99);
+    // open/close loin du floor → toucher quasi impossible
+    expect(intradayTouchProb(98000, 98000, 95000, v)).toBeLessThan(0.01);
+    // décroissance monotone avec l'éloignement du close
+    const near = intradayTouchProb(96000, 95500, 95000, v);
+    const far = intradayTouchProb(96000, 97000, 95000, v);
+    expect(near).toBeGreaterThan(far);
+    // variance nulle → pas de toucher
+    expect(intradayTouchProb(95010, 95010, 95000, 0)).toBe(0);
+  });
+
+  it('barrière intraday ON ajoute des KO (λ extrême: breach jour 1 dominant)', () => {
     const spec = getFtmoSpec(100000, 'two_step', 'standard');
-    const on = simulateChallenge(spec, calib, 6, 2, { nSims: 600, seed: 23, intradayBarrier: true });
-    const off = simulateChallenge(spec, calib, 6, 2, { nSims: 600, seed: 23, intradayBarrier: false });
+    const on = simulateChallenge(spec, calib, 15, 2, { nSims: 300, seed: 23, intradayBarrier: true });
+    const off = simulateChallenge(spec, calib, 15, 2, { nSims: 300, seed: 23, intradayBarrier: false });
+    expect(on.pFailDailyP1).toBeGreaterThan(0.3);
+    // jour 1: préfixe RNG identique, la barrière ne peut qu'ajouter l'échec
     expect(on.pFailDailyP1).toBeGreaterThan(off.pFailDailyP1);
   });
 
