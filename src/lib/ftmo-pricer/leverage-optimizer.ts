@@ -217,6 +217,70 @@ export function sensitivityGrid(
   return out;
 }
 
+export interface StressRow {
+  key: string;
+  label: string;
+  detail: string;
+  lambdaEvalStar: number;
+  lambdaFundedStar: number;
+  edge: number;
+  edgeCI: [number, number];
+  pPass1: number;
+  pFunded: number;
+  pFailDaily1: number;
+}
+
+/** Scénarios de régime: base calib live + VIX 20 (variances ×k) ± sauts ×2 ± coûts/ERP.
+ *  Chaque scénario ré-optimise λ_éval/λ_funded (l'optimiseur compense le régime). */
+export function stressScenarios(
+  spec: FtmoSpec,
+  calib: MarketCalib,
+  opts: { nSims?: number; targetVix?: number; costs?: CostModel } = {}
+): StressRow[] {
+  const nSims = opts.nSims ?? 600;
+  const targetVix = opts.targetVix ?? 0.2;
+  const costs = opts.costs;
+  const ivNow = Math.sqrt(calib.bates.V0);
+  const k = (targetVix / Math.max(ivNow, 1e-6)) ** 2;
+  const b = calib.bates;
+  const mk = (p: typeof b, erp: number): MarketCalib => ({
+    ...calib,
+    bates: p,
+    equityRiskPremium: erp,
+  });
+  const vol20 = { ...b, V0: b.V0 * k, theta: b.theta * k };
+  const defs: { key: string; label: string; detail: string; calib: MarketCalib; costs?: CostModel }[] = [
+    { key: 'base', label: `Base (vol spot ${(Math.sqrt(calib.bates.V0) * 100).toFixed(0)}%)`, detail: 'calib live', calib: { ...calib } },
+    { key: 'vix20', label: `VIX ${(targetVix * 100).toFixed(0)}%`, detail: `variances ×${k.toFixed(2)} (V0+θ)`, calib: mk(vol20, calib.equityRiskPremium ?? 0) },
+    { key: 'jumps', label: `VIX 20% + sauts ×2`, detail: 'régime crash (λj ×2)', calib: mk({ ...vol20, lambdaJ: b.lambdaJ * 2 }, calib.equityRiskPremium ?? 0) },
+    {
+      key: 'adverse',
+      label: 'Sauts + coûts 3.3bps',
+      detail: `pire cas coûts${calib.equityRiskPremium ? ' + ERP actif' : ' (mesure courante)'}`,
+      calib: mk({ ...vol20, lambdaJ: b.lambdaJ * 2 }, calib.equityRiskPremium ?? 0),
+      costs: { dailyCostBps: 0.8, swapBps: 2.5 },
+    },
+  ];
+  const out: StressRow[] = [];
+  for (const d of defs) {
+    const opt = optimizeLeverages(spec, d.calib, { objective: 'pv_funded', nSims, seed: 42, costs: d.costs ?? costs, lambdaMax: 4 });
+    const r = opt.mc;
+    out.push({
+      key: d.key,
+      label: d.label,
+      detail: d.detail,
+      lambdaEvalStar: opt.lambdaEvalStar,
+      lambdaFundedStar: opt.lambdaFundedStar,
+      edge: r.fairValue - spec.feeUsd,
+      edgeCI: [r.fairValueCI95[0] - spec.feeUsd, r.fairValueCI95[1] - spec.feeUsd],
+      pPass1: r.pPassPhase1,
+      pFunded: r.pReachFunded,
+      pFailDaily1: r.pFailDailyP1,
+    });
+  }
+  return out;
+}
+
 /** Surface 2D edge net × (λ_éval, λ_funded) pour le graphe de la référence. */
 export function edgeSurface(
   spec: FtmoSpec,

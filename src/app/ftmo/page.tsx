@@ -22,6 +22,8 @@ import {
   optimizeLeverages,
   edgeSurface,
   sensitivityGrid,
+  stressScenarios,
+  type StressRow,
   type LeverageObjective,
 } from '@/lib/ftmo-pricer/leverage-optimizer';
 import { DEFAULT_COSTS, simulateChallenge, type MarketCalib, type McResult } from '@/lib/ftmo-pricer/monte-carlo';
@@ -109,6 +111,8 @@ export default function FtmoPage() {
   const [opt, setOpt] = useState<ReturnType<typeof optimizeLeverages> | null>(null);
   const [optLoading, setOptLoading] = useState(false);
   const [sens, setSens] = useState<{ costBps: number; erp: number; edge: number }[] | null>(null);
+  const [stress, setStress] = useState<StressRow[] | null>(null);
+  const [stressLoading, setStressLoading] = useState(false);
   const [ladder, setLadder] = useState<LadderRow[] | null>(null);
   const [surface, setSurface] = useState<{ lambdaEval: number; lambdaFunded: number; edge: number }[] | null>(null);
   const [surfaceLoading, setSurfaceLoading] = useState(false);
@@ -202,6 +206,15 @@ export default function FtmoPage() {
     }, 30);
     return () => clearTimeout(t);
   }, [marketCalib, spec, objective, quality, accountType]);
+
+  const runStress = useCallback(() => {
+    if (!marketCalib) return;
+    setStressLoading(true);
+    setTimeout(() => {
+      setStress(stressScenarios(spec, marketCalib, { nSims: 600 }));
+      setStressLoading(false);
+    }, 30);
+  }, [marketCalib, spec]);
 
   const runSurface = useCallback(() => {
     if (!marketCalib) return;
@@ -401,6 +414,9 @@ export default function FtmoPage() {
                   feeRefundable={spec.feeRefundable}
                   frictionAnnual={frictionAnnual}
                   sensitivity={sens}
+                  stress={stress}
+                  stressLoading={stressLoading}
+                  onRunStress={runStress}
                   ladder={ladder}
                   measureLabel={measureLabel}
                   label={`${accountKey.toUpperCase()} ${model === 'two_step' ? '2-step' : '1-step'} ${accountType}`}

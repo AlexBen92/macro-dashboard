@@ -2,6 +2,7 @@
 
 import type { McResult, Outcome } from '@/lib/ftmo-pricer/monte-carlo';
 import type { KellyResult } from '@/lib/ftmo-pricer/kelly-sizing';
+import type { StressRow } from '@/lib/ftmo-pricer/leverage-optimizer';
 
 export interface LadderRow {
   lambdaEval: number;
@@ -48,6 +49,9 @@ export default function FtmoDecisionCard({
   feeRefundable,
   frictionAnnual,
   sensitivity,
+  stress,
+  stressLoading,
+  onRunStress,
   ladder,
   measureLabel,
   label,
@@ -59,6 +63,9 @@ export default function FtmoDecisionCard({
   feeRefundable: boolean;
   frictionAnnual: number;
   sensitivity: { costBps: number; erp: number; edge: number }[] | null;
+  stress?: StressRow[] | null;
+  stressLoading?: boolean;
+  onRunStress?: () => void;
   ladder: LadderRow[] | null;
   measureLabel: string;
   label: string;
@@ -272,6 +279,57 @@ export default function FtmoDecisionCard({
           </div>
         </div>
       ) : null}
+
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <div className="font-mono text-[0.55rem] text-[var(--label)] uppercase tracking-[1.5px]">
+            Scénarios de régime — stress VIX 20 (λ* ré-optimisés par scénario)
+          </div>
+          <button
+            onClick={onRunStress}
+            disabled={stressLoading}
+            className="rounded-[2px] border border-[var(--border)] px-2 py-0.5 font-mono text-[0.5rem] uppercase tracking-[1px] text-[var(--dim)] hover:text-[var(--text)] disabled:opacity-50"
+          >
+            {stressLoading ? 'simulation…' : 'lancer stress VIX 20'}
+          </button>
+        </div>
+        {stress && stress.length > 0 ? (
+          <>
+            <div className="grid gap-[1px]" style={{ gridTemplateColumns: '1.4fr 0.7fr 1.2fr 0.6fr 0.6fr' }}>
+              {['scénario', 'λ* é/f', 'edge [IC95]', 'funded', 'KO day'].map((h) => (
+                <div key={h} className="font-mono text-[0.5rem] text-[var(--dim)] uppercase tracking-[1px] border-b border-[var(--border)] pb-0.5">
+                  {h}
+                </div>
+              ))}
+              {stress.map((r) => (
+                <div key={r.key} className="contents">
+                  <div className="font-mono text-[0.55rem] py-0.5">
+                    <span className="text-[var(--text)]">{r.label}</span>{' '}
+                    <span className="text-[var(--dim)] text-[0.45rem]">({r.detail})</span>
+                  </div>
+                  <div className="font-mono text-[0.55rem] text-[var(--text)] py-0.5">
+                    {r.lambdaEvalStar.toFixed(2)}/{r.lambdaFundedStar.toFixed(2)}
+                  </div>
+                  <div className="font-mono text-[0.55rem] py-0.5" style={{ color: r.edgeCI[1] < 0 ? 'var(--red)' : 'var(--green)' }}>
+                    ${r.edge.toFixed(0)} [{r.edgeCI[0].toFixed(0)}, {r.edgeCI[1].toFixed(0)}]
+                  </div>
+                  <div className="font-mono text-[0.55rem] text-[var(--text)] py-0.5">{(r.pFunded * 100).toFixed(1)}%</div>
+                  <div className="font-mono text-[0.55rem] text-[var(--text)] py-0.5">{(r.pFailDaily1 * 100).toFixed(1)}%</div>
+                </div>
+              ))}
+            </div>
+            <div className="font-mono text-[0.45rem] text-[var(--dim)]">
+              Stress paramétrique (V0/θ scalés, pas recalibration SSVI complète). Payoff type digitale = convexe en
+              vol: VIX↑ ⇒ KO daily↑ mais l'optimiseur abaisse λ_funded — le risque d'un régime volatif est la chute
+              de P(funded) (plus de resets), pas la perte de l'edge.
+            </div>
+          </>
+        ) : (
+          <div className="h-[36px] flex items-center font-mono text-[0.5rem] text-[var(--dim)]">
+            {stressLoading ? '4 scénarios × ré-optimisation λ en cours…' : 'cliquer pour lancer les 4 scénarios (base / VIX 20 / sauts ×2 / pire cas)'}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

@@ -11,6 +11,7 @@ import {
   optimizeLeverages,
   edgeSurface,
   sensitivityGrid,
+  stressScenarios,
 } from '../../src/lib/ftmo-pricer/leverage-optimizer';
 import { analyzeRuin } from '../../src/lib/ftmo-pricer/ruin-analysis';
 import { analyzePayoffs } from '../../src/lib/ftmo-pricer/payoff-distribution';
@@ -162,6 +163,23 @@ describe('Leverage optimizer', () => {
     expect(qRow[0].edge).toBeGreaterThan(qRow[qRow.length - 1].edge);
     const lowCostP = grid.find((g) => g.erp !== 0 && g.costBps === qRow[0].costBps)!;
     expect(lowCostP.edge).toBeGreaterThan(qRow[0].edge);
+  });
+
+  it('stressScenarios: 4 régimes, VIX 20 double la variance et le KO daily', { timeout: 180000 }, () => {
+    const spec = getFtmoSpec(100000, 'two_step', 'standard');
+    const rows = stressScenarios(spec, calib, { nSims: 200 });
+    expect(rows.length).toBe(4);
+    expect(rows.map((r) => r.key)).toEqual(['base', 'vix20', 'jumps', 'adverse']);
+    for (const r of rows) {
+      expect(isFinite(r.edge)).toBe(true);
+      expect(r.edgeCI[0]).toBeLessThanOrEqual(r.edge);
+      expect(r.edgeCI[1]).toBeGreaterThanOrEqual(r.edge);
+      expect(r.lambdaEvalStar).toBeGreaterThan(0);
+    }
+    // scaling variance ancré sur la vol spot implicite de V0 (17.3% ici → ×1.33)
+    expect(rows[1].detail).toMatch(/variances ×1\.\d+/);
+    expect(rows[2].label).toContain('sauts');
+    expect(rows[3].label).toContain('3.3bps');
   });
 });
 
