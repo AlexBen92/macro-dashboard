@@ -60,15 +60,7 @@ interface PersistedSettings {
 }
 
 function readInitialSettings(): PersistedSettings {
-  const defaults: PersistedSettings = {
-    accountKey: '100k',
-    model: 'two_step',
-    accountType: 'standard',
-    objective: 'pv_funded',
-    quality: 'standard',
-    measure: 'q',
-    tab: 'pricer',
-  };
+  const defaults: PersistedSettings = DEFAULT_SETTINGS;
   try {
     const u = new URLSearchParams(window.location.search);
     const s = localStorage.getItem('ftmo-pricer-settings');
@@ -85,23 +77,27 @@ function readInitialSettings(): PersistedSettings {
   }
 }
 
+const DEFAULT_SETTINGS: PersistedSettings = {
+  accountKey: '100k',
+  model: 'two_step',
+  accountType: 'standard',
+  objective: 'pv_funded',
+  quality: 'standard',
+  measure: 'q',
+  tab: 'pricer',
+};
+
 export default function FtmoPage() {
-  const [settings, setSettings] = useState<PersistedSettings>(() =>
-    typeof window === 'undefined'
-      ? {
-          accountKey: '100k',
-          model: 'two_step',
-          accountType: 'standard',
-          objective: 'pv_funded',
-          quality: 'standard',
-          measure: 'q',
-          tab: 'pricer',
-        }
-      : readInitialSettings()
-  );
+  // état initial = défauts des deux côtés (SSR + client): la restauration
+  // localStorage/URL se fait en effet post-mount, sinon hydration mismatch (#418).
+  const [settings, setSettings] = useState<PersistedSettings>(DEFAULT_SETTINGS);
   const { accountKey, model, accountType, objective, quality, measure, tab } = settings;
   const set = useCallback((patch: Partial<PersistedSettings>) => {
     setSettings((s) => ({ ...s, ...patch }));
+  }, []);
+
+  useEffect(() => {
+    setSettings((s) => ({ ...s, ...readInitialSettings() }));
   }, []);
 
   const [calib, setCalib] = useState<FtmoCalibPayload | null>(null);
