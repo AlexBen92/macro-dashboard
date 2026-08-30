@@ -422,3 +422,51 @@ export function computeSpxHedge(params: SpxHedgeParams): SpxHedgeResult {
       : 0;
   return { contractsNeeded, singleContractNotional };
 }
+
+/** Calibration pricer FTMO servie par /api/ftmo-pricer (chaîne SPX CBOE → SSVI → Bates). */
+export interface FtmoCalibPayload {
+  schema_version: number;
+  asOf: string;
+  source: string;
+  symbol: string;
+  spot: number;
+  iv30: number;
+  rate: number;
+  fwdDriftAnn: number;
+  nOptionsRaw: number;
+  nSlices: number;
+  slices: { T: number; expiryDays: number; expiryLabel: string; forward: number; atmIv: number; nKept: number }[];
+  ssvi: {
+    params: { rho: number; eta: number; gamma: number; thetaCurve: { T: number; theta: number }[] };
+    rmseIv: number;
+    butterflyOk: boolean;
+    calendarOk: boolean;
+    maxThetaPhi: number;
+    maxThetaPhiSq: number;
+    sviSlices: { T: number; rmseIv: number }[];
+  };
+  bates: {
+    params: {
+      kappa: number;
+      theta: number;
+      sigmaV: number;
+      rho: number;
+      V0: number;
+      lambdaJ: number;
+      nuJ: number;
+      deltaJ: number;
+    };
+    rmseIv: number;
+    fellerOk: boolean;
+    fellerRatio: number;
+  };
+  densities: { T: number; days: number; points: { k: number; pdf: number; cdf: number }[] }[];
+  calibration_ms: number;
+  last_export_success: string;
+}
+
+export async function fetchFtmoCalib(): Promise<FtmoCalibPayload> {
+  const res = await fetch('/api/ftmo-pricer', { cache: 'no-store' });
+  if (!res.ok) throw new Error(`API ftmo-pricer HTTP ${res.status}`);
+  return (await res.json()) as FtmoCalibPayload;
+}
