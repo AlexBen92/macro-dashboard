@@ -226,7 +226,7 @@ export default function FtmoPage() {
     };
     if (typeof Worker !== 'undefined') {
       try {
-        const w = new Worker(new URL('../lib/ftmo-pricer/surface.worker.ts', import.meta.url));
+        const w = new Worker(new URL('../../lib/ftmo-pricer/surface.worker.ts', import.meta.url));
         w.onmessage = (e: MessageEvent) => {
           setSurface(e.data as { lambdaEval: number; lambdaFunded: number; edge: number }[]);
           setSurfaceLoading(false);
