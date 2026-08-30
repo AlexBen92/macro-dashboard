@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { getFtmoSpec } from '@/lib/ftmo';
-import { computeRiskBudget, DEFAULT_SOFT_STOP_SHARE } from '@/lib/ftmo-pricer/risk-budget';
+import { computeRiskBudget, computeRiskGate, DEFAULT_SOFT_STOP_SHARE } from '@/lib/ftmo-pricer/risk-budget';
 
 describe('computeRiskBudget', () => {
   it('100k 2-step: floors 95k/90k, pertes consécutives à 0.5%', () => {
@@ -53,5 +53,60 @@ describe('computeRiskBudget', () => {
 
   it('défaut soft stop = 75%', () => {
     expect(DEFAULT_SOFT_STOP_SHARE).toBe(0.75);
+  });
+});
+
+describe('computeRiskGate', () => {
+  const spec = getFtmoSpec(100000, 'two_step', 'standard');
+
+  it('GREEN: equity stable, marge saine, ouverture autorisée', () => {
+    const g = computeRiskGate(spec, { equity: 100000, dayStartEquity: 100000, riskPerTrade: 0.005 });
+    expect(g.verdict).toBe('GREEN');
+    expect(g.canOpenNewTrade).toBe(true);
+    expect(g.reduceOnly).toBe(false);
+    expect(g.killNow).toBe(false);
+    expect(g.floors.daily.floorUsd).toBe(95000);
+    expect(g.floors.total.floorUsd).toBe(90000);
+    expect(g.lossesToDailyFloor).toBe(10);
+  });
+
+  it('ORANGE: usage daily ≥50% → alerte, marge encore saine (reduceOnly false)', () => {
+    const g = computeRiskGate(spec, { equity: 97400, dayStartEquity: 100000, riskPerTrade: 0.005 });
+    expect(g.verdict).toBe('ORANGE');
+    expect(g.reduceOnly).toBe(false); // usage 52% = signal, soft/marge intacts
+    expect(g.killNow).toBe(false);
+  });
+
+  it('RED soft hit: equity sous soft floor 96250 → reduceOnly', () => {
+    const g = computeRiskGate(spec, { equity: 96000, dayStartEquity: 100000, riskPerTrade: 0.005 });
+    expect(g.verdict).toBe('ORANGE'); // soft hit mais au-dessus des floors durs
+    expect(g.floors.softDaily.hit).toBe(true);
+    expect(g.canOpenNewTrade).toBe(false);
+  });
+
+  it('RED kill: equity sous floor daily → killNow', () => {
+    const g = computeRiskGate(spec, { equity: 94900, dayStartEquity: 100000, riskPerTrade: 0.005 });
+    expect(g.verdict).toBe('RED');
+    expect(g.killNow).toBe(true);
+  });
+
+  it('marge 2× risk/trade: juste au-dessus du floor → canOpenNewTrade false sans kill', () => {
+    // equity 95,900: marge daily = 900 < 2×500 → pas d'ouverture, pas de kill
+    const g = computeRiskGate(spec, { equity: 95900, dayStartEquity: 100000, riskPerTrade: 0.005 });
+    expect(g.killNow).toBe(false);
+    expect(g.canOpenNewTrade).toBe(false);
+    expect(g.reduceOnly).toBe(true);
+  });
+
+  it('1-step trailing: peak 105k → total floor 94,500', () => {
+    const s1 = getFtmoSpec(100000, 'one_step', 'standard');
+    const g = computeRiskGate(s1, { equity: 100000, dayStartEquity: 100000, peakEodBalance: 105000 });
+    expect(g.floors.total.floorUsd).toBe(94500);
+  });
+
+  it('gain jour+: usage daily 0 même si equity < dayStart impossible — clamp ≥0', () => {
+    const g = computeRiskGate(spec, { equity: 101500, dayStartEquity: 100000 });
+    expect(g.floors.daily.usagePct).toBe(0);
+    expect(g.verdict).toBe('GREEN');
   });
 });

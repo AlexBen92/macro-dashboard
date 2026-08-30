@@ -320,6 +320,9 @@ export default function FtmoPage() {
               />
               <FtmoFloorsCard
                 spec={spec}
+                accountKey={accountKey}
+                model={model}
+                accountType={accountType}
                 riskPerTrade={settings.riskPerTrade}
                 onRiskPerTradeChange={(r) => set({ riskPerTrade: r })}
               />
