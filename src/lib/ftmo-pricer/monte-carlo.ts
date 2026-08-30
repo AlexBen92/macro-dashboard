@@ -102,10 +102,13 @@ export interface CostModel {
   swapBps: number;
 }
 
-/** Coûts totaux = 2.3 bps/j ≈ 0.8 spread + 1.5 carry (fwdDrift ~3.8%/an). */
+/** Coûts totaux = 2.8 bps/j ≈ 0.8 spread + 2.0 swap long.
+ * Swap réel FTMO US500.cash (API wp-json/ftmo/symbols, 2026-08-30):
+ * swapLong −156.44 points/j à digits=2 → −1.5644 unités d'index/j sur
+ * spot ~7711 → 2.03 bps/j. Arrondi 2.0 (US100 croisé: −2.5 bps/j). */
 export const DEFAULT_COSTS: CostModel = {
   dailyCostBps: 0.8,
-  swapBps: 1.5,
+  swapBps: 2.0,
 };
 
 export type Outcome =

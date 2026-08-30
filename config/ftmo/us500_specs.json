@@ -9,17 +9,18 @@
   "margin_currency": "USD",
   "swap_model": {
     "charged_at": "00:00 server (CE(S)T)",
-    "unit": "USD par contrat par jour",
-    "swap_long": -1.5,
-    "swap_short": -0.8,
+    "unit": "points d'index (x0.01) par lot par jour - source: ftmo.com/wp-json/ftmo/symbols 2026-08-30",
+    "swap_long": -156.44,
+    "swap_short": -5.34,
     "triple_day": "vendredi (weekend carry)",
-    "holidays": "Pas de swap les jours de marché fermé (Thanksgiving, Christmas)"
+    "holidays": "Pas de swap les jours de marché fermé (Thanksgiving, Christmas)",
+    "note": "swapLong -156.44 pts = -1.5644 unites/j = -2.03 bps/j a SPX 7711. US100 croise: -636.24 pts = -2.5 bps/j."
   },
   "trading_hours": "Lun-Ven 00:05-23:55 (server), cash pause 23:00-23:05",
   "limits_reference": {
     "account_size": 100000,
     "account_key": "100k",
     "max_daily_loss": 0.05,
-    "max_total_loss": 0.10
+    "max_total_loss": 0.1
   }
 }
