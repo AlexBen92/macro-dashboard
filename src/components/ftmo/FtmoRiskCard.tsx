@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell, ReferenceLine } from 'recharts';
 import type { McResult } from '@/lib/ftmo-pricer/monte-carlo';
 import { analyzePayoffs } from '@/lib/ftmo-pricer/payoff-distribution';
 
@@ -25,7 +25,7 @@ const OUTCOME_COLOR: Record<string, string> = {
   funded_alive_end: 'var(--green)',
 };
 
-export default function FtmoRiskCard({ mc, accountSize }: { mc: McResult; accountSize: number }) {
+export default function FtmoRiskCard({ mc, accountSize, measureLabel }: { mc: McResult; accountSize: number; measureLabel?: string }) {
   const dist = useMemo(() => analyzePayoffs(mc.payoffs), [mc.payoffs]);
   const pathData = useMemo(() => {
     const entries = Object.entries(mc.representativePaths).slice(0, 7);
@@ -45,10 +45,11 @@ export default function FtmoRiskCard({ mc, accountSize }: { mc: McResult; accoun
     <section className="rounded-[3px] border border-[var(--border)] bg-[var(--bg2)] p-3 flex flex-col gap-3">
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="font-mono text-[0.65rem] text-[var(--purple)] uppercase tracking-[2px]">
-          Risque — trajectoires & distribution (Q)
+          Risque — trajectoires & distribution{measureLabel ? ` (${measureLabel})` : ''}
         </div>
         <div className="font-mono text-[0.55rem] text-[var(--dim)]">
           {mc.nSims.toLocaleString('fr-FR')} chemins · équité en fraction du solde initial · knock-out = barrière
+          (intraday pont brownien)
         </div>
       </header>
 
@@ -64,6 +65,8 @@ export default function FtmoRiskCard({ mc, accountSize }: { mc: McResult; accoun
                 <XAxis dataKey="d" tick={{ fontSize: 8, fill: 'var(--dim)' }} stroke="var(--border)" />
                 <YAxis tick={{ fontSize: 8, fill: 'var(--dim)' }} stroke="var(--border)" domain={[0.85, 1.15]} />
                 <Tooltip contentStyle={{ fontSize: 9, background: 'var(--bg)', border: '1px solid var(--border)' }} />
+                <ReferenceLine y={0.9} stroke="var(--red)" strokeDasharray="4 2" label={{ value: 'floor max loss 10%', position: 'insideBottomLeft', fontSize: 8, fill: 'var(--red)' }} />
+                <ReferenceLine y={0.95} stroke="var(--orange)" strokeDasharray="4 2" label={{ value: 'daily −5% (rel. veille)', position: 'insideTopLeft', fontSize: 8, fill: 'var(--orange)' }} />
                 <Line type="monotone" dataKey="1.1" stroke="var(--dim)" strokeDasharray="3 3" dot={false} strokeWidth={0.5} />
                 {pathData.keys.map((k) => (
                   <Line key={k} type="monotone" dataKey={k} name={OUTCOME_LABEL[k] ?? k} stroke={OUTCOME_COLOR[k] ?? 'var(--purple)'} dot={false} strokeWidth={1.2} connectNulls={false} />

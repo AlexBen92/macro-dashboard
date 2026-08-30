@@ -15,7 +15,7 @@ function Param({ label, value, ok }: { label: string; value: string; ok?: boolea
   );
 }
 
-export default function FtmoCalibrationCard({ calib }: { calib: FtmoCalibPayload | null }) {
+export default function FtmoCalibrationCard({ calib, loading }: { calib: FtmoCalibPayload | null; loading?: boolean }) {
   const densityData = useMemo(() => {
     if (!calib)
       return {
@@ -35,7 +35,7 @@ export default function FtmoCalibrationCard({ calib }: { calib: FtmoCalibPayload
   if (!calib) {
     return (
       <section className="rounded-[3px] border border-[var(--border)] bg-[var(--bg2)] p-3 font-mono text-[0.55rem] text-[var(--dim)]">
-        Calibration indisponible (chaîne SPX CBOE non encore collectée)
+        {loading ? 'chargement calibration SPX (CBOE)…' : 'Calibration indisponible (chaîne SPX CBOE non collectée)'}
       </section>
     );
   }

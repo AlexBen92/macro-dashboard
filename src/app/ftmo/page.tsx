@@ -17,8 +17,13 @@ import {
   type FtmoAccountType,
   type FtmoCalibPayload,
 } from '@/lib/ftmo';
-import { optimizeLeverage, edgeSurface, type LeverageObjective } from '@/lib/ftmo-pricer/leverage-optimizer';
-import type { MarketCalib, McResult } from '@/lib/ftmo-pricer/monte-carlo';
+import {
+  optimizeLeverages,
+  edgeSurface,
+  sensitivityGrid,
+  type LeverageObjective,
+} from '@/lib/ftmo-pricer/leverage-optimizer';
+import { DEFAULT_COSTS, type MarketCalib, type McResult } from '@/lib/ftmo-pricer/monte-carlo';
 import { kellyFromPayoffs } from '@/lib/ftmo-pricer/kelly-sizing';
 import { analyzeRuin, type RuinAnalysisResult } from '@/lib/ftmo-pricer/ruin-analysis';
 
@@ -42,18 +47,69 @@ const SIZE_MAP: Record<AccountKey, number> = {
   '200k': 200000,
 };
 
+const ERP_P = 0.035;
+
+interface PersistedSettings {
+  accountKey: AccountKey;
+  model: FtmoModel;
+  accountType: FtmoAccountType;
+  objective: LeverageObjective;
+  quality: 'standard' | 'deep';
+  measure: 'q' | 'p';
+  tab: 'pricer' | 'bankroll';
+}
+
+function readInitialSettings(): PersistedSettings {
+  const defaults: PersistedSettings = {
+    accountKey: '100k',
+    model: 'two_step',
+    accountType: 'standard',
+    objective: 'pv_funded',
+    quality: 'standard',
+    measure: 'q',
+    tab: 'pricer',
+  };
+  try {
+    const u = new URLSearchParams(window.location.search);
+    const s = localStorage.getItem('ftmo-pricer-settings');
+    const merged: Partial<PersistedSettings> = { ...(s ? JSON.parse(s) : {}) };
+    const accountParam = u.get('account');
+    if (accountParam && accountParam in SIZE_MAP) merged.accountKey = accountParam as AccountKey;
+    if (u.get('model') === 'one_step' || u.get('model') === 'two_step') merged.model = u.get('model') as FtmoModel;
+    if (u.get('type') === 'standard' || u.get('type') === 'swing') merged.accountType = u.get('type') as FtmoAccountType;
+    if (u.get('tab') === 'bankroll' || u.get('tab') === 'pricer') merged.tab = u.get('tab') as 'pricer' | 'bankroll';
+    if (u.get('measure') === 'p' || u.get('measure') === 'q') merged.measure = u.get('measure') as 'q' | 'p';
+    return { ...defaults, ...merged };
+  } catch {
+    return defaults;
+  }
+}
+
 export default function FtmoPage() {
-  const [accountKey, setAccountKey] = useState<AccountKey>('100k');
-  const [model, setModel] = useState<FtmoModel>('two_step');
-  const [accountType, setAccountType] = useState<FtmoAccountType>('standard');
-  const [objective, setObjective] = useState<LeverageObjective>('pv_funded');
-  const [quality, setQuality] = useState<'standard' | 'deep'>('standard');
-  const [tab, setTab] = useState<'pricer' | 'bankroll'>('pricer');
+  const [settings, setSettings] = useState<PersistedSettings>(() =>
+    typeof window === 'undefined'
+      ? {
+          accountKey: '100k',
+          model: 'two_step',
+          accountType: 'standard',
+          objective: 'pv_funded',
+          quality: 'standard',
+          measure: 'q',
+          tab: 'pricer',
+        }
+      : readInitialSettings()
+  );
+  const { accountKey, model, accountType, objective, quality, measure, tab } = settings;
+  const set = useCallback((patch: Partial<PersistedSettings>) => {
+    setSettings((s) => ({ ...s, ...patch }));
+  }, []);
 
   const [calib, setCalib] = useState<FtmoCalibPayload | null>(null);
+  const [calibLoading, setCalibLoading] = useState(true);
   const [calibError, setCalibError] = useState<string | null>(null);
-  const [opt, setOpt] = useState<ReturnType<typeof optimizeLeverage> | null>(null);
+  const [opt, setOpt] = useState<ReturnType<typeof optimizeLeverages> | null>(null);
   const [optLoading, setOptLoading] = useState(false);
+  const [sens, setSens] = useState<{ costBps: number; erp: number; edge: number }[] | null>(null);
   const [surface, setSurface] = useState<{ lambdaEval: number; lambdaFunded: number; edge: number }[] | null>(null);
   const [surfaceLoading, setSurfaceLoading] = useState(false);
   const [ruin, setRuin] = useState<RuinAnalysisResult | null>(null);
@@ -62,24 +118,47 @@ export default function FtmoPage() {
   const spec = getFtmoSpec(SIZE_MAP[accountKey], model, accountType);
 
   useEffect(() => {
+    setCalibLoading(true);
     fetchFtmoCalib()
-      .then(setCalib)
-      .catch((e: Error) => setCalibError(e.message));
+      .then((c) => {
+        setCalib(c);
+        setCalibError(null);
+      })
+      .catch((e: Error) => setCalibError(e.message))
+      .finally(() => setCalibLoading(false));
   }, []);
+
+  // persistence: localStorage + URL
+  useEffect(() => {
+    try {
+      localStorage.setItem('ftmo-pricer-settings', JSON.stringify(settings));
+      const u = new URLSearchParams({
+        account: settings.accountKey,
+        model: settings.model,
+        type: settings.accountType,
+        tab: settings.tab,
+        measure: settings.measure,
+      });
+      window.history.replaceState(null, '', `?${u.toString()}`);
+    } catch {
+      // localStorage indisponible (private mode) — non bloquant
+    }
+  }, [settings]);
 
   const marketCalib: MarketCalib | null = useMemo(() => {
     if (!calib) return null;
     return {
       bates: calib.bates.params,
       fwdDriftAnn: calib.fwdDriftAnn,
+      equityRiskPremium: measure === 'p' ? ERP_P : 0,
       rate: calib.rate,
       asOf: calib.asOf,
       source: calib.source,
       spot: calib.spot,
     };
-  }, [calib]);
+  }, [calib, measure]);
 
-  // réoptimisation quand calib/spec/objective/quality changent
+  // réoptimisation quand calib/spec/objective/quality/measure changent
   useEffect(() => {
     if (!marketCalib) return;
     setOptLoading(true);
@@ -87,13 +166,16 @@ export default function FtmoPage() {
     const t = setTimeout(() => {
       try {
         const nSims = quality === 'deep' ? 3000 : 800;
-        const r = optimizeLeverage(spec, marketCalib, 2, {
+        const r = optimizeLeverages(spec, marketCalib, {
           objective,
           nSims,
           seed: 42,
-          lambdaCap: accountType === 'swing' ? 8 : 12,
+          lambdaCap: accountType === 'swing' ? 8 : 8,
         });
         setOpt(r);
+        setSens(
+          sensitivityGrid(spec, marketCalib, r.lambdaEvalStar, r.lambdaFundedStar, { nSims: 600 })
+        );
       } finally {
         setOptLoading(false);
       }
@@ -104,18 +186,37 @@ export default function FtmoPage() {
   const runSurface = useCallback(() => {
     if (!marketCalib) return;
     setSurfaceLoading(true);
-    setTimeout(() => {
+    const doSync = () => {
       const s = edgeSurface(spec, marketCalib, { nSims: 250, nLambda: 8, lambdaMax: 8 });
       setSurface(s);
       setSurfaceLoading(false);
-    }, 30);
+    };
+    if (typeof Worker !== 'undefined') {
+      try {
+        const w = new Worker(new URL('../lib/ftmo-pricer/surface.worker.ts', import.meta.url));
+        w.onmessage = (e: MessageEvent) => {
+          setSurface(e.data as { lambdaEval: number; lambdaFunded: number; edge: number }[]);
+          setSurfaceLoading(false);
+          w.terminate();
+        };
+        w.onerror = () => {
+          w.terminate();
+          doSync();
+        };
+        w.postMessage({ spec, calib: marketCalib, nSims: 250, nLambda: 8, lambdaMax: 8 });
+        return;
+      } catch {
+        // worker indisponible — fallback synchrone
+      }
+    }
+    setTimeout(doSync, 30);
   }, [marketCalib, spec]);
 
   const runRuin = useCallback(() => {
     if (!marketCalib || !opt) return;
     setRuinLoading(true);
     setTimeout(() => {
-      const r = analyzeRuin(spec, marketCalib, opt.lambdaStar, 2, {
+      const r = analyzeRuin(spec, marketCalib, opt.lambdaEvalStar, opt.lambdaFundedStar, {
         nSims: 200,
         years: 3,
         maxChallenges: 40,
@@ -129,15 +230,26 @@ export default function FtmoPage() {
   const kelly = useMemo(
     () =>
       mc
-        ? kellyFromPayoffs(mc.payoffs, spec.fee)
+        ? kellyFromPayoffs(mc.payoffs, spec.feeUsd)
         : { fullKelly: 0, halfKelly: 0, discreteKelly: null, interpretation: '—' },
-    [mc, spec.fee]
+    [mc, spec.feeUsd]
   );
-  // friction annuelle estimée: coûts quotidiens × λ* × notionnel (bps → $)
+  const kellyLoop = useMemo(
+    () =>
+      ruin
+        ? kellyFromPayoffs(ruin.perChallengePayoffs, spec.feeUsd)
+        : null,
+    [ruin, spec.feeUsd]
+  );
+  // friction annuelle estimée: coûts quotidiens × λ moyen × notionnel (bps → $)
   const frictionAnnual = useMemo(() => {
     if (!opt) return 0;
-    return (spec.accountSize * opt.lambdaStar * 3.3) / 10000 / 100;
+    const totalBps = DEFAULT_COSTS.dailyCostBps + DEFAULT_COSTS.swapBps;
+    const lambdaAvg = (opt.lambdaEvalStar + opt.lambdaFundedStar) / 2;
+    return (spec.accountSize * lambdaAvg * totalBps * 252) / 10000;
   }, [opt, spec.accountSize]);
+
+  const measureLabel = measure === 'q' ? 'mesure Q' : `mesure P (ERP ${(ERP_P * 100).toFixed(1)}%)`;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -147,7 +259,7 @@ export default function FtmoPage() {
           {(['pricer', 'bankroll'] as const).map((t) => (
             <button
               key={t}
-              onClick={() => setTab(t)}
+              onClick={() => set({ tab: t })}
               className={`rounded-[2px] border px-3 py-1 font-mono text-[0.55rem] uppercase tracking-[2px] ${
                 tab === t
                   ? 'border-[var(--purple)] text-[var(--purple)] bg-[var(--purple)]/10'
@@ -163,22 +275,22 @@ export default function FtmoPage() {
           <>
             {/* TIER 0 — sélection + règles */}
             <section className="flex flex-col gap-3">
-              <TierLabel>Tier 0 · Sélection — compte · modèle · type · objectif · qualité MC</TierLabel>
+              <TierLabel>Tier 0 · Sélection — compte · modèle · type · objectif · qualité MC · mesure</TierLabel>
               <FtmoSpecCard
                 spec={spec}
                 accountKey={accountKey}
                 model={model}
                 accountType={accountType}
-                onAccountChange={(k) => setAccountKey(k as AccountKey)}
-                onModelChange={setModel}
-                onAccountTypeChange={setAccountType}
+                onAccountChange={(k) => set({ accountKey: k as AccountKey })}
+                onModelChange={(m) => set({ model: m })}
+                onAccountTypeChange={(t) => set({ accountType: t })}
               />
               <div className="flex flex-wrap items-center gap-2 font-mono text-[0.55rem]">
                 <span className="text-[var(--label)] uppercase tracking-[1px]">objectif optimisation:</span>
                 {(Object.keys(OBJECTIVE_LABEL) as LeverageObjective[]).map((o) => (
                   <button
                     key={o}
-                    onClick={() => setObjective(o)}
+                    onClick={() => set({ objective: o })}
                     className={`rounded-[2px] border px-2 py-0.5 ${
                       objective === o
                         ? 'border-[var(--purple)] text-[var(--purple)] bg-[var(--purple)]/10'
@@ -192,7 +304,7 @@ export default function FtmoPage() {
                 {(['standard', 'deep'] as const).map((q) => (
                   <button
                     key={q}
-                    onClick={() => setQuality(q)}
+                    onClick={() => set({ quality: q })}
                     className={`rounded-[2px] border px-2 py-0.5 ${
                       quality === q
                         ? 'border-[var(--purple)] text-[var(--purple)] bg-[var(--purple)]/10'
@@ -200,6 +312,21 @@ export default function FtmoPage() {
                     }`}
                   >
                     {q === 'standard' ? 'standard' : 'deep (plus de trajectoires)'}
+                  </button>
+                ))}
+                <span className="ml-2 text-[var(--label)] uppercase tracking-[1px]">mesure:</span>
+                {(['q', 'p'] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => set({ measure: m })}
+                    title={m === 'q' ? 'risque-neutre (valorisation)' : `physique: drift + ${(ERP_P * 100).toFixed(1)}%/an de prime de risque`}
+                    className={`rounded-[2px] border px-2 py-0.5 ${
+                      measure === m
+                        ? 'border-[var(--purple)] text-[var(--purple)] bg-[var(--purple)]/10'
+                        : 'border-[var(--border)] text-[var(--dim)] hover:text-[var(--text)]'
+                    }`}
+                  >
+                    {m === 'q' ? 'Q (valorisation)' : `P (ERP ${(ERP_P * 100).toFixed(1)}%)`}
                   </button>
                 ))}
               </div>
@@ -214,20 +341,21 @@ export default function FtmoPage() {
                   confiance.
                 </div>
               ) : null}
-              <FtmoCalibrationCard calib={calib} />
+              <FtmoCalibrationCard calib={calib} loading={calibLoading && !calibError} />
             </section>
 
             {/* TIER optimisation */}
             <section className="flex flex-col gap-3">
-              <TierLabel>Tier 2 · Optimisation du levier — λ* par phase · surface edge</TierLabel>
+              <TierLabel>Tier 2 · Optimisation du levier — λ* éval / λ* funded · surface edge</TierLabel>
               {optLoading || !opt ? (
                 <div className="rounded-[3px] border border-[var(--border)] bg-[var(--bg2)] p-3 font-mono text-[0.55rem] text-[var(--dim)]">
-                  {optLoading ? 'optimisation en cours (grille λ + section dorée)…' : 'en attente de calibration…'}
+                  {optLoading ? 'optimisation en cours (grille 2D + sections dorées alternées)…' : 'en attente de calibration…'}
                 </div>
               ) : (
                 <FtmoOptimizationCard
                   curve={opt.curve}
-                  lambdaStar={opt.lambdaStar}
+                  lambdaEvalStar={opt.lambdaEvalStar}
+                  lambdaFundedStar={opt.lambdaFundedStar}
                   objectiveLabel={OBJECTIVE_LABEL[objective]}
                   surface={surface}
                   surfaceLoading={surfaceLoading}
@@ -238,13 +366,16 @@ export default function FtmoPage() {
 
             {/* TIER décision */}
             <section className="flex flex-col gap-3">
-              <TierLabel>Tier 3 · Décision — funnel Q · décomposition edge · verdict · Kelly</TierLabel>
+              <TierLabel>Tier 3 · Décision — funnel · décomposition edge ± IC · verdict · Kelly · sensibilité</TierLabel>
               {mc ? (
                 <FtmoDecisionCard
                   mc={mc}
                   kelly={kelly}
                   fee={spec.fee}
+                  feeUsd={spec.feeUsd}
                   frictionAnnual={frictionAnnual}
+                  sensitivity={sens}
+                  measureLabel={measureLabel}
                   label={`${accountKey.toUpperCase()} ${model === 'two_step' ? '2-step' : '1-step'} ${accountType}`}
                 />
               ) : (
@@ -257,19 +388,31 @@ export default function FtmoPage() {
             {/* TIER risque */}
             <section className="flex flex-col gap-3">
               <TierLabel>Tier 4 · Risque — trajectoires stratifiées · payoffs (log)</TierLabel>
-              {mc ? <FtmoRiskCard mc={mc} accountSize={spec.accountSize} /> : null}
+              {mc ? <FtmoRiskCard mc={mc} accountSize={spec.accountSize} measureLabel={measureLabel} /> : null}
             </section>
           </>
         ) : (
           <section className="flex flex-col gap-3">
             <TierLabel>Tier 5 · Bankroll — rachat en boucle · P(ruine) · badge edge réalisé</TierLabel>
-            <FtmoBankrollCard result={ruin} loading={ruinLoading} onRun={runRuin} years={3} nScen={200} />
+            <FtmoBankrollCard
+              result={ruin}
+              loading={ruinLoading}
+              onRun={runRuin}
+              years={3}
+              nScen={200}
+              kellyLoop={kellyLoop}
+              feeUsd={spec.feeUsd}
+            />
           </section>
         )}
       </main>
 
       <footer className="px-4 py-2 border-t border-[var(--border)] bg-[var(--bg2)] flex items-center justify-between font-mono text-[0.55rem] text-[var(--muted)] uppercase tracking-[1.5px]">
-        <span>Valorisation risque-neutre (Q) — CBOE SPX · SSVI · Bates · pricer, pas un hedge</span>
+        <span>
+          {measure === 'q'
+            ? 'Valorisation risque-neutre (Q) — CBOE SPX · SSVI · Bates · pricer, pas un hedge'
+            : `Mesure physique (P, ERP ${(ERP_P * 100).toFixed(1)}%) — scénarios réels estimés, pas une valorisation`}
+        </span>
         <span className="text-[var(--dim)]">educational · not investment advice</span>
       </footer>
     </div>

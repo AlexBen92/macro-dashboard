@@ -125,7 +125,7 @@ export default function FtmoSpecCard({
           color="var(--bear)"
         />
         <RuleBar
-          label="Max total loss"
+          label={`Max total loss (${spec.maxLossMode === 'trailing_eod' ? 'trailing EOD' : 'statique'})`}
           pct={spec.maxTotalLoss}
           valueLabel={`${fmtPct(spec.maxTotalLoss)} · ${fmtEur(spec.accountSize * spec.maxTotalLoss)}`}
           color="var(--bear)"
@@ -138,8 +138,8 @@ export default function FtmoSpecCard({
         />
         <RuleBar
           label={`Fee challenge (${MODEL_LABEL[spec.model].split(' ')[0]})`}
-          pct={spec.fee / spec.accountSize}
-          valueLabel={`${fmtEur(spec.fee)}${spec.feeRefundable ? ' · remboursable' : ' · non-remboursable'}`}
+          pct={spec.feeUsd / spec.accountSize}
+          valueLabel={`€${spec.fee.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} ≈ $${spec.feeUsd.toLocaleString('fr-FR', { maximumFractionDigits: 0 })}${spec.feeRefundable ? ' · remboursable' : ' · non-remboursable'}`}
           color="var(--caution)"
         />
       </div>

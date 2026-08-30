@@ -10,14 +10,16 @@ export interface SurfacePoint {
 
 export default function FtmoOptimizationCard({
   curve,
-  lambdaStar,
+  lambdaEvalStar,
+  lambdaFundedStar,
   objectiveLabel,
   surface,
   surfaceLoading,
   onRunSurface,
 }: {
   curve: { lambda: number; value: number }[];
-  lambdaStar: number;
+  lambdaEvalStar: number;
+  lambdaFundedStar: number;
   objectiveLabel: string;
   surface: SurfacePoint[] | null;
   surfaceLoading: boolean;
@@ -45,7 +47,7 @@ export default function FtmoOptimizationCard({
           Optimisation du levier par phase
         </div>
         <div className="font-mono text-[0.55rem] text-[var(--label)] uppercase tracking-[1px]">
-          λ* = {lambdaStar.toFixed(2)} · objectif: {objectiveLabel}
+          λ*_éval = {lambdaEvalStar.toFixed(2)} · λ*_funded = {lambdaFundedStar.toFixed(2)} · objectif: {objectiveLabel}
         </div>
       </header>
 
@@ -61,7 +63,7 @@ export default function FtmoOptimizationCard({
                 <XAxis dataKey="l" tick={{ fontSize: 8, fill: 'var(--dim)' }} stroke="var(--border)" />
                 <YAxis tick={{ fontSize: 8, fill: 'var(--dim)' }} stroke="var(--border)" />
                 <Tooltip contentStyle={{ fontSize: 9, background: 'var(--bg)', border: '1px solid var(--border)' }} />
-                <ReferenceLine x={lambdaStar} stroke="var(--green)" strokeDasharray="3 3" />
+                <ReferenceLine x={lambdaEvalStar} stroke="var(--green)" strokeDasharray="3 3" />
                 <Line type="monotone" dataKey="v" stroke="var(--purple)" dot={false} strokeWidth={1.5} />
               </LineChart>
             </ResponsiveContainer>
@@ -87,16 +89,16 @@ export default function FtmoOptimizationCard({
                 optimum: λ_éval {best?.lambdaEval.toFixed(1)} / λ_funded {best?.lambdaFunded.toFixed(1)} → edge{' '}
                 {best ? `$${best.edge.toFixed(0)}` : '-'}
               </div>
-              <div className="grid gap-[1px]" style={{ gridTemplateColumns: `28px repeat(${les.length}, 1fr)` }}>
+              <div className="grid gap-[1px]" style={{ gridTemplateColumns: `30px repeat(${les.length}, 1fr)` }}>
                 <div />
                 {les.map((le) => (
-                  <div key={le} className="text-center font-mono text-[0.4rem] text-[var(--dim)]">
+                  <div key={le} className="text-center font-mono text-[0.5rem] text-[var(--dim)]">
                     {le.toFixed(0)}
                   </div>
                 ))}
                 {lfs.map((lf) => (
                   <div key={lf} className="contents">
-                    <div className="flex items-center justify-end pr-1 font-mono text-[0.4rem] text-[var(--dim)]">
+                    <div className="flex items-center justify-end pr-1 font-mono text-[0.5rem] text-[var(--dim)]">
                       {lf.toFixed(0)}
                     </div>
                     {les.map((le) => {
@@ -105,16 +107,18 @@ export default function FtmoOptimizationCard({
                         <div
                           key={`${le}-${lf}`}
                           title={`λ_éval ${le} / λ_funded ${lf} → $${pt.edge.toFixed(0)}`}
-                          className="h-[14px] rounded-[1px]"
-                          style={{ background: cellColor(pt.edge) }}
-                        />
+                          className="h-[16px] rounded-[1px] flex items-center justify-center font-mono text-[0.45rem]"
+                          style={{ background: cellColor(pt.edge), color: 'var(--text)' }}
+                        >
+                          {Math.abs(pt.edge) >= 10000 ? `${(pt.edge / 1000).toFixed(0)}k` : pt.edge.toFixed(0)}
+                        </div>
                       );
                     })}
                   </div>
                 ))}
               </div>
-              <div className="font-mono text-[0.4rem] text-[var(--dim)]">
-                lignes = λ_funded · colonnes = λ_éval · vert = edge positif
+              <div className="font-mono text-[0.45rem] text-[var(--dim)]">
+                lignes = λ_funded · colonnes = λ_éval · valeur = edge net $ · vert = positif
               </div>
             </div>
           ) : (

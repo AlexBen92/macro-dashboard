@@ -1,6 +1,7 @@
 'use client';
 
 import type { RuinAnalysisResult } from '@/lib/ftmo-pricer/ruin-analysis';
+import type { KellyResult } from '@/lib/ftmo-pricer/kelly-sizing';
 
 function Row({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -19,12 +20,16 @@ export default function FtmoBankrollCard({
   onRun,
   years,
   nScen,
+  kellyLoop,
+  feeUsd,
 }: {
   result: RuinAnalysisResult | null;
   loading: boolean;
   onRun: () => void;
   years: number;
   nScen: number;
+  kellyLoop: KellyResult | null;
+  feeUsd: number;
 }) {
   return (
     <section className="rounded-[3px] border border-[var(--border)] bg-[var(--bg2)] p-3 flex flex-col gap-3">
@@ -42,8 +47,9 @@ export default function FtmoBankrollCard({
       </header>
 
       <div className="font-mono text-[0.45rem] text-[var(--dim)] leading-relaxed">
-        Simulation risque-neutre (Q) sur forwards — backtest synthétique, pas de données historiques. Le capital de
-        départ sert à racheter systématiquement le challenge en boucle.
+        Simulation sur forwards — backtest synthétique, pas de données historiques. Le capital de départ sert à
+        racheter systématiquement le challenge en boucle. NAV en cash: payouts non actualisés, fee $
+        {feeUsd.toFixed(0)} payé comptant.
       </div>
 
       {result ? (
@@ -88,6 +94,24 @@ export default function FtmoBankrollCard({
             ))}
           </div>
 
+          {kellyLoop ? (
+            <div className="flex flex-wrap gap-x-6 gap-y-0.5 font-mono text-[0.55rem]">
+              <div className="flex justify-between gap-2">
+                <span className="text-[var(--label)]">Kelly boucle (payouts cash agrégés)</span>
+                <span className="text-[var(--text)]">{(kellyLoop.fullKelly * 100).toFixed(1)}%</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <span className="text-[var(--label)]">Demi-Kelly boucle</span>
+                <span className="text-[var(--green)]">{(kellyLoop.halfKelly * 100).toFixed(1)}%</span>
+              </div>
+              {kellyLoop.discreteKelly !== null ? (
+                <div className="flex justify-between gap-2">
+                  <span className="text-[var(--label)]">Discret boucle</span>
+                  <span className="text-[var(--text)]">{(kellyLoop.discreteKelly * 100).toFixed(1)}%</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           <div className="font-mono text-[0.45rem] text-[var(--orange)]">
             Le badge EDGE RÉALISÉ n'apparaît que si P(ruine) ≤ 5% et NAV médiane finale &gt; capital initial tiennent
             simultanément — jamais l'un sans l'autre.
