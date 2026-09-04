@@ -38,6 +38,7 @@ import Top50CryptoTable from '@/components/crypto/Top50CryptoTable';
 import FundingCarryPanel from '@/components/crypto/FundingCarryPanel';
 import ExploratorySection from '@/components/ui/ExploratorySection';
 import ResearchProgramStatus from '@/components/ResearchProgramStatus';
+import PaperDsrCard from '@/components/crypto/PaperDsrCard';
 import ResearchCatalog from '@/components/ResearchCatalog';
 import ExecutionPanel from '@/components/execution/ExecutionPanel';
 import { useTelegramAlerts } from '@/components/TelegramAlerts';
@@ -207,6 +208,8 @@ export default function CryptoPage() {
         <ExploratorySection label="Bloc 6 · Top 50 — market cap · performance · funding perp">
           <Top50CryptoTable />
         </ExploratorySection>
+
+        <PaperDsrCard />
 
         <ResearchProgramStatus variant="crypto" />
 

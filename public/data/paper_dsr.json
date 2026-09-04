@@ -1,0 +1,23 @@
+{
+ "generated_utc": "2026-09-04T07:39:35.444599+00:00",
+ "sr_star_lot39_daily": 0.085,
+ "window_days": 60,
+ "strats": {
+  "ICHI_COMBO": {
+   "strategy": "ICHI_COMBO",
+   "open_trades": 0,
+   "total_trades": 0,
+   "closed_trades": 0,
+   "status": "INSUFFICIENT",
+   "reason": "no closed trades yet"
+  },
+  "SRSI_COMBO": {
+   "strategy": "SRSI_COMBO",
+   "open_trades": 3,
+   "total_trades": 3,
+   "closed_trades": 0,
+   "status": "INSUFFICIENT",
+   "reason": "no closed trades yet"
+  }
+ }
+}
