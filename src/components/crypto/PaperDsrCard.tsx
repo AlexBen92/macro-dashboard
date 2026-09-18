@@ -100,7 +100,7 @@ export default function PaperDsrCard() {
           <span>PSR vs lot {r.psrVsLot !== null ? r.psrVsLot.toFixed(3) : '—'}</span>
           {r.status !== 'OK' && (
             <span className="text-[var(--muted)]">
-              lisible quand ≥60j de trades fermés (hold ICHI 3j · SRSI 7j)
+              lisible quand ≥60j de trades fermés (hold SRSI ~7j)
             </span>
           )}
         </div>

@@ -1,8 +1,8 @@
 /**
  * GET /api/paper-dsr
  *
- * Rolling Sharpe/PSR/DSR monitor for the freqtrade paper-trade combos
- * (ICHI_COMBO spot 4h + SRSI_COMBO futures 1d). Source: VPS cron
+ * Rolling Sharpe/PSR/DSR monitor for the freqtrade paper-trade combo
+ * (SRSI_COMBO futures 1d; autres bots stoppés 2026-09-18). Source: VPS cron
  * rolling_dsr.py (06:37 daily) -> /dash-data/paper_dsr.json.
  *
  * Same modes as /api/edge-m15-status:
