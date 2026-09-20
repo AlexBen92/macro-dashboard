@@ -29,6 +29,7 @@ import PriceLevelsM15Chart from '@/components/crypto/m15/PriceLevelsM15Chart';
 import EdgeM15BTCCard from '@/components/crypto/m15/EdgeM15BTCCard';
 import VolHeatmapM15 from '@/components/crypto/m15/VolHeatmapM15';
 import CorrelationTable from '@/components/crypto/m15/CorrelationTable';
+import ContextMacroCorr from '@/components/crypto/ContextMacroCorr';
 import SessionPlanCard from '@/components/crypto/m15/SessionPlanCard';
 import SetupsPanel from '@/components/crypto/m15/SetupsPanel';
 import OrderFlowImbalanceWidget from '@/components/crypto/orderflow/OrderFlowImbalanceWidget';
@@ -117,6 +118,12 @@ export default function CryptoPage() {
             <PnlAttributionPanel />
             <StrategyContractsTable />
           </div>
+        </section>
+
+        {/* Contexte corrélations crypto × macro — informatif, jamais branché trading (brief 2026-09-20) */}
+        <section className="flex flex-col gap-3">
+          <TierLabel>Contexte · Corrélations crypto × macro — lecture, jamais un signal</TierLabel>
+          <ContextMacroCorr />
         </section>
 
         {/* Séparateur T2/T3 — anti association visuelle recherche → signal (audit §6) */}

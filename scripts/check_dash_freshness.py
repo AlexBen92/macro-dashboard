@@ -33,6 +33,7 @@ FLUXES = [
     ("cot", "cot_status.json", ("as_of",), 12 * 24 * 60),
     ("event_impact", "event_impact_status.json", ("last_export_success", "as_of"), 26 * 60),
     ("corr_basket", "corr_basket_status.json", ("last_export_success", "as_of"), 26 * 60),
+    ("corr_macro", "corr_macro_status.json", ("last_export_success", "as_of"), 26 * 60),
 ]
 
 

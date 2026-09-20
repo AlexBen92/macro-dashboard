@@ -1,0 +1,840 @@
+{
+  "as_of": "2026-09-19",
+  "last_export_success": "2026-09-20T08:57:51.953219+00:00",
+  "rows": [
+    "BTC",
+    "ETH",
+    "ALTS_INDEX"
+  ],
+  "cols": [
+    "CLSK",
+    "COIN",
+    "DX-Y.NYB",
+    "MARA",
+    "MSTR",
+    "NVDA",
+    "RIOT",
+    "^GSPC",
+    "^NDX",
+    "^TYX",
+    "^VIX",
+    "M2SL",
+    "UNRATE"
+  ],
+  "windows": [
+    "7d",
+    "30d",
+    "90d"
+  ],
+  "daily": {
+    "cells": [
+      {
+        "row": "BTC",
+        "col": "NVDA",
+        "window": "7d",
+        "r": 0.763,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "NVDA",
+        "window": "30d",
+        "r": -0.061,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "NVDA",
+        "window": "90d",
+        "r": -0.095,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "MSTR",
+        "window": "7d",
+        "r": 0.499,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "MSTR",
+        "window": "30d",
+        "r": 0.054,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "MSTR",
+        "window": "90d",
+        "r": -0.089,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "MARA",
+        "window": "7d",
+        "r": 0.024,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "MARA",
+        "window": "30d",
+        "r": -0.03,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "MARA",
+        "window": "90d",
+        "r": 0.026,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "CLSK",
+        "window": "7d",
+        "r": 0.05,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "CLSK",
+        "window": "30d",
+        "r": -0.044,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "CLSK",
+        "window": "90d",
+        "r": 0.079,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "COIN",
+        "window": "7d",
+        "r": 0.665,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "COIN",
+        "window": "30d",
+        "r": 0.391,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "COIN",
+        "window": "90d",
+        "r": 0.082,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "RIOT",
+        "window": "7d",
+        "r": 0.63,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "RIOT",
+        "window": "30d",
+        "r": 0.181,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "RIOT",
+        "window": "90d",
+        "r": 0.093,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "DX-Y.NYB",
+        "window": "7d",
+        "r": 0.579,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "DX-Y.NYB",
+        "window": "30d",
+        "r": -0.138,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "DX-Y.NYB",
+        "window": "90d",
+        "r": -0.055,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "^TYX",
+        "window": "7d",
+        "r": 0.51,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "^TYX",
+        "window": "30d",
+        "r": 0.319,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "^TYX",
+        "window": "90d",
+        "r": 0.09,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "^VIX",
+        "window": "7d",
+        "r": 0.348,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "^VIX",
+        "window": "30d",
+        "r": 0.3,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "^VIX",
+        "window": "90d",
+        "r": 0.254,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "^NDX",
+        "window": "7d",
+        "r": 0.13,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "^NDX",
+        "window": "30d",
+        "r": -0.118,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "^NDX",
+        "window": "90d",
+        "r": -0.026,
+        "n": 90
+      },
+      {
+        "row": "BTC",
+        "col": "^GSPC",
+        "window": "7d",
+        "r": 0.157,
+        "n": 7
+      },
+      {
+        "row": "BTC",
+        "col": "^GSPC",
+        "window": "30d",
+        "r": -0.031,
+        "n": 30
+      },
+      {
+        "row": "BTC",
+        "col": "^GSPC",
+        "window": "90d",
+        "r": 0.018,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "NVDA",
+        "window": "7d",
+        "r": 0.861,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "NVDA",
+        "window": "30d",
+        "r": -0.137,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "NVDA",
+        "window": "90d",
+        "r": -0.06,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "MSTR",
+        "window": "7d",
+        "r": 0.25,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "MSTR",
+        "window": "30d",
+        "r": 0.075,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "MSTR",
+        "window": "90d",
+        "r": 0.053,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "MARA",
+        "window": "7d",
+        "r": -0.031,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "MARA",
+        "window": "30d",
+        "r": 0.138,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "MARA",
+        "window": "90d",
+        "r": 0.057,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "CLSK",
+        "window": "7d",
+        "r": -0.07,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "CLSK",
+        "window": "30d",
+        "r": 0.062,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "CLSK",
+        "window": "90d",
+        "r": -0.072,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "COIN",
+        "window": "7d",
+        "r": 0.671,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "COIN",
+        "window": "30d",
+        "r": 0.316,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "COIN",
+        "window": "90d",
+        "r": 0.12,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "RIOT",
+        "window": "7d",
+        "r": 0.533,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "RIOT",
+        "window": "30d",
+        "r": 0.057,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "RIOT",
+        "window": "90d",
+        "r": -0.122,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "DX-Y.NYB",
+        "window": "7d",
+        "r": 0.322,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "DX-Y.NYB",
+        "window": "30d",
+        "r": -0.463,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "DX-Y.NYB",
+        "window": "90d",
+        "r": -0.046,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "^TYX",
+        "window": "7d",
+        "r": 0.491,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "^TYX",
+        "window": "30d",
+        "r": 0.128,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "^TYX",
+        "window": "90d",
+        "r": 0.091,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "^VIX",
+        "window": "7d",
+        "r": 0.299,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "^VIX",
+        "window": "30d",
+        "r": -0.053,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "^VIX",
+        "window": "90d",
+        "r": 0.028,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "^NDX",
+        "window": "7d",
+        "r": 0.372,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "^NDX",
+        "window": "30d",
+        "r": -0.071,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "^NDX",
+        "window": "90d",
+        "r": -0.135,
+        "n": 90
+      },
+      {
+        "row": "ETH",
+        "col": "^GSPC",
+        "window": "7d",
+        "r": 0.257,
+        "n": 7
+      },
+      {
+        "row": "ETH",
+        "col": "^GSPC",
+        "window": "30d",
+        "r": -0.241,
+        "n": 30
+      },
+      {
+        "row": "ETH",
+        "col": "^GSPC",
+        "window": "90d",
+        "r": -0.08,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "NVDA",
+        "window": "7d",
+        "r": 0.274,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "NVDA",
+        "window": "30d",
+        "r": -0.139,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "NVDA",
+        "window": "90d",
+        "r": -0.041,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "MSTR",
+        "window": "7d",
+        "r": 0.399,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "MSTR",
+        "window": "30d",
+        "r": 0.191,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "MSTR",
+        "window": "90d",
+        "r": 0.061,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "MARA",
+        "window": "7d",
+        "r": -0.055,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "MARA",
+        "window": "30d",
+        "r": 0.176,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "MARA",
+        "window": "90d",
+        "r": 0.081,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "CLSK",
+        "window": "7d",
+        "r": -0.121,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "CLSK",
+        "window": "30d",
+        "r": 0.112,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "CLSK",
+        "window": "90d",
+        "r": 0.046,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "COIN",
+        "window": "7d",
+        "r": 0.02,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "COIN",
+        "window": "30d",
+        "r": 0.023,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "COIN",
+        "window": "90d",
+        "r": 0.022,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "RIOT",
+        "window": "7d",
+        "r": 0.056,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "RIOT",
+        "window": "30d",
+        "r": 0.211,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "RIOT",
+        "window": "90d",
+        "r": 0.008,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "DX-Y.NYB",
+        "window": "7d",
+        "r": -0.633,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "DX-Y.NYB",
+        "window": "30d",
+        "r": -0.206,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "DX-Y.NYB",
+        "window": "90d",
+        "r": -0.045,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^TYX",
+        "window": "7d",
+        "r": -0.17,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^TYX",
+        "window": "30d",
+        "r": -0.094,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^TYX",
+        "window": "90d",
+        "r": -0.018,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^VIX",
+        "window": "7d",
+        "r": 0.589,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^VIX",
+        "window": "30d",
+        "r": 0.364,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^VIX",
+        "window": "90d",
+        "r": 0.118,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^NDX",
+        "window": "7d",
+        "r": -0.039,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^NDX",
+        "window": "30d",
+        "r": -0.192,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^NDX",
+        "window": "90d",
+        "r": 0.084,
+        "n": 90
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^GSPC",
+        "window": "7d",
+        "r": 0.35,
+        "n": 7
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^GSPC",
+        "window": "30d",
+        "r": -0.079,
+        "n": 30
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "^GSPC",
+        "window": "90d",
+        "r": -0.08,
+        "n": 90
+      }
+    ]
+  },
+  "monthly": {
+    "window_months": 36,
+    "cells": [
+      {
+        "row": "BTC",
+        "col": "M2SL",
+        "r": -0.02,
+        "n_obs": 36
+      },
+      {
+        "row": "BTC",
+        "col": "UNRATE",
+        "r": 0.139,
+        "n_obs": 36
+      },
+      {
+        "row": "ETH",
+        "col": "M2SL",
+        "r": 0.053,
+        "n_obs": 36
+      },
+      {
+        "row": "ETH",
+        "col": "UNRATE",
+        "r": -0.045,
+        "n_obs": 36
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "M2SL",
+        "r": -0.422,
+        "n_obs": 36
+      },
+      {
+        "row": "ALTS_INDEX",
+        "col": "UNRATE",
+        "r": -0.016,
+        "n_obs": 36
+      }
+    ]
+  },
+  "alt_index": {
+    "members": [
+      "AAVE",
+      "ADA",
+      "APT",
+      "ARB",
+      "ATOM",
+      "AVAX",
+      "BNB",
+      "COMP",
+      "CRV",
+      "DOT",
+      "DYDX",
+      "GMX",
+      "INJ",
+      "LDO",
+      "LINEA",
+      "MANTA",
+      "NEAR",
+      "OP",
+      "PENDLE",
+      "SEI",
+      "SNX",
+      "SOL",
+      "STRK",
+      "SUI",
+      "TIA",
+      "UNI",
+      "ZK"
+    ],
+    "excluded": [
+      {
+        "sym": "MATIC",
+        "reason": "delisted 2024-09, no POL splice (level break)"
+      },
+      {
+        "sym": "BASE",
+        "reason": "absent hl_1d, pas de symbole Yahoo fiable"
+      },
+      {
+        "sym": "SCROLL",
+        "reason": "absent hl_1d, pas de symbole Yahoo fiable"
+      },
+      {
+        "sym": "TON",
+        "reason": "stale 2026-06-14 (> 3d)"
+      },
+      {
+        "sym": "BLAST",
+        "reason": "stale 2026-05-24 (> 3d)"
+      },
+      {
+        "sym": "MKR",
+        "reason": "stale 2025-09-04 (> 3d)"
+      }
+    ],
+    "min_members_per_day": 20
+  },
+  "note": "Contexte informatif \u2014 corr\u00e9lation \u2260 signal de trading valid\u00e9 \u00b7 daily = intersection dates NYSE, pas d'interpolation \u00b7 mensuel = 36 mois sur variations m/m",
+  "errors": [
+    {
+      "id": "TON",
+      "error": "stale 2026-06-14 (> 3d)"
+    },
+    {
+      "id": "BLAST",
+      "error": "stale 2026-05-24 (> 3d)"
+    },
+    {
+      "id": "MKR",
+      "error": "stale 2025-09-04 (> 3d)"
+    }
+  ]
+}

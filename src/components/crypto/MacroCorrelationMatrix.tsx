@@ -1,17 +1,11 @@
 'use client';
 
 import { useCorrMatrix, type CorrWindowKey } from '@/hooks/api/useCorrMatrix';
+import { corrCellColor as cellColor } from '@/lib/ui/corrColors';
 
 const CRYPTO = ['BTC', 'ETH', 'SOL'] as const;
 const MACRO = ['DXY', 'SPX', 'Gold'] as const;
 const WINDOWS: CorrWindowKey[] = ['24h', '7d', '30d'];
-
-function cellColor(r: number): { bg: string; text: string } {
-  const abs = Math.abs(r);
-  if (abs < 0.2) return { bg: 'rgba(74,222,128,0.18)', text: 'var(--bull)' };
-  if (abs <= 0.6) return { bg: 'rgba(140,140,160,0.12)', text: 'var(--muted)' };
-  return { bg: 'rgba(255,51,85,0.18)', text: 'var(--caution)' };
-}
 
 interface MacroCorrelationMatrixProps {
   extraRefs?: string[];
