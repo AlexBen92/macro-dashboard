@@ -30,6 +30,7 @@ export interface CorrMacroPayload {
     excluded: Array<{ sym: string; reason: string }>;
     min_members_per_day: number;
   };
+  market_state?: { perf_30d: Record<string, number | null> };
   note: string;
   errors: Array<{ id: string; error: string }>;
 }

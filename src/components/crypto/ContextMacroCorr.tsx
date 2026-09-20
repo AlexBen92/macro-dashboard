@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { useCorrMacro } from '@/hooks/api/useCorrMacro';
 import { corrCellColor } from '@/lib/ui/corrColors';
+import { computeMarketState, MARKET_STATE_RULE, type MarketVerdict } from '@/lib/marketState';
 
 const COL_LABELS: Record<string, string> = {
   'DX-Y.NYB': 'DXY',
@@ -16,6 +17,13 @@ const COL_LABELS: Record<string, string> = {
 };
 
 const CONTEXT_LABEL = 'Contexte informatif — corrélation ≠ signal de trading validé';
+
+const VERDICT_STYLE: Record<MarketVerdict, { bg: string; fg: string }> = {
+  HAUSSIER: { bg: 'rgba(74,222,128,0.15)', fg: 'var(--bull)' },
+  BAISSIER: { bg: 'rgba(255,51,85,0.15)', fg: 'var(--bear)' },
+  NEUTRE: { bg: 'rgba(255,170,0,0.12)', fg: 'var(--caution)' },
+  INDISPONIBLE: { bg: 'transparent', fg: 'var(--muted)' },
+};
 
 function colLabel(col: string): string {
   return COL_LABELS[col] ?? col;
@@ -38,6 +46,9 @@ export default function ContextMacroCorr() {
   const rows = data?.rows ?? [];
   const dailyCells = data?.daily.cells.filter((c) => c.window === window) ?? [];
   const monthlyCells = data?.monthly.cells ?? [];
+  const marketState = data
+    ? computeMarketState(data.daily.cells, data.monthly.cells, data.rows, data.market_state?.perf_30d)
+    : null;
 
   const get = (row: string, col: string): { r: number; n: number } | null => {
     const c = dailyCells.find((x) => x.row === row && x.col === col);
@@ -77,6 +88,42 @@ export default function ContextMacroCorr() {
           </div>
         </div>
       </div>
+
+      {marketState && (
+        <div
+          className="px-3 py-2 border-b border-[var(--border)] flex items-center gap-3 flex-wrap font-mono"
+          title={`${marketState.rule} · perf = close 24/7 calendar 30j, ρ = intersection NYSE · décrit l'état présent, ne prédit rien`}
+        >
+          <span
+            className="px-2 py-0.5 rounded-[3px] text-[0.65rem] uppercase tracking-[2px] border border-[var(--border)]"
+            style={{ background: VERDICT_STYLE[marketState.verdict].bg, color: VERDICT_STYLE[marketState.verdict].fg }}
+          >
+            {marketState.verdict}
+          </span>
+          {marketState.perfMean30d !== null && (
+            <span className="text-[0.6rem] text-[var(--fg)]">
+              perf 30j{' '}
+              <span style={{ color: marketState.perfMean30d >= 0 ? 'var(--bull)' : 'var(--bear)' }}>
+                {marketState.perfMean30d >= 0 ? '+' : ''}
+                {(marketState.perfMean30d * 100).toFixed(1)}%
+              </span>
+            </span>
+          )}
+          {marketState.families.map((f) => {
+            const rho = f.rho30 ?? f.rho90 ?? f.rho36m;
+            if (rho === null || rho === undefined) return null;
+            const win = f.rho30 !== null ? '30j' : f.rho90 !== null ? '90j' : '36m';
+            return (
+              <span key={f.id} className="text-[0.55rem] text-[var(--muted)]" title={`${f.label} · ρ ${win}`}>
+                {f.label} <span className="text-[var(--fg)]">ρ{win} {rho.toFixed(2)}</span>
+              </span>
+            );
+          })}
+          <span className="text-[0.5rem] text-[var(--muted)] uppercase tracking-[1px]">
+            état présent — pas une prédiction
+          </span>
+        </div>
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full font-mono text-[0.6rem]">
@@ -180,7 +227,7 @@ export default function ContextMacroCorr() {
       <div className="border-t border-[var(--border)] px-3 py-1.5 font-mono text-[0.5rem] text-[var(--muted)] leading-relaxed">
         {CONTEXT_LABEL} · daily = intersection dates NYSE (close-to-close, pas
         d&apos;interpolation sur sessions crypto) · seuils |ρ|&lt;0.20 diversifiant ·
-        0.20-0.60 à pondérer · &gt;0.60 même cluster
+        0.20-0.60 à pondérer · &gt;0.60 même cluster · verdict = {MARKET_STATE_RULE}
       </div>
     </div>
   );
