@@ -47,7 +47,7 @@ export default function ContextMacroCorr() {
   const dailyCells = data?.daily.cells.filter((c) => c.window === window) ?? [];
   const monthlyCells = data?.monthly.cells ?? [];
   const marketState = data
-    ? computeMarketState(data.daily.cells, data.monthly.cells, data.rows, data.market_state?.perf_30d)
+    ? computeMarketState(data.daily.cells, data.monthly.cells, data.rows, data.market_state)
     : null;
 
   const get = (row: string, col: string): { r: number; n: number } | null => {
@@ -100,15 +100,15 @@ export default function ContextMacroCorr() {
           >
             {marketState.verdict}
           </span>
-          {marketState.perfMean30d !== null && (
-            <span className="text-[0.6rem] text-[var(--fg)]">
-              perf 30j{' '}
-              <span style={{ color: marketState.perfMean30d >= 0 ? 'var(--bull)' : 'var(--bear)' }}>
-                {marketState.perfMean30d >= 0 ? '+' : ''}
-                {(marketState.perfMean30d * 100).toFixed(1)}%
+          {marketState.perfHorizons.filter((h) => h.mean !== null).map((h) => (
+            <span key={h.id} className="text-[0.6rem] text-[var(--fg)]" title={`perf moyenne ${h.label} BTC/ETH/ALTS`}>
+              {h.label}{' '}
+              <span style={{ color: (h.mean ?? 0) >= 0 ? 'var(--bull)' : 'var(--bear)' }}>
+                {(h.mean ?? 0) >= 0 ? '+' : ''}
+                {((h.mean ?? 0) * 100).toFixed(1)}%
               </span>
             </span>
-          )}
+          ))}
           {marketState.families.map((f) => {
             const rho = f.rho30 ?? f.rho90 ?? f.rho36m;
             if (rho === null || rho === undefined) return null;

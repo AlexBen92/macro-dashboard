@@ -10,9 +10,16 @@ export interface MarketStateFamily {
   rho36m: number | null;
 }
 
+export interface MarketPerfHorizon {
+  id: '1d' | '7d' | '30d';
+  label: string;
+  mean: number | null;
+}
+
 export interface MarketState {
   verdict: MarketVerdict;
   perfMean30d: number | null;
+  perfHorizons: MarketPerfHorizon[];
   families: MarketStateFamily[];
   rule: string;
 }
@@ -30,6 +37,11 @@ const FAMILIES: Array<{ id: string; label: string; cols: string[] }> = [
 const LIQUIDITE_COLS = ['M2SL', 'UNRATE'];
 const PERF_THRESHOLD = 0.02;
 const RHO_THRESHOLD = 0.3;
+
+export type MarketPerfPayload = {
+  perf?: Partial<Record<'1d' | '7d' | '30d', Record<string, number>>>;
+  perf_30d?: Record<string, number | null>;
+};
 
 function meanRho(
   cells: CorrMacroDailyCell[],
@@ -56,16 +68,37 @@ function meanRhoMonthly(
   return vals.reduce((a, b) => a + b, 0) / vals.length;
 }
 
+function horizonMean(
+  rows: string[],
+  perf: MarketPerfPayload,
+  horizon: '1d' | '7d' | '30d',
+): number | null {
+  const values = rows
+    .map((r) => perf.perf?.[horizon]?.[r])
+    .filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+  if (values.length === 0) {
+    if (horizon !== '30d') return null;
+    const legacy = rows
+      .map((r) => perf.perf_30d?.[r])
+      .filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+    if (legacy.length === 0) return null;
+    return legacy.reduce((a, b) => a + b, 0) / legacy.length;
+  }
+  return values.reduce((a, b) => a + b, 0) / values.length;
+}
+
 export function computeMarketState(
   dailyCells: CorrMacroDailyCell[],
   monthlyCells: CorrMacroMonthlyCell[],
   rows: string[],
-  perf30d: Record<string, number | null> | undefined,
+  perf: MarketPerfPayload | undefined,
 ): MarketState {
-  const perfs = rows
-    .map((r) => perf30d?.[r])
-    .filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
-  const perfMean30d = perfs.length > 0 ? perfs.reduce((a, b) => a + b, 0) / perfs.length : null;
+  const perfHorizons: MarketPerfHorizon[] = [
+    { id: '1d', label: '1j', mean: horizonMean(rows, perf ?? {}, '1d') },
+    { id: '7d', label: '7j', mean: horizonMean(rows, perf ?? {}, '7d') },
+    { id: '30d', label: '30j', mean: horizonMean(rows, perf ?? {}, '30d') },
+  ];
+  const perfMean30d = perfHorizons.find((h) => h.id === '30d')?.mean ?? null;
 
   const families: MarketStateFamily[] = FAMILIES.map((f) => ({
     id: f.id,
@@ -91,5 +124,5 @@ export function computeMarketState(
     else verdict = 'NEUTRE';
   }
 
-  return { verdict, perfMean30d, families, rule: MARKET_STATE_RULE };
+  return { verdict, perfMean30d, perfHorizons, families, rule: MARKET_STATE_RULE };
 }
