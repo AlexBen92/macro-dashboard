@@ -4,7 +4,7 @@ import { useEdgeM15Status } from '@/hooks/api/useEdgeM15Status';
 import { m15StationarityVerdict, stationarityGuidance } from '@/lib/cockpit/m15Stationarity';
 
 /**
- * Tier 2 — ADF/KPSS stationnarité closes M15 (BTC, fenêtre 24h).
+ * Vol & risque — ADF/KPSS stationnarité closes M15 (BTC, fenêtre 24h).
  * Oriente famille de setups: mean-reversion vs momentum. Indicatif, n≈96.
  */
 export default function M15StationarityCard() {

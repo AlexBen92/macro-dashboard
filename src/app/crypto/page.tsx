@@ -12,7 +12,6 @@ import VolSurfaceRegimeCard from '@/components/crypto/cockpit/VolSurfaceRegimeCa
 import RoughVsMarkovCard from '@/components/crypto/cockpit/RoughVsMarkovCard';
 import CarryBasisHealthPanel from '@/components/crypto/cockpit/CarryBasisHealthPanel';
 import PnlAttributionPanel from '@/components/crypto/cockpit/PnlAttributionPanel';
-import StrategyContractsTable from '@/components/crypto/cockpit/StrategyContractsTable';
 import AgentSkillsDashboard from '@/components/crypto/cockpit/AgentSkillsDashboard';
 import LawsOfTheGameCard from '@/components/crypto/cockpit/LawsOfTheGameCard';
 import M15SignalsGrid from '@/components/crypto/cockpit/M15SignalsGrid';
@@ -49,10 +48,14 @@ import { useOptionsExposure } from '@/hooks/api/useOptionsExposure';
 import { useRegimeStatus } from '@/hooks/api/useRegimeStatus';
 import type { ExpiryBucket, SupportedCurrency, Timeframe } from '@/lib/options/types';
 
-function TierLabel({ children }: { children: string }) {
+/** En-tête de section: libellé contenu + filet, sans hiérarchie artificielle (fin des tiers 2026-09-21). */
+function SectionLabel({ children }: { children: string }) {
   return (
-    <div className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px]">
-      {children}
+    <div className="flex items-center gap-3">
+      <span className="font-mono text-[0.6rem] text-[var(--label)] uppercase tracking-[3px] whitespace-nowrap">
+        {children}
+      </span>
+      <span className="h-px flex-1 bg-[var(--border)]" />
     </div>
   );
 }
@@ -97,15 +100,12 @@ export default function CryptoPage() {
       <main className="flex-1 px-4 py-3 flex flex-col gap-6">
         <DailyBriefBar />
 
-        {/* TIER 1 — état global: gate principal, jamais replié */}
-        <section className="flex flex-col gap-3">
-          <TierLabel>Tier 1 · État global du système — gate principal (jamais trader si rouge)</TierLabel>
-          <GlobalSystemGateBar />
-        </section>
+        {/* État global: gate principal, jamais replié */}
+        <GlobalSystemGateBar />
 
-        {/* TIER 2 — vol & risk: surface, rough/markovien, path, carry, attribution, contrats */}
+        {/* Vol & risque */}
         <section className="flex flex-col gap-3">
-          <TierLabel>Tier 2 · Volatilité & risque — surface · rough vs markovien · carry · attribution</TierLabel>
+          <SectionLabel>Volatilité & risque</SectionLabel>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <VolSurfaceRegimeCard />
             <RoughVsMarkovCard />
@@ -115,29 +115,26 @@ export default function CryptoPage() {
             <CarryBasisHealthPanel />
           </div>
           <M15StationarityCard />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            <PnlAttributionPanel />
-            <StrategyContractsTable />
-          </div>
+          <PnlAttributionPanel />
         </section>
 
         {/* Contexte corrélations crypto × macro — informatif, jamais branché trading (brief 2026-09-20) */}
         <section className="flex flex-col gap-3">
-          <TierLabel>Contexte · Corrélations crypto × macro — lecture, jamais un signal</TierLabel>
+          <SectionLabel>Contexte — corrélations crypto × macro (lecture, jamais un signal)</SectionLabel>
           <ContextMacroCorr />
         </section>
 
-        {/* Séparateur T2/T3 — anti association visuelle recherche → signal (audit §6) */}
+        {/* Séparateur recherche/trading — anti association visuelle recherche → signal (audit §6) */}
         <div className="rounded-[3px] border border-dashed border-[var(--border)] bg-[var(--bg2)] px-3 py-1.5 font-mono text-[0.5rem] leading-relaxed text-[var(--muted)]">
-          ⤓ Limite recherche / trading — ce qui précède (Tier 2) informe le pricing/hedging S1
+          ⤓ Limite recherche / trading — les panneaux ci-dessus informent le pricing/hedging S1
           et le dimensionnement du risque. Aucun élément ci-dessus ne constitue un signal
-          directionnel pour les setups M15 ci-dessous. Les seuls éléments tradable du Tier 3
-          proviennent du statut VALIDATED du registre statistique.
+          directionnel pour les setups M15 ci-dessous. Les seuls éléments tradables proviennent
+          du statut VALIDATED du registre statistique.
         </div>
 
-        {/* TIER 3 — signaux M15 + journal + skills */}
+        {/* Signaux M15 + journal + skills */}
         <section className="flex flex-col gap-3">
-          <TierLabel>Tier 3 · Signaux M15 · journal · skills agent</TierLabel>
+          <SectionLabel>Signaux M15 · journal · skills agent</SectionLabel>
           <M15SignalsGrid />
           <M15StrategiesBankCard />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
