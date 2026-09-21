@@ -119,6 +119,12 @@ export default function CryptoPage() {
           <PnlAttributionPanel />
         </section>
 
+        {/* Microstructure OFI/OBI — spec complète toujours visible (étude close 2026-09-21) */}
+        <section className="flex flex-col gap-3">
+          <SectionLabel>Microstructure — OFI/OBI · spec technique (étude close)</SectionLabel>
+          <OfiObiSpecSection />
+        </section>
+
         {/* Contexte corrélations crypto × macro — informatif, jamais branché trading (brief 2026-09-20) */}
         <section className="flex flex-col gap-3">
           <SectionLabel>Contexte — corrélations crypto × macro (lecture, jamais un signal)</SectionLabel>
@@ -203,9 +209,6 @@ export default function CryptoPage() {
             </div>
             <div className="lg:col-span-12">
               <OfiObiStatusCard />
-            </div>
-            <div className="lg:col-span-12">
-              <OfiObiSpecSection />
             </div>
           </div>
         </ExploratorySection>
