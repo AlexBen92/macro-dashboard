@@ -34,6 +34,7 @@ import SetupsPanel from '@/components/crypto/m15/SetupsPanel';
 import OrderFlowImbalanceWidget from '@/components/crypto/orderflow/OrderFlowImbalanceWidget';
 import AlphaTermStructureChart from '@/components/crypto/orderflow/AlphaTermStructureChart';
 import OfiSetupsPanel from '@/components/crypto/orderflow/OfiSetupsPanel';
+import MicrostructurePanel from '@/components/crypto/microstructure/MicrostructurePanel';
 import OfiObiStatusCard from '@/components/crypto/ofiobi/OfiObiStatusCard';
 import OfiObiSpecSection from '@/components/crypto/ofiobi/OfiObiSpecSection';
 import Top50CryptoTable from '@/components/crypto/Top50CryptoTable';
@@ -212,6 +213,13 @@ export default function CryptoPage() {
             </div>
           </div>
         </ExploratorySection>
+
+        {/* Microstructure HL live — collector systemd (WS public), indice relatif κ×ε,
+            jamais un signal directionnel (déploiement 2026-09-21) */}
+        <section className="flex flex-col gap-3">
+          <SectionLabel>Microstructure — Hyperliquid live · κ × ε (risque d&apos;exécution, non directionnel)</SectionLabel>
+          <MicrostructurePanel />
+        </section>
 
         <ExploratorySection label="Bloc 5 · Carry D1 paper trader (état complet) · Execution H1H4">
           <div className="flex flex-col gap-3">
