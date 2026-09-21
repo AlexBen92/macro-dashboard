@@ -32,6 +32,28 @@ export interface OfiObiUsageB {
   note?: string;
 }
 
+export interface OfiObiSpec {
+  title?: string;
+  data?: { bars?: string; hf_zone?: string; window?: string };
+  signals?: Record<string, string>;
+  grid?: string;
+  usage_a_def?: string;
+  usage_b_def?: string;
+  combination_def?: string;
+  validation?: string[];
+  decision?: string[];
+  reactivation?: string;
+}
+
+export interface OfiObiBackfillCoin {
+  bars?: number;
+  bars_per_day?: number;
+  mid_zero_pct?: number;
+  bar_sec_median?: number;
+  spread_bps_median?: number;
+  obi5_vs_imbalance5_corr?: number;
+}
+
 export interface OfiObiStatusPayload {
   as_of: string;
   last_export_success?: string | null;
@@ -46,6 +68,8 @@ export interface OfiObiStatusPayload {
   pbo_lot: Record<string, { PBO?: number; interpretation?: string }>;
   protocol: string[];
   costs: string;
+  spec?: OfiObiSpec;
+  backfill?: Record<string, OfiObiBackfillCoin>;
   config_hash: string;
   error?: string | null;
 }

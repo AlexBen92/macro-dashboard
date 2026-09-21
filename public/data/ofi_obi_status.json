@@ -1,6 +1,6 @@
 {
- "as_of": "2026-09-21T04:18:53.605586+00:00",
- "last_export_success": "2026-09-21T04:18:53.605620+00:00",
+ "as_of": "2026-09-21T06:03:23.691846+00:00",
+ "last_export_success": "2026-09-21T06:03:23.691886+00:00",
  "stale_threshold_min": 1500,
  "data_window_days": 30,
  "symbols": [
@@ -265,6 +265,57 @@
   "litt\u00e9rature: CKS 2014 + Kyle 1985 OK"
  ],
  "costs": "10 bps RT (taker 4.5 + slip 0.5, x2 sides)",
+ "spec": {
+  "title": "OFI/OBI \u2014 sp\u00e9cification technique compl\u00e8te",
+  "data": {
+   "bars": "Barres de volume Hyperliquid (jamais temps, spec \u00a71.2): trades accumul\u00e9s en unit\u00e9s V*, surplus report\u00e9 sur la barre suivante, cl\u00f4ture au mid du carnet (pas dernier trade). V* calibr\u00e9 = volume moyen base sur 8 s cibles, arrondi 2 chiffres significatifs.",
+   "hf_zone": "Zone HF exclue: N >= 20 uniquement (guard-rail anti-bruit).",
+   "window": "Backfill 30 j continu (tape + book snapshots HL)."
+  },
+  "signals": {
+   "ofi_mo": "OFI market orders \u2014 sign\u00d7volume des trades (CKS 2014)",
+   "ofi_book": "OFI carnet incr\u00e9mental \u2014 \u0394bid \u2212 \u0394ask pond\u00e9r\u00e9 profondeurs",
+   "obi_N": "Order Book Imbalance profondeur N \u2208 {1, 5, 10, 20}"
+  },
+  "grid": "6 signaux \u00d7 N \u2208 {20, 50, 100} \u00d7 H \u2208 {5, 10, 20} \u00d7 {BTC, ETH} = 108 cellules",
+  "usage_a_def": "TWAP na\u00eff vs slicing OFI-inform\u00e9 (registre execution_quality) \u2014 12 entr\u00e9es buy/sell \u00d7 taille Q 10k\u2013150k, gain en bps vs 4.5 taker.",
+  "usage_b_def": "Signal directionnel brut (registre ofi_signal) \u2014 bps/j net de co\u00fbts, IC + permutation, WF 3-blocs, DSR, PBO lot.",
+  "combination_def": "\u00a74 \u2014 IC incr\u00e9mental: info propre de OBI-10 et OFI-book au-del\u00e0 d'OFI-MO; combi simple/weighted test\u00e9es si gain net.",
+  "validation": [
+   "WF 3-blocs 60/30/10 (cal/val/holdout, holdout ouvert 1\u00d7)",
+   "IC + permutation (p plancher 0.001, 999 tirages)",
+   "PBO CSCV lot (blocs temporels, s\u00e9lection inter-cellules)",
+   "DSR vs SR* = 0.085/j",
+   "sign-mirror sans abs() (miroir brut, canon)",
+   "stress co\u00fbts \u00d72"
+  ],
+  "decision": [
+   "Usage A: NULL \u2014 gain 0.08\u20130.16 bps (~2\u20134% co\u00fbt taker), asym\u00e9trie buy/sell = drift fen\u00eatre 30 j (BTC +5.7%, ETH +10.0%), pas de comp\u00e9tence OFI. Pas d'adoption slicing.",
+   "Usage B: 108/108 NULL net de co\u00fbts (10 bps RT). MAIS IC r\u00e9els (perm p=0.001) dans toutes les cellules: le signal microstructure existe, magnitude << co\u00fbts taker.",
+   "OBI depth-10 dominant (IC 0.12\u20130.14 BTC); r\u00e9siduel OBI vs OFI-MO \u2248 IC plein (info ind\u00e9pendante); OFI carnet incr\u00e9mental \u2248 0 \u2192 pas de combinaison justifi\u00e9e (\u00a74.1).",
+   "PBO lot: BTC 0.20 (mod\u00e9r\u00e9), ETH 0.51 (mauvais) \u2014 s\u00e9lection inter-cellules non robuste c\u00f4t\u00e9 ETH.",
+   "Q 10k\u2013150k sans effet: L1 HL avale 150k sans walk."
+  ],
+  "reactivation": "Re-test uniquement avec frictions maker/queue (pas taker) ou horizons plus longs \u00e0 persistance d\u00e9montr\u00e9e \u2014 pas avant."
+ },
+ "backfill": {
+  "BTC": {
+   "bars": 569926,
+   "bars_per_day": 18998,
+   "mid_zero_pct": 0.0,
+   "bar_sec_median": 0.0,
+   "spread_bps_median": 0.13,
+   "obi5_vs_imbalance5_corr": 0.4977
+  },
+  "ETH": {
+   "bars": 342897,
+   "bars_per_day": 11430,
+   "mid_zero_pct": 0.0,
+   "bar_sec_median": 0.0,
+   "spread_bps_median": 0.4,
+   "obi5_vs_imbalance5_corr": 0.6919
+  }
+ },
  "config_hash": "2f7eb2665a1cd404",
  "error": null
 }
