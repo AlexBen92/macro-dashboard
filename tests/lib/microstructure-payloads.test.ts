@@ -9,11 +9,11 @@ import {
   type MicrostructurePayload,
 } from '@/lib/microstructure/payloads';
 
-const NOW = Date.parse('2026-09-21T07:00:00Z');
+const NOW = Date.now();
 
 function makePayload(overrides: Partial<MicrostructurePayload> = {}): MicrostructurePayload {
   return {
-    generated_at: '2026-09-21T06:59:59Z',
+    generated_at: new Date(NOW - 1000).toISOString(),
     status: 'CONNECTED',
     threshold: 1.5,
     threshold_note: 'Seuil configuré — non universel',
