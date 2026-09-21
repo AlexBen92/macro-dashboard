@@ -1,0 +1,270 @@
+{
+ "as_of": "2026-09-21T04:18:53.605586+00:00",
+ "last_export_success": "2026-09-21T04:18:53.605620+00:00",
+ "stale_threshold_min": 1500,
+ "data_window_days": 30,
+ "symbols": [
+  "BTC",
+  "ETH"
+ ],
+ "verdict": {
+  "usage_a": "NULL",
+  "usage_b": "108/108 NULL net co\u00fbts"
+ },
+ "usage_a": {
+  "n_entries": 12,
+  "verdicts": {
+   "NULL": 12
+  },
+  "gain_bps_abs_range": [
+   0.077,
+   0.158
+  ],
+  "taker_cost_bps": 4.5,
+  "note": "Gain ~2-4% du co\u00fbt taker, asym\u00e9trie buy/sell = drift fen\u00eatre; Q 10k-150k sans effet (L1 HL profonde)."
+ },
+ "usage_b": {
+  "n_cells": 108,
+  "status_counts": {
+   "NULL": 108,
+   "IN_TEST": 0,
+   "IN_VALIDATION": 0,
+   "CONFIRMED": 0
+  },
+  "ic_abs_range": [
+   0.01848886184488105,
+   0.14466918585842964
+  ],
+  "perm_p_max": 0.000999000999000999,
+  "note": "IC r\u00e9els (p=0.001) mais magnitude << co\u00fbts taker 10 bps RT. OBI depth-10 dominant; OFI carnet incr\u22480."
+ },
+ "best_by_signal": [
+  {
+   "coin": "BTC",
+   "signal": "obi_1",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.13611007146480977,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -2131.5324418927707,
+   "holdout_bps_day": -1243.6289663978955,
+   "status": "NULL"
+  },
+  {
+   "coin": "BTC",
+   "signal": "obi_10",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.14466918585842964,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -2073.3599568854265,
+   "holdout_bps_day": -1443.9224395919805,
+   "status": "NULL"
+  },
+  {
+   "coin": "BTC",
+   "signal": "obi_20",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.13577904264026663,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -2018.3381336634097,
+   "holdout_bps_day": -1488.0146154448807,
+   "status": "NULL"
+  },
+  {
+   "coin": "BTC",
+   "signal": "obi_5",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.14229280397343816,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -2111.0857246598166,
+   "holdout_bps_day": -1381.2952899385054,
+   "status": "NULL"
+  },
+  {
+   "coin": "BTC",
+   "signal": "ofi_book",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.04287349980356936,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -5208.8230698050165,
+   "holdout_bps_day": -4219.546954925204,
+   "status": "NULL"
+  },
+  {
+   "coin": "BTC",
+   "signal": "ofi_mo",
+   "n": 20,
+   "h": 20,
+   "ic_cal": 0.11144023513356753,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -722.2708495707876,
+   "holdout_bps_day": -401.6592488048512,
+   "status": "NULL"
+  },
+  {
+   "coin": "ETH",
+   "signal": "obi_1",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.10000893449953409,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -1298.54069647179,
+   "holdout_bps_day": -893.2788919373653,
+   "status": "NULL"
+  },
+  {
+   "coin": "ETH",
+   "signal": "obi_10",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.10351700303929767,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -1342.462276737769,
+   "holdout_bps_day": -730.0947886287701,
+   "status": "NULL"
+  },
+  {
+   "coin": "ETH",
+   "signal": "obi_20",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.10092884722066824,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -1322.538587069311,
+   "holdout_bps_day": -946.5816039134029,
+   "status": "NULL"
+  },
+  {
+   "coin": "ETH",
+   "signal": "obi_5",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.10560291925331491,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -1451.5847382613467,
+   "holdout_bps_day": -877.4097492634397,
+   "status": "NULL"
+  },
+  {
+   "coin": "ETH",
+   "signal": "ofi_book",
+   "n": 20,
+   "h": 5,
+   "ic_cal": 0.027187824095480862,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -3930.066335687418,
+   "holdout_bps_day": -3056.4363890183745,
+   "status": "NULL"
+  },
+  {
+   "coin": "ETH",
+   "signal": "ofi_mo",
+   "n": 20,
+   "h": 20,
+   "ic_cal": 0.08039102748741249,
+   "ic_perm_p": 0.000999000999000999,
+   "val_bps_day": -416.4072831621299,
+   "holdout_bps_day": -243.70777339776453,
+   "status": "NULL"
+  }
+ ],
+ "incremental_ic": {
+  "BTC": {
+   "5": {
+    "ic_ofi_mo": 0.05552511810525273,
+    "ic_obi_10": 0.14359654130942479,
+    "ic_ofi_book": 0.043284293221518416,
+    "ic_obi10_incr": 0.14031208595169728,
+    "ic_ofi_book_incr": 0.013992334697677114,
+    "h": 5
+   },
+   "10": {
+    "ic_ofi_mo": 0.06942926795852396,
+    "ic_obi_10": 0.13576002742417467,
+    "ic_ofi_book": 0.03490190188810165,
+    "ic_obi10_incr": 0.13153779939431867,
+    "ic_ofi_book_incr": 0.006522498398654624,
+    "h": 10
+   },
+   "20": {
+    "ic_ofi_mo": 0.08156920020028477,
+    "ic_obi_10": 0.12060719261621536,
+    "ic_ofi_book": 0.02823140700387499,
+    "ic_obi10_incr": 0.11557440100602402,
+    "ic_ofi_book_incr": 0.0023215487556012626,
+    "h": 20
+   }
+  },
+  "ETH": {
+   "5": {
+    "ic_ofi_mo": 0.04329025274358713,
+    "ic_obi_10": 0.10321170079316695,
+    "ic_ofi_book": 0.02748084473809971,
+    "ic_obi10_incr": 0.09934999800508211,
+    "ic_ofi_book_incr": 0.010599806456777487,
+    "h": 5
+   },
+   "10": {
+    "ic_ofi_mo": 0.05363250922193628,
+    "ic_obi_10": 0.09938232995748914,
+    "ic_ofi_book": 0.02406389531290301,
+    "ic_obi10_incr": 0.09443905099405119,
+    "ic_ofi_book_incr": 0.007430417649535206,
+    "h": 10
+   },
+   "20": {
+    "ic_ofi_mo": 0.06147399916964325,
+    "ic_obi_10": 0.09343352261486876,
+    "ic_ofi_book": 0.020764312543348668,
+    "ic_obi10_incr": 0.08764653642933996,
+    "ic_ofi_book_incr": 0.004775837282473899,
+    "h": 20
+   }
+  }
+ },
+ "pbo_lot": {
+  "BTC": {
+   "N_configs": 54,
+   "T_buckets": 10,
+   "bucket_min": 5,
+   "S_blocks": 8,
+   "block_size_buckets": 1,
+   "block_hours": 8.333333333333333e-05,
+   "n_combinations": 70,
+   "PBO": 0.2,
+   "avg_oos_rank_of_best_is": 0.7277628032345014,
+   "median_oos_rank_of_best_is": 0.839622641509434,
+   "log_likelihood_ratio": -1.3862943611198906,
+   "interpretation": "BON: overfit mod\u00e9r\u00e9"
+  },
+  "ETH": {
+   "N_configs": 54,
+   "T_buckets": 9,
+   "bucket_min": 5,
+   "S_blocks": 8,
+   "block_size_buckets": 1,
+   "block_hours": 8.333333333333333e-05,
+   "n_combinations": 70,
+   "PBO": 0.5142857142857142,
+   "avg_oos_rank_of_best_is": 0.4296495956873316,
+   "median_oos_rank_of_best_is": 0.4716981132075472,
+   "log_likelihood_ratio": 0.057158413839948415,
+   "interpretation": "MAUVAIS: best IS probablement sous-m\u00e9dian OOS"
+  }
+ },
+ "protocol": [
+  "sign-mirror (<=5bps/j sans abs)",
+  "WF 3-blocs 60/30/10",
+  "PBO CSCV lot",
+  "DSR vs SR*=0.085/j",
+  "co\u00fbts x2 stress",
+  "litt\u00e9rature: CKS 2014 + Kyle 1985 OK"
+ ],
+ "costs": "10 bps RT (taker 4.5 + slip 0.5, x2 sides)",
+ "config_hash": "2f7eb2665a1cd404",
+ "error": null
+}

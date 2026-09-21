@@ -35,6 +35,7 @@ import SetupsPanel from '@/components/crypto/m15/SetupsPanel';
 import OrderFlowImbalanceWidget from '@/components/crypto/orderflow/OrderFlowImbalanceWidget';
 import AlphaTermStructureChart from '@/components/crypto/orderflow/AlphaTermStructureChart';
 import OfiSetupsPanel from '@/components/crypto/orderflow/OfiSetupsPanel';
+import OfiObiStatusCard from '@/components/crypto/ofiobi/OfiObiStatusCard';
 import Top50CryptoTable from '@/components/crypto/Top50CryptoTable';
 import FundingCarryPanel from '@/components/crypto/FundingCarryPanel';
 import ExploratorySection from '@/components/ui/ExploratorySection';
@@ -201,6 +202,9 @@ export default function CryptoPage() {
             </div>
             <div className="lg:col-span-12">
               <OfiSetupsPanel />
+            </div>
+            <div className="lg:col-span-12">
+              <OfiObiStatusCard />
             </div>
           </div>
         </ExploratorySection>

@@ -27,6 +27,8 @@ FLUXES = [
     ("m15", "edge_m15_status.json", ("last_export_success", "as_of"), 20),
     ("decision", "decision_btceth_status.json", ("last_export_success", "as_of"), 20),
     ("orderflow", "orderflow_status.json", ("last_export_success", "as_of"), 20),
+    # registres statiques recherche OFI/OBI — refresh daily, SLA 25h
+    ("ofi_obi", "ofi_obi_status.json", ("last_export_success", "as_of"), 25 * 60),
     ("regime_matrix", "regime_matrix.json", ("as_of",), 26 * 60),
     # as_of = mardi du rapport CFTC (publication vendredi J+3) — âge pire-cas
     # 11j à cadence hebdo, seuil 12j = semaine manquée
