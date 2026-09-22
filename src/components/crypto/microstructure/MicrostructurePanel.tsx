@@ -7,7 +7,12 @@ import { useMicrostructure } from '@/hooks/api/useMicrostructure';
 import {
   clampDisplayScore,
   displayState,
+  EXEC_TIER_MULTIPLIER,
+  microTrend,
   regimeColor,
+  tierColor,
+  trendGlyph,
+  type ExecTier,
   type MicrostructurePayload,
   type SymbolMetrics,
 } from '@/lib/microstructure/payloads';
@@ -53,6 +58,11 @@ function SymbolRow({
   const [showTooltip, setShowTooltip] = useState(false);
   const state = live && sym.available ? 'LIVE' : 'UNAVAILABLE';
   const rColor = regimeColor(sym.regime);
+  const tier = sym.execution_risk_tier;
+  const eColor = tier ? tierColor(tier) : 'var(--muted)';
+  const mult = tier ? EXEC_TIER_MULTIPLIER[tier as ExecTier] ?? 1.0 : null;
+  const trend = microTrend(sym.series, tier);
+  const tColor = tierColor(trend === 'STRESS' ? 'EXTREME' : trend === 'DÉGRADATION' ? 'HIGH' : trend === 'AMÉLIORATION' ? 'LOW' : 'MEDIUM');
   return (
     <>
       <tr className="border-t border-[var(--border)]">
@@ -83,6 +93,24 @@ function SymbolRow({
               </span>
             </td>
             <td className="px-2 py-1.5">
+              {tier ? (
+                <span
+                  className="font-mono text-[0.5rem] uppercase tracking-[1px] px-1.5 py-0.5 rounded-[2px]"
+                  style={{ color: eColor, border: `1px solid ${eColor}` }}
+                  title={`Sizing m15-agent: ×${mult}`}
+                >
+                  {tier} {sym.execution_risk_score != null ? `${clampDisplayScore(sym.execution_risk_score).toFixed(0)}` : ''}
+                </span>
+              ) : (
+                <UnavailableCell label="—" />
+              )}
+            </td>
+            <td className="px-2 py-1.5">
+              <span className="font-mono text-[0.5rem] uppercase tracking-[1px]" style={{ color: tColor }}>
+                {trendGlyph(trend)}
+              </span>
+            </td>
+            <td className="px-2 py-1.5">
               <span
                 className="font-mono text-[0.5rem] uppercase tracking-[1px] px-1.5 py-0.5 rounded-[2px]"
                 style={{ color: rColor, border: `1px solid ${rColor}` }}
@@ -97,6 +125,12 @@ function SymbolRow({
               <UnavailableCell label="UNAVAILABLE" />
             </td>
             <td className="px-2 py-1.5">
+              <UnavailableCell label="—" />
+            </td>
+            <td className="px-2 py-1.5">
+              <UnavailableCell label="—" />
+            </td>
+            <td className="px-2 py-1.5">
               <UnavailableCell label={sym.regime === 'INSUFFISANT' ? 'WARMUP' : '—'} />
             </td>
           </>
@@ -104,7 +138,7 @@ function SymbolRow({
       </tr>
       {showTooltip && state === 'LIVE' && (
         <tr className="border-t border-[var(--border)] bg-[var(--bg2)]">
-          <td colSpan={9} className="px-2 py-1.5 font-mono text-[0.5rem] leading-relaxed text-[var(--muted)]">
+          <td colSpan={11} className="px-2 py-1.5 font-mono text-[0.5rem] leading-relaxed text-[var(--muted)]">
             κ × ε est une mesure relative de cette implémentation — pas une preuve de rentabilité ni un
             signal directionnel. Seuil {threshold} = configuré, non universel. Composantes κ:
             imbalance {sym.components.trade_imbalance.toFixed(2)}, intensité {sym.components.intensity_norm.toFixed(2)},
@@ -160,11 +194,32 @@ export default function MicrostructurePanel() {
       </div>
 
       {overall === 'LIVE' && first && first.series.length >= 2 ? (
-        <ToxicitySparkline
-          series={first.series}
-          threshold={p.threshold}
-          color={regimeColor(first.regime)}
-        />
+        <div className="flex flex-col gap-1">
+          {coins.map((coin) => {
+            const s = p.symbols[coin];
+            return (
+              <div key={coin} className="grid grid-cols-[auto_1fr_1fr_1fr] items-center gap-2">
+                <span className="font-mono text-[0.5rem] uppercase tracking-[1px] text-[var(--label)] w-8">
+                  {coin}
+                </span>
+                <ToxicitySparkline series={s.series} threshold={p.threshold} color={regimeColor(s.regime)} label="κ × ε" />
+                <ToxicitySparkline series={s.series_spread ?? []} color="var(--caution)" label="spread (bps)" decimals={2} />
+                <ToxicitySparkline series={s.series_slip ?? []} color="#e07000" label="slippage (bps)" decimals={2} />
+              </div>
+            );
+          })}
+          {(!first.series_spread || !first.series_slip) && (
+            <div className="font-mono text-[0.45rem] text-[var(--muted)]">
+              évolutions spread/slippage: série absente (payload pré-v2 collector)
+            </div>
+          )}
+          <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-2 font-mono text-[0.45rem] text-[var(--muted)]">
+            <span />
+            <span>κ × ε (seuil {p.threshold}, pointillé)</span>
+            <span>spread (bps)</span>
+            <span>slippage est. (bps)</span>
+          </div>
+        </div>
       ) : (
         <div className="h-[60px] flex items-center justify-center font-mono text-[0.5rem] text-[var(--bear)]">
           {error ? `NO_DATA — ${error}` : 'INDICE UNAVAILABLE — flux non vérifié ou warmup en cours'}
@@ -175,7 +230,7 @@ export default function MicrostructurePanel() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              {['Sym', 'Mid', 'Spread (bps)', 'Depth imb.', 'Slip. est. (bps)', 'κ', 'ε', 'κ × ε · score', 'Régime'].map(
+              {['Sym', 'Mid', 'Spread (bps)', 'Depth imb.', 'Slip. est. (bps)', 'κ', 'ε', 'κ × ε · score', 'Exec risk', 'Trend', 'Régime'].map(
                 (h) => (
                   <th
                     key={h}
@@ -203,8 +258,9 @@ export default function MicrostructurePanel() {
 
       <div className="rounded-[3px] border border-dashed border-[var(--border)] px-2 py-1 font-mono text-[0.5rem] leading-relaxed text-[var(--muted)]">
         Contexte de microstructure — non validé comme signal directionnel. Utiliser uniquement pour le
-        pricing, le filtrage d&apos;exécution et le sizing du risque. {p.threshold_note} ({p.threshold}) ·{' '}
-        {p.disclaimer}
+        pricing, le filtrage d&apos;exécution et le sizing du risque. Execution risk tier → sizing
+        m15-agent ×1.0 / ×0.7 / ×0.4 / ×0.25 (calibrage initial, recalibrage sur données réelles).{' '}
+        {p.threshold_note} ({p.threshold}) · {p.disclaimer}
       </div>
     </div>
   );

@@ -3,9 +3,12 @@ import { describe, expect, it } from 'vitest';
 import {
   clampDisplayScore,
   displayState,
+  EXEC_TIER_MULTIPLIER,
   isPayloadStale,
+  microTrend,
   payloadAgeMs,
   regimeColor,
+  tierColor,
   type MicrostructurePayload,
 } from '@/lib/microstructure/payloads';
 
@@ -151,5 +154,64 @@ describe('regimeColor', () => {
     expect(regimeColor('FAIBLE')).toBe('var(--bull)');
     expect(regimeColor('EXTRÊME')).toBe('var(--bear)');
     expect(regimeColor('INSUFFISANT')).toBe('var(--muted)');
+  });
+});
+
+describe('tierColor', () => {
+  it('mappe les 4 tiers + fallback muted', () => {
+    expect(tierColor('LOW')).toBe('var(--bull)');
+    expect(tierColor('MEDIUM')).toBe('var(--caution)');
+    expect(tierColor('HIGH')).toBe('#e07000');
+    expect(tierColor('EXTREME')).toBe('var(--bear)');
+    expect(tierColor('inconnu')).toBe('var(--muted)');
+  });
+});
+
+describe('EXEC_TIER_MULTIPLIER', () => {
+  it('contrat sizing collector↔m15-agent', () => {
+    expect(EXEC_TIER_MULTIPLIER.LOW).toBe(1.0);
+    expect(EXEC_TIER_MULTIPLIER.MEDIUM).toBe(0.7);
+    expect(EXEC_TIER_MULTIPLIER.HIGH).toBe(0.4);
+    expect(EXEC_TIER_MULTIPLIER.EXTREME).toBe(0.25);
+  });
+});
+
+describe('microTrend', () => {
+  const rising: [number, number][] = Array.from({ length: 12 }, (_, i) => [i, 1.0 + i * 0.05]);
+  const falling: [number, number][] = Array.from({ length: 12 }, (_, i) => [i, 2.2 - i * 0.1]);
+  const flat: [number, number][] = Array.from({ length: 12 }, (_, i) => [i, 1.5]);
+  const spike: [number, number][] = Array.from({ length: 12 }, (_, i) => [i, i < 6 ? 1.0 : 2.0]);
+
+  it('STABLE si série absente/courte', () => {
+    expect(microTrend(undefined)).toBe('STABLE');
+    expect(microTrend([[1, 1.5]])).toBe('STABLE');
+  });
+  it('STABLE si plat', () => {
+    expect(microTrend(flat)).toBe('STABLE');
+  });
+  it('DÉGRADATION si monte modérément', () => {
+    expect(microTrend(rising)).toBe('DÉGRADATION');
+  });
+  it('AMÉLIORATION si baisse', () => {
+    expect(microTrend(falling)).toBe('AMÉLIORATION');
+  });
+  it('STRESS si spike ≥40% ou tier EXTREME', () => {
+    expect(microTrend(spike)).toBe('STRESS');
+    expect(microTrend(flat, 'EXTREME')).toBe('STRESS');
+  });
+});
+
+describe('payload v2 — champs execution risk optionnels', () => {
+  it('accepte payload sans champs v2 (rétro-compatible)', () => {
+    const p = makePayload();
+    expect(p.symbols.BTC.execution_risk_tier).toBeUndefined();
+    expect(microTrend(p.symbols.BTC.series)).toBe('STABLE');
+  });
+  it('accepte payload avec champs v2', () => {
+    const p = makePayload();
+    p.symbols.BTC.execution_risk_tier = 'HIGH';
+    p.symbols.BTC.execution_risk_score = 65;
+    expect(p.symbols.BTC.execution_risk_tier).toBe('HIGH');
+    expect(EXEC_TIER_MULTIPLIER[p.symbols.BTC.execution_risk_tier]).toBe(0.4);
   });
 });

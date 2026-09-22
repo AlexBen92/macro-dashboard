@@ -41,6 +41,11 @@ export interface SymbolMetrics {
   components: ToxicityComponents;
   series: [number, number][];
   book_last_update: number | null;
+  /** v2 payload — absent sur payload ancien → UI garde optionnels */
+  execution_risk_score?: number;
+  execution_risk_tier?: string;
+  series_spread?: [number, number][];
+  series_slip?: [number, number][];
 }
 
 export interface MicrostructurePayload {
@@ -111,5 +116,73 @@ export function regimeColor(regime: string): string {
       return 'var(--bear)';
     default:
       return 'var(--muted)';
+  }
+}
+
+/** Tiers execution risk (collector exec_risk.py) — seuils configurés, non universels. */
+export const EXEC_TIER_ORDER = ['LOW', 'MEDIUM', 'HIGH', 'EXTREME'] as const;
+export type ExecTier = (typeof EXEC_TIER_ORDER)[number];
+
+export function tierColor(tier: string): string {
+  switch (tier) {
+    case 'LOW':
+      return 'var(--bull)';
+    case 'MEDIUM':
+      return 'var(--caution)';
+    case 'HIGH':
+      return '#e07000';
+    case 'EXTREME':
+      return 'var(--bear)';
+    default:
+      return 'var(--muted)';
+  }
+}
+
+/** Multiplicateur sizing m15-agent (contrat partagé collector↔agent). */
+export const EXEC_TIER_MULTIPLIER: Record<ExecTier, number> = {
+  LOW: 1.0,
+  MEDIUM: 0.7,
+  HIGH: 0.4,
+  EXTREME: 0.25,
+};
+
+export type MicroTrend = 'STABLE' | 'DÉGRADATION' | 'STRESS' | 'AMÉLIORATION';
+
+function median(vals: number[]): number {
+  const s = [...vals].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+/**
+ * Tendance récente κ×ε : médiane 2e moitié vs 1re moitié de la fenêtre.
+ * ≥+40% ou tier EXTREME → STRESS ; ≥+10% DÉGRADATION ; ≤−10% AMÉLIORATION ; sinon STABLE.
+ * Aucune valeur directionnelle — état d'exécution uniquement.
+ */
+export function microTrend(series: [number, number][] | undefined, tier?: string): MicroTrend {
+  if (tier === 'EXTREME') return 'STRESS';
+  if (!series || series.length < 6) return 'STABLE';
+  const vals = series.map(([, v]) => v);
+  const mid = Math.floor(vals.length / 2);
+  const m1 = median(vals.slice(0, mid));
+  const m2 = median(vals.slice(mid));
+  if (m1 <= 0) return 'STABLE';
+  const delta = (m2 - m1) / m1;
+  if (delta >= 0.4) return 'STRESS';
+  if (delta >= 0.1) return 'DÉGRADATION';
+  if (delta <= -0.1) return 'AMÉLIORATION';
+  return 'STABLE';
+}
+
+export function trendGlyph(t: MicroTrend): string {
+  switch (t) {
+    case 'AMÉLIORATION':
+      return '↗ AMÉLIORATION';
+    case 'DÉGRADATION':
+      return '↘ DÉGRADATION';
+    case 'STRESS':
+      return '↘↘ STRESS';
+    default:
+      return '→ STABLE';
   }
 }
