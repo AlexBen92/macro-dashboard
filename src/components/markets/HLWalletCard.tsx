@@ -45,14 +45,18 @@ export default function HLWalletCard() {
 
       {data && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
             <div>
-              <div className="font-mono text-[0.52rem] text-[var(--muted)] tracking-[2px] uppercase">Account Value</div>
-              <div className="font-mono text-[0.95rem]" style={{ color: 'var(--fg)' }}>${fmtUsd(data.accountValue)}</div>
+              <div className="font-mono text-[0.52rem] text-[var(--muted)] tracking-[2px] uppercase">Total (perp+spot)</div>
+              <div className="font-mono text-[0.95rem]" style={{ color: 'var(--fg)' }}>${fmtUsd(data.totalEquity)}</div>
             </div>
             <div>
-              <div className="font-mono text-[0.52rem] text-[var(--muted)] tracking-[2px] uppercase">Withdrawable</div>
-              <div className="font-mono text-[0.95rem]">${fmtUsd(data.withdrawable)}</div>
+              <div className="font-mono text-[0.52rem] text-[var(--muted)] tracking-[2px] uppercase">Perp</div>
+              <div className="font-mono text-[0.95rem]">${fmtUsd(data.accountValue)}</div>
+            </div>
+            <div>
+              <div className="font-mono text-[0.52rem] text-[var(--muted)] tracking-[2px] uppercase">Spot USDC</div>
+              <div className="font-mono text-[0.95rem]">${fmtUsd(data.spotUsdc)}</div>
             </div>
             <div>
               <div className="font-mono text-[0.52rem] text-[var(--muted)] tracking-[2px] uppercase">Margin Used</div>
@@ -64,11 +68,17 @@ export default function HLWalletCard() {
             </div>
           </div>
 
-          {flat ? (
+          {flat && data.spotUsdc > 0 && (
+            <div className="font-mono text-[0.6rem] py-2 border-t border-[var(--border)]" style={{ color: 'var(--caution)' }}>
+              FLAT perp · ${fmtUsd(data.spotUsdc)} USDC parqués sur le spot
+            </div>
+          )}
+          {flat && data.spotUsdc === 0 && (
             <div className="font-mono text-[0.6rem] text-[var(--muted)] py-2 border-t border-[var(--border)]">
               FLAT — aucune position ouverte
             </div>
-          ) : (
+          )}
+          {!flat && (
             <div className="overflow-x-auto border-t border-[var(--border)]">
               <table className="w-full font-mono text-[0.62rem] min-w-[680px]">
                 <thead>

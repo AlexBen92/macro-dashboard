@@ -39,6 +39,8 @@ export interface HlWalletState {
   withdrawable: number;
   marginUsed: number;
   notionalPos: number;
+  spotUsdc: number;
+  totalEquity: number;
   positions: HlPosition[];
   fills: HlFill[];
   timestamp: number;
@@ -61,7 +63,7 @@ async function postHl<T>(method: string, params: Record<string, string>): Promis
   return json.data as T;
 }
 
-function parseState(raw: unknown): Omit<HlWalletState, 'fills'> {
+function parseState(raw: unknown): Omit<HlWalletState, "fills" | "spotUsdc" | "totalEquity"> {
   const s = raw as {
     marginSummary: HlMarginSummary;
     withdrawable: string;
@@ -98,12 +100,30 @@ function parseState(raw: unknown): Omit<HlWalletState, 'fills'> {
 }
 
 const fetcher = async (): Promise<HlWalletState> => {
-  const [state, fills] = await Promise.all([
+  const [state, fills, spot] = await Promise.all([
     postHl<unknown>('user_state', { address: HL_WALLET_ADDRESS }),
     postHl<unknown[]>('user_fills', { address: HL_WALLET_ADDRESS }).catch(() => []),
+    postHl<unknown>('spot_state', { address: HL_WALLET_ADDRESS }).catch(() => null),
   ]);
   const parsed = parseState(state);
-  const fillRows: HlFill[] = (Array.isArray(fills) ? fills : [])
+  const spotUsdc = parseSpotUsdc(spot);
+  return {
+    ...parsed,
+    spotUsdc,
+    totalEquity: parsed.accountValue + spotUsdc,
+    fills: parseFills(fills),
+  };
+};
+
+function parseSpotUsdc(spot: unknown): number {
+  if (!spot || typeof spot !== 'object') return 0;
+  const balances = (spot as { balances?: Array<Record<string, unknown>> }).balances ?? [];
+  const usdc = balances.find((b) => b.coin === 'USDC');
+  return usdc ? Number(usdc.total ?? 0) : 0;
+}
+
+function parseFills(fills: unknown): HlFill[] {
+  return (Array.isArray(fills) ? fills : [])
     .slice(0, 8)
     .map((f) => {
       const row = f as Record<string, string | number>;
@@ -116,8 +136,7 @@ const fetcher = async (): Promise<HlWalletState> => {
         time: Number(row.time ?? 0),
       };
     });
-  return { ...parsed, fills: fillRows };
-};
+}
 
 export function useHlWallet(): {
   data: HlWalletState | null;

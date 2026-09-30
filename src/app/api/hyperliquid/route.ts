@@ -103,8 +103,26 @@ export async function POST(request: NextRequest) {
         data = pricesData;
         break;
 
+      case 'spot_state':
+        // Spot balances (funds parked outside perp)
+        if (!params?.address) {
+          throw new Error('Address required for spot_state');
+        }
+        const spotResponse = await fetch(`${HYPERLIQUID_BASE_URL}/info`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'spotClearinghouseState',
+            user: params.address,
+          }),
+        });
+        if (!spotResponse.ok) {
+          throw new Error(`Hyperliquid spot error: ${spotResponse.statusText}`);
+        }
+        data = await spotResponse.json();
+        break;
+
       case 'user_fills':
-        // Get user trade history
         if (!params?.address) {
           throw new Error('Address required for user_fills');
         }
