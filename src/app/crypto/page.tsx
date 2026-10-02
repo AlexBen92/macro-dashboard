@@ -16,6 +16,8 @@ import AgentSkillsDashboard from '@/components/crypto/cockpit/AgentSkillsDashboa
 import LawsOfTheGameCard from '@/components/crypto/cockpit/LawsOfTheGameCard';
 import M15SignalsGrid from '@/components/crypto/cockpit/M15SignalsGrid';
 import M15StrategiesBankCard from '@/components/crypto/cockpit/M15StrategiesBankCard';
+import { M15TraderCard } from '@/components/crypto/m15/M15TraderCard';
+import { M15ShadowVariantsCard } from '@/components/crypto/m15/M15ShadowVariantsCard';
 import PathFeaturesCard from '@/components/crypto/cockpit/PathFeaturesCard';
 import M15StationarityCard from '@/components/crypto/cockpit/M15StationarityCard';
 import JournalTimeline from '@/components/crypto/cockpit/JournalTimeline';
@@ -144,7 +146,9 @@ export default function CryptoPage() {
         <section className="flex flex-col gap-3">
           <SectionLabel>Signaux M15 · journal · skills agent</SectionLabel>
           <M15SignalsGrid />
+          <M15TraderCard />
           <M15StrategiesBankCard />
+          <M15ShadowVariantsCard />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <JournalTimeline />
             <AgentSkillsDashboard />
