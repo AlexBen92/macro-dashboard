@@ -1,6 +1,6 @@
 {
- "as_of": "2026-09-21T06:03:23.691846+00:00",
- "last_export_success": "2026-09-21T06:03:23.691886+00:00",
+ "as_of": "2026-10-02T06:03:02.133457+00:00",
+ "last_export_success": "2026-10-02T06:03:02.133511+00:00",
  "stale_threshold_min": 1500,
  "data_window_days": 30,
  "symbols": [
@@ -12,9 +12,9 @@
   "usage_b": "108/108 NULL net co\u00fbts"
  },
  "usage_a": {
-  "n_entries": 12,
+  "n_entries": 13,
   "verdicts": {
-   "NULL": 12
+   "NULL": 13
   },
   "gain_bps_abs_range": [
    0.077,

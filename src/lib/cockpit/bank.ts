@@ -9,6 +9,7 @@ export function bankStatusColor(status: string): string {
   if (status === 'VALIDATED') return 'var(--bull)';
   if (status === 'REJECTED' || status === 'NULL') return 'var(--bear)';
   if (status === 'IN_VALIDATION') return 'var(--caution)';
+  if (status === 'LIVE_MEASUREMENT') return 'var(--muted)'; // mesure live: PAS un vert
   return 'var(--dim)'; // UNTESTED / inconnu — jamais vert
 }
 
@@ -31,6 +32,7 @@ export function bankStatusText(s: BankStrategy): string {
   if (eff === 'BLOQUÉ') return 'BLOQUÉ (données/clés)';
   if (eff === 'VALIDATED') return 'VALIDÉ';
   if (eff === 'IN_VALIDATION') return 'EN TEST';
+  if (eff === 'LIVE_MEASUREMENT') return 'MESURE LIVE (non validé)';
   return 'NON TESTÉ';
 }
 

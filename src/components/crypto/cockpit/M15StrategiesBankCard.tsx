@@ -76,6 +76,9 @@ export default function M15StrategiesBankCard() {
       <div className="mt-1.5 font-mono text-[0.42rem] text-[var(--dim)] leading-relaxed">
         Règle: un signal M15 n&apos;est ALLOWED que si sa stratégie est VALIDATED au registre.
         Familles NULL/BLOCKED = catalogue documentaire (politique anti-retest loi 8).
+        Exception explicite (registre LIVE_MEASUREMENT 10-02): le playbook M15-TRADER
+        trade en MESURE LIVE bornée (budget 5 USDC, STOP_LIVE auto) — non validé,
+        pas un signal &quot;ALLOWED&quot;.
       </div>
     </div>
   );
