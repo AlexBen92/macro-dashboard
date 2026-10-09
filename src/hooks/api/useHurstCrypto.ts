@@ -2,7 +2,6 @@
 
 import useSWR from 'swr';
 
-import { DASH_DATA_ORIGIN } from '@/lib/agentState';
 import type { HurstCryptoPayload } from '@/lib/hurst';
 
 const REFRESH_MS = 10 * 60 * 1000;
@@ -20,7 +19,7 @@ export function useHurstCrypto(): {
   asOf: string | null;
 } {
   const { data, error, isLoading } = useSWR<HurstCryptoPayload>(
-    `${DASH_DATA_ORIGIN}/hurst_crypto.json`,
+    '/api/hurst-crypto',
     fetcher,
     { refreshInterval: REFRESH_MS, revalidateOnFocus: false },
   );
