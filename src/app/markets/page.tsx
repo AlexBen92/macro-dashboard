@@ -8,8 +8,6 @@ import HurstTimeframesCard from '@/components/markets/HurstTimeframesCard';
 import ImpactWindow from '@/components/markets/ImpactWindow';
 import LiquidBasketTable from '@/components/markets/LiquidBasketTable';
 import EdgeWatchlist from '@/components/markets/EdgeWatchlist';
-import GoldDonchianPanel from '@/components/markets/GoldDonchianPanel';
-import HLWalletCard from '@/components/markets/HLWalletCard';
 import FundingCarryPanel from '@/components/crypto/FundingCarryPanel';
 import ResearchProgramStatus from '@/components/ResearchProgramStatus';
 import ResearchCatalog from '@/components/ResearchCatalog';
@@ -75,14 +73,6 @@ export default function MarketsPage() {
         {/* NIVEAU 1 — stratégies systématiques réelles */}
         <motion.div variants={fadeUp}>
           <FundingCarryPanel />
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
-          <HLWalletCard />
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
-          <GoldDonchianPanel />
         </motion.div>
 
         {/* NIVEAU 2 — contexte macro */}
