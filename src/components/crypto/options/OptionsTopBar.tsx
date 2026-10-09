@@ -3,6 +3,7 @@
 import { Activity, HelpCircle, RefreshCw, Stethoscope, Wrench } from 'lucide-react';
 import type { DataFreshness, GammaRegime, DealerDeltaBias, SupportedCurrency, Timeframe } from '@/lib/options/types';
 import { fmtPrice, fmtPct } from '@/lib/options/format';
+import HurstBadge from '@/components/crypto/HurstBadge';
 
 interface OptionsTopBarProps {
   symbol: SupportedCurrency;
@@ -142,6 +143,8 @@ export default function OptionsTopBar(props: OptionsTopBarProps) {
           </button>
         ))}
       </div>
+
+      <HurstBadge symbol={symbol} timeframe={timeframe} />
 
       <div className="flex items-center gap-2 font-mono text-[0.7rem]">
         <span className="text-[var(--text)] font-semibold tabular-nums">
