@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 const FAKE_ROWS = [
   {
-    instrument_name: 'BTC-26SEP26-100000-C',
+    instrument_name: 'BTC-26DEC26-100000-C',
     mark_iv: 50,
     open_interest: 10,
     bid_price: 0.001,
@@ -13,7 +13,7 @@ const FAKE_ROWS = [
     base_currency: 'BTC',
   },
   {
-    instrument_name: 'BTC-26SEP26-100000-P',
+    instrument_name: 'BTC-26DEC26-100000-P',
     mark_iv: 50,
     open_interest: 20,
     bid_price: 0.001,
