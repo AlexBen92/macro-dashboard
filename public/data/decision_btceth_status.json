@@ -1,9 +1,9 @@
 {
-  "as_of": "2026-10-02T19:30:14.357909+00:00",
-  "last_export_success": "2026-10-02T19:30:14.357913+00:00",
+  "as_of": "2026-10-09T09:15:12.684770+00:00",
+  "last_export_success": "2026-10-09T09:15:12.684773+00:00",
   "heartbeat": {
-    "last_attempt_iso": "2026-10-02T19:30:14.357915+00:00",
-    "last_success_iso": "2026-10-02T19:30:14.357918+00:00",
+    "last_attempt_iso": "2026-10-09T09:15:12.684776+00:00",
+    "last_success_iso": "2026-10-09T09:15:12.684778+00:00",
     "error": null
   },
   "pipeline_version": "0.7.0-stage11",
@@ -11,17 +11,17 @@
   "btc": {
     "symbol": "BTC",
     "verdict": "NO_TRADE",
-    "score": 37,
+    "score": 30,
     "confidence": 0,
     "regime": {
       "label": "BUILDING",
       "hurst": null,
-      "adx": 40.13297239904069,
-      "vol_ratio": 0.89,
+      "adx": 29.234029911994128,
+      "vol_ratio": 0.055,
       "hmm_state": null,
       "garch_regime": null,
       "trend_direction": "range",
-      "confidence": 0.6
+      "confidence": 0.4
     },
     "setup": {
       "kind": "NO_TRADE",
@@ -29,13 +29,13 @@
       "contributions": [
         {
           "source": "REGIME",
-          "delta_pts": 12,
-          "reason": "BUILDING conf=0.60"
+          "delta_pts": 8,
+          "reason": "BUILDING conf=0.40"
         },
         {
           "source": "DEPTH_IMBALANCE",
-          "delta_pts": 9,
-          "reason": "imbalance +0.47"
+          "delta_pts": -7,
+          "reason": "imbalance -0.39"
         },
         {
           "source": "DATA_QUALITY",
@@ -47,7 +47,7 @@
     },
     "entry": {
       "state": "EXPIRED",
-      "price": 84122.0,
+      "price": 82528.0,
       "armed_at_iso": "2026-08-12T15:00:20.303387+00:00",
       "trigger_at_iso": null,
       "expires_at_iso": null,
@@ -87,21 +87,21 @@
       "sources": {
         "hl": {
           "fresh": true,
-          "age_ms": 2409,
+          "age_ms": 1521,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:10.801035+00:00"
+          "last_ok_iso": "2026-10-09T09:15:09.654286+00:00"
         },
         "binance": {
           "fresh": true,
-          "age_ms": 672,
+          "age_ms": 517,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:12.537722+00:00"
+          "last_ok_iso": "2026-10-09T09:15:10.658067+00:00"
         },
         "deribit": {
           "fresh": true,
-          "age_ms": 606,
+          "age_ms": 463,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:12.604306+00:00"
+          "last_ok_iso": "2026-10-09T09:15:10.711551+00:00"
         },
         "coinglass": {
           "fresh": false,
@@ -111,9 +111,9 @@
         },
         "yahoo": {
           "fresh": true,
-          "age_ms": 7,
+          "age_ms": 2,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:13.203125+00:00"
+          "last_ok_iso": "2026-10-09T09:15:11.172629+00:00"
         }
       },
       "stale_sources": [
@@ -168,7 +168,7 @@
       "suppression_reason": null
     },
     "session": {
-      "name": "NY",
+      "name": "LONDON",
       "expectancy_bps": null,
       "n_obs": 0,
       "sharpe": null,
@@ -185,11 +185,11 @@
       "directions": [
         {
           "tf": "4H",
-          "dir": "bull"
+          "dir": "bear"
         },
         {
           "tf": "1H",
-          "dir": "bull"
+          "dir": "bear"
         },
         {
           "tf": "M15",
@@ -197,24 +197,24 @@
         },
         {
           "tf": "5M",
-          "dir": "bear"
+          "dir": "bull"
         }
       ]
     },
     "derivatives": {
-      "oi_now": 8017989687.4859,
-      "oi_delta_15m_pct": -0.147,
-      "oi_delta_1h_pct": -0.898,
-      "oi_delta_4h_pct": -3.473,
-      "oi_classification": "SHORT_COVERING",
-      "funding_now": 4.84e-05,
-      "funding_annualized_pct": 5.2998,
-      "funding_zscore_30d": -1.2,
+      "oi_now": 7674820654.2148,
+      "oi_delta_15m_pct": 0.2,
+      "oi_delta_1h_pct": -0.043,
+      "oi_delta_4h_pct": 0.863,
+      "oi_classification": "NEUTRAL",
+      "funding_now": 3.446e-05,
+      "funding_annualized_pct": 3.7733700000000003,
+      "funding_zscore_30d": 0.28,
       "funding_tag": "NEUTRAL",
       "basis_bps": null
     },
     "orderflow": {
-      "cvd_now": 0.14845,
+      "cvd_now": 0.59743,
       "cvd_slope_15m": null,
       "cvd_divergence": "UNKNOWN",
       "taker_buy_sell_ratio": null,
@@ -247,17 +247,17 @@
   "eth": {
     "symbol": "ETH",
     "verdict": "NO_TRADE",
-    "score": 37,
+    "score": 30,
     "confidence": 0,
     "regime": {
       "label": "BUILDING",
       "hurst": null,
-      "adx": 37.709017687862726,
-      "vol_ratio": 0.875,
+      "adx": 29.52306258848462,
+      "vol_ratio": 0.075,
       "hmm_state": null,
       "garch_regime": null,
       "trend_direction": "range",
-      "confidence": 0.6
+      "confidence": 0.4
     },
     "setup": {
       "kind": "NO_TRADE",
@@ -265,25 +265,25 @@
       "contributions": [
         {
           "source": "REGIME",
-          "delta_pts": 12,
-          "reason": "BUILDING conf=0.60"
-        },
-        {
-          "source": "DEPTH_IMBALANCE",
-          "delta_pts": -4,
-          "reason": "imbalance -0.23"
+          "delta_pts": 8,
+          "reason": "BUILDING conf=0.40"
         },
         {
           "source": "DATA_QUALITY",
           "delta_pts": 3,
           "reason": "data-quality 65/100"
+        },
+        {
+          "source": "DEPTH_IMBALANCE",
+          "delta_pts": -2,
+          "reason": "imbalance -0.12"
         }
       ],
       "setup_score": 0
     },
     "entry": {
       "state": "EXPIRED",
-      "price": 2667.0,
+      "price": 2502.6,
       "armed_at_iso": "2026-08-12T12:14:18.391360+00:00",
       "trigger_at_iso": null,
       "expires_at_iso": null,
@@ -323,21 +323,21 @@
       "sources": {
         "hl": {
           "fresh": true,
-          "age_ms": 2409,
+          "age_ms": 1521,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:10.801035+00:00"
+          "last_ok_iso": "2026-10-09T09:15:09.654286+00:00"
         },
         "binance": {
           "fresh": true,
-          "age_ms": 672,
+          "age_ms": 517,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:12.537722+00:00"
+          "last_ok_iso": "2026-10-09T09:15:10.658067+00:00"
         },
         "deribit": {
           "fresh": true,
-          "age_ms": 606,
+          "age_ms": 463,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:12.604306+00:00"
+          "last_ok_iso": "2026-10-09T09:15:10.711551+00:00"
         },
         "coinglass": {
           "fresh": false,
@@ -347,9 +347,9 @@
         },
         "yahoo": {
           "fresh": true,
-          "age_ms": 7,
+          "age_ms": 2,
           "coverage_pct": 100.0,
-          "last_ok_iso": "2026-10-02T19:30:13.203125+00:00"
+          "last_ok_iso": "2026-10-09T09:15:11.172629+00:00"
         }
       },
       "stale_sources": [
@@ -397,14 +397,14 @@
       "no qualifying setup"
     ],
     "cross_asset": {
-      "btc_leadership": 59.3,
+      "btc_leadership": 42.6,
       "beta_to_btc": null,
       "relative_strength": null,
       "suppressed_by_btc": false,
       "suppression_reason": null
     },
     "session": {
-      "name": "NY",
+      "name": "LONDON",
       "expectancy_bps": null,
       "n_obs": 0,
       "sharpe": null,
@@ -421,11 +421,11 @@
       "directions": [
         {
           "tf": "4H",
-          "dir": "bull"
+          "dir": "bear"
         },
         {
           "tf": "1H",
-          "dir": "bull"
+          "dir": "bear"
         },
         {
           "tf": "M15",
@@ -433,24 +433,24 @@
         },
         {
           "tf": "5M",
-          "dir": "bear"
+          "dir": "bull"
         }
       ]
     },
     "derivatives": {
-      "oi_now": 6124589019.55852,
-      "oi_delta_15m_pct": -0.198,
-      "oi_delta_1h_pct": -1.241,
-      "oi_delta_4h_pct": -1.844,
+      "oi_now": 5858259437.14011,
+      "oi_delta_15m_pct": 0.331,
+      "oi_delta_1h_pct": -0.064,
+      "oi_delta_4h_pct": 0.865,
       "oi_classification": "SHORT_COVERING",
-      "funding_now": -2.177e-05,
-      "funding_annualized_pct": -2.383815,
-      "funding_zscore_30d": -0.71,
+      "funding_now": -3.907e-05,
+      "funding_annualized_pct": -4.2781649999999996,
+      "funding_zscore_30d": -1.19,
       "funding_tag": "NEUTRAL",
       "basis_bps": null
     },
     "orderflow": {
-      "cvd_now": 2.0556,
+      "cvd_now": 0.4317,
       "cvd_slope_15m": null,
       "cvd_divergence": "UNKNOWN",
       "taker_buy_sell_ratio": null,
@@ -483,46 +483,46 @@
   "cross_asset": {
     "beta_eth_to_btc": null,
     "lead_lag_btc_eth_hours": null,
-    "btc_leadership_score": 59.3,
+    "btc_leadership_score": 42.6,
     "eth_suppressed": false,
-    "as_of_iso": "2026-10-02T19:30:14.357897+00:00"
+    "as_of_iso": "2026-10-09T09:15:12.684757+00:00"
   },
   "macro": {
     "risk_state": "NEUTRAL",
-    "macro_pressure": 37,
+    "macro_pressure": 35,
     "drivers": [
       {
         "asset": "DXY",
-        "corr_30d": 0.21,
-        "daily_change_pct": 1.037
+        "corr_30d": 0.176,
+        "daily_change_pct": 1.125
       },
       {
         "asset": "SPX",
-        "corr_30d": 0.056,
-        "daily_change_pct": 3.204
+        "corr_30d": -0.111,
+        "daily_change_pct": 3.777
       },
       {
         "asset": "NDX",
-        "corr_30d": 0.032,
-        "daily_change_pct": 5.204
+        "corr_30d": -0.045,
+        "daily_change_pct": 5.113
       },
       {
         "asset": "VIX",
-        "corr_30d": -0.076,
-        "daily_change_pct": -3.901
+        "corr_30d": -0.179,
+        "daily_change_pct": -3.977
       },
       {
         "asset": "US10Y",
-        "corr_30d": -0.035,
-        "daily_change_pct": 17.659
+        "corr_30d": -0.112,
+        "daily_change_pct": 14.489
       },
       {
         "asset": "GOLD",
-        "corr_30d": 0.242,
-        "daily_change_pct": 1.217
+        "corr_30d": -0.057,
+        "daily_change_pct": 1.688
       }
     ],
-    "as_of_iso": "2026-10-02T19:30:13.203161+00:00"
+    "as_of_iso": "2026-10-09T09:15:11.172695+00:00"
   },
   "event_risk": {
     "next_event_iso": null,
@@ -533,7 +533,7 @@
     "calendar_version": "2026-08-12-manual-v1"
   },
   "session_matrix": {
-    "as_of_iso": "2026-10-02T19:30:13.214056+00:00",
+    "as_of_iso": "2026-10-09T09:15:11.177255+00:00",
     "cells": [
       {
         "session": "ASIA",

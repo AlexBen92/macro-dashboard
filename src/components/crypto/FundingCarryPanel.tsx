@@ -143,15 +143,15 @@ export default function FundingCarryPanel() {
 
   return (
     <section
-      className="bg-[var(--bg2)] border border-[var(--bull)]/40 rounded-[4px] px-3 py-2"
-      title="Funding_Carry_Systematic_D1 — seule stratégie VALIDATED du programme H4/D1 (6/6 gates WF). Paper trading 2 jambes, cron 00:25 UTC."
+      className="bg-[var(--bg2)] border border-[var(--caution)]/40 rounded-[4px] px-3 py-2"
+      title="Funding_Carry_Systematic_D1 — VALIDATED v36 historique (6/6 gates WF), re-validation v44 S01/S01b NO-GO (2026-10-02): érosion 2025-26. Paper 2 jambes maintenu = monitoring only, aucune promo live."
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-        <span className="font-mono text-[0.55rem] uppercase tracking-[2px] text-[var(--bull)]">
+        <span className="font-mono text-[0.55rem] uppercase tracking-[2px] text-[var(--muted)]">
           funding carry d1
         </span>
-        <span className="font-mono text-[0.5rem] text-[var(--muted)] uppercase tracking-[1px]">
-          validated 6/6 gates wf
+        <span className="font-mono text-[0.5rem] text-[var(--caution)] uppercase tracking-[1px]">
+          v44 NO-GO — érosion 2025-26 · monitoring paper
         </span>
         {ps && (
           <span className="font-mono text-[0.55rem] text-[var(--muted)]">

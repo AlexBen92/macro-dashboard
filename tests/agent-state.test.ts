@@ -92,10 +92,11 @@ describe('buildAgentState', () => {
     expect(s.m15.setups[0].pipeline_status).toBe('BACKTEST');
   });
 
-  it('h4d1: seul funding_carry_d1 tradable', () => {
+  it('h4d1: aucun tradable — v44 S01/S01b NO-GO sur funding_carry_d1 (érosion 2025-26)', () => {
     const s = buildAgentState(freshEdgeM15(), freshRegime(), freshDecision(), freshOrderflow, null, undefined, NOW);
     const tradables = s.h4d1.filter((e) => e.tradable);
-    expect(tradables.map((e) => e.id)).toEqual(['funding_carry_d1']);
+    expect(tradables.map((e) => e.id)).toEqual([]);
+    expect(s.h4d1.find((e) => e.id === 'funding_carry_d1')?.status).toBe('NO_EDGE');
     expect(s.h4d1.find((e) => e.id === 'directional_d1_h4')?.status).toBe('NO_EDGE');
   });
 

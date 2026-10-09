@@ -65,7 +65,7 @@ export default function GoldDonchianPanel() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
         {[
-          { label: 'OOS Sharpe', value: '1.77' },
+          { label: 'OOS Sharpe · non-gated (pas de DSR/per-fold)', value: '1.77' },
           { label: 'Système', value: 'Donchian breakout' },
           { label: 'Timeframe', value: 'D1 · MQL5' },
           { label: 'Feed dashboard', value: 'aucun — manuel' },

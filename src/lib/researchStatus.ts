@@ -1,6 +1,8 @@
 /**
  * Statut public du programme de recherche H4/Daily (V36→V38, fermé 2026-08-15).
- * Source: registre interne strategy_status_registry_h4_d1 + rapports V36-V38.
+ * MAJ 2026-10-09: re-validation v44 S01/S01b NO-GO (érosion 2025-26) — le carry
+ * validé v36 n'est plus tradable; XS carry fermé v39 (0/160).
+ * Source: registre interne strategy_status_registry_h4_d1 + rapports V36-V44.
  * Affiché sur /markets et /crypto pour transparence méthodologique:
  * un dashboard pro n'affiche pas de signal non validé comme tradable.
  */
@@ -37,14 +39,15 @@ export const H4D1_PROGRAM: {
     {
       id: 'funding_carry_d1',
       label: 'Funding carry D1 (BTC/ETH)',
-      status: 'VALIDATED',
-      detail: '6/6 gates WF — seule stratégie VALIDATED du programme, en paper trading 2 jambes',
+      status: 'NO_EDGE',
+      detail:
+        'v44 S01/S01b re-validation NO-GO (2026-10-02) — érosion 2025-26: −49 bps 2025, −215 bps 2026. VALIDATED v36 historique, plus tradable. Paper 2 jambes = monitoring only',
     },
     {
       id: 'xs_carry',
       label: 'XS carry bas-turnover',
-      status: 'RECONSTRUCTION',
-      detail: 'V37/V38 NULL sur holdout frais — mécanisme en reconstruction, pas tradable',
+      status: 'NULL',
+      detail: 'v39 0/160 — fermé 2026-08-16, pas de reconstruction en cours. Ne pas retester sans nouveau mécanisme',
     },
     {
       id: 'stablecoin_depeg',
