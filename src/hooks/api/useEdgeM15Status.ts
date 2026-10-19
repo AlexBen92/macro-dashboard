@@ -130,10 +130,9 @@ export interface EdgeM15Status {
   error?: string;
 }
 
-const DATA_BASE = process.env.NEXT_PUBLIC_DASH_DATA_URL ?? '';
-const EDGE_M15_URL = DATA_BASE
-  ? `${DATA_BASE.replace(/\/$/, '')}/edge_m15_status.json`
-  : '/data/edge_m15_status.json';
+// Client → TOUJOURS /api/* (proxy serveur, cf. fix mixed content 5810c54).
+// Fetch direct dash-data depuis le navigateur = http bloqué sur Vercel HTTPS.
+const EDGE_M15_URL = '/api/edge-m15-status';
 
 const STALE_THRESHOLD_MS = 20 * 60 * 1000;
 
