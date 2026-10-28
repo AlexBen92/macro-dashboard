@@ -130,8 +130,7 @@ export default function OrbChart({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between gap-2">
-        <h3 className="flex items-center gap-2 text-sm font-semibold">
-          Graphique séance (NQ=F, heures ET)
+        <div className="flex items-center gap-2">
           {trend ? (
             <span
               className={`rounded px-1.5 py-0.5 text-[10px] ${
