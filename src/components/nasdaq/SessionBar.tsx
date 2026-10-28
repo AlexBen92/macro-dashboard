@@ -39,7 +39,12 @@ export default function SessionBar({
   const todayIso = now?.toISOString().slice(0, 10) ?? '';
   const todaySession = sessionCal?.next_sessions.find((s) => s.date === todayIso);
   const halfDay = todaySession?.half_day ?? status?.session?.half_day ?? false;
-  const phase = now ? sessionPhaseLocal(now, sessionCal) : null;
+  // calendrier absent (export manquant) → phase du collecteur, sinon calcul local
+  const phase = now
+    ? sessionCal
+      ? sessionPhaseLocal(now, sessionCal)
+      : { phase: status?.session?.phase ?? 'closed', nextOpen: null }
+    : null;
   const h = now ? horloges(now) : null;
   const delay = status?.feed?.delay_s ?? null;
   const nyTime = h?.ny ?? '00:00';
