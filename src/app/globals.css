@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Terminal de trading : dark permanent (les variantes dark: ne dépendent
+   plus de l'OS — fond blanc illisible sur fond deVariables sombres). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --bg: #06070b;
   --bg2: #0d0f15;

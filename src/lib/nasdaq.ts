@@ -267,6 +267,197 @@ export function breakMarker(
   };
 }
 
+// --- Plan de trade (spec V3 §6) -----------------------------------------------
+
+/**
+ * Protocole pré-enregistré — REPRIS DU CODE backtest.py (règle d'or spec §6 :
+ * rien n'est réinterprété ici). Constantes : backtest.py:22-29.
+ */
+export const PROTOCOL = {
+  range: '09:30-09:45 ET (RISK_FREEZE 09:45)',
+  cassure: "clôture M5 au-delà du haut/bas ; entrée à l'open M1 suivant (backtest.py:153-177)",
+  frequence: '1 entrée/jour, 1re cassure conforme uniquement',
+  filtre: 'H1 RTH MA20 > MA50 → longs ; < → shorts (barres H1 complétées avant 09:45)',
+  stop: 'distance = max(|entrée − milieu du range|, 0,25 × EM) ; EM = open × VXN veille / √252',
+  sortie: '15:55 ET (12:55 demi-séance) ou stop touché',
+  filtre_range: 'pas de trade si range > 0,5 × EM',
+  dernier_entry: '15:50 ET (12:50 demi-séance)',
+  cout: '2 pts NQ aller-retour (sensibilité 4 pts) — le coût qui a basculé le backtest en négatif',
+} as const;
+
+export type CheckState = 'ok' | 'ko' | 'wait';
+
+export interface CheckItem {
+  id: string;
+  label: string;
+  state: CheckState;
+  detail: string;
+}
+
+const etMinLocal = (d: Date): number => {
+  const et = new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit', minute: '2-digit', hour12: false,
+    timeZone: 'America/New_York',
+  }).format(d);
+  return Number(et.slice(0, 2)) * 60 + Number(et.slice(3, 5));
+};
+
+/** Minutes locales ET (pour bornes de phase côté appelants). */
+export function etMinutes(d: Date): number {
+  return etMinLocal(d);
+}
+
+/**
+ * Checklist §6.2. Item 6 (trade du jour) et 8 (limites jour) : non mesurables
+ * sans journal d'exécution → « wait » explicite, jamais ok inventé.
+ */
+export function checklist(opts: {
+  delayS: number | null | undefined;
+  rangeFrozenMin: number; // minutes ET (≥ 585 = après 09:45)
+  rangeOverEm: number | null | undefined;
+  breakState: string | undefined;
+  theoDir: string | undefined;
+  trendV: number | undefined;
+  macroInWindow: boolean;
+}): CheckItem[] {
+  const flux = opts.delayS === null || opts.delayS === undefined
+    ? { state: 'wait' as CheckState, detail: 'retard flux inconnu' }
+    : opts.delayS <= 30
+      ? { state: 'ok' as CheckState, detail: `retard ${opts.delayS} s` }
+      : { state: 'ko' as CheckState, detail: `retard ${opts.delayS} s > 30 s — ne pas trader sur ce prix` };
+  const fige = opts.rangeFrozenMin >= 9 * 60 + 45
+    ? { state: 'ok' as CheckState, detail: 'range figé depuis 09:45 ET' }
+    : { state: 'wait' as CheckState, detail: `range en formation (${Math.floor(opts.rangeFrozenMin / 60)}:${String(opts.rangeFrozenMin % 60).padStart(2, '0')} ET)` };
+  const taille = opts.rangeOverEm === null || opts.rangeOverEm === undefined
+    ? { state: 'wait' as CheckState, detail: 'EM ou range indisponible' }
+    : opts.rangeOverEm <= 0.5
+      ? { state: 'ok' as CheckState, detail: `range = ${opts.rangeOverEm.toFixed(2)} × EM ≤ 0,5` }
+      : { state: 'ko' as CheckState, detail: `range = ${opts.rangeOverEm.toFixed(2)} × EM > 0,5 → pas de trade (protocole)` };
+  const cassure = !opts.breakState
+    ? { state: 'wait' as CheckState, detail: 'état cassure indisponible' }
+    : opts.breakState === 'aucune'
+      ? { state: 'wait' as CheckState, detail: 'aucune clôture M5 hors range (le collector ne détecte que des clôtures — jamais une mèche)' }
+      : { state: 'ok' as CheckState, detail: `cassure ${opts.breakState} sur clôture M5` };
+  const dir = !opts.theoDir
+    ? { state: 'wait' as CheckState, detail: 'pas de théorique — pas de cassure conforme au filtre' }
+    : opts.trendV === undefined
+      ? { state: 'wait' as CheckState, detail: 'tendance H1 indisponible' }
+      : (opts.theoDir === 'haute' && opts.trendV === 1) || (opts.theoDir === 'basse' && opts.trendV === -1)
+        ? { state: 'ok' as CheckState, detail: `théorique ${opts.theoDir} conforme au filtre H1` }
+        : { state: 'ko' as CheckState, detail: `théorique ${opts.theoDir} CONTRAIRE au filtre H1 (ne pas prendre)` };
+  return [
+    { id: 'flux', label: 'Flux à jour (retard < 30 s)', ...flux },
+    { id: 'range_fige', label: 'Range figé (après 09:45 ET)', ...fige },
+    { id: 'taille', label: 'Range ≤ 0,5 × EM', ...taille },
+    { id: 'cassure', label: 'Cassure sur clôture M5 (pas une mèche)', ...cassure },
+    { id: 'direction', label: 'Direction conforme au filtre H1', ...dir },
+    {
+      id: 'unique',
+      label: 'Aucun trade déjà pris aujourd’hui',
+      state: 'wait',
+      detail: 'non mesurable sans journal d’exécution (incr. journal) — tenir à la main',
+    },
+    {
+      id: 'macro',
+      label: 'Publication macro dans la fenêtre ?',
+      ...(opts.macroInWindow
+        ? { state: 'ko' as CheckState, detail: 'publication listée aujourd’hui — voir calendrier' }
+        : { state: 'ok' as CheckState, detail: 'aucune publication listée dans la fenêtre' }),
+    },
+    {
+      id: 'limites',
+      label: 'Limites de risque du jour non atteintes',
+      state: 'wait',
+      detail: 'perte du jour non mesurable sans journal (incr. journal) — rappel FTMO ci-dessous',
+    },
+  ];
+}
+
+/** Événement du jour dans la fenêtre de décision (09:30-11:00 ET), pour la checklist. */
+export function macroInWindow(events: NasdaqEvent[] | undefined, now: Date): { hit: boolean; label: string | null } {
+  const todayIso = now.toISOString().slice(0, 10);
+  const min = etMinLocal(now);
+  const inWin = (events ?? []).filter((e) => {
+    if (e.date !== todayIso || !/^\d{1,2}:\d{2}$/.test(e.heure_ny)) return false;
+    const [h, m] = e.heure_ny.split(':').map(Number);
+    return h * 60 + m >= 9 * 60 + 30 && h * 60 + m <= 11 * 60;
+  });
+  if (!inWin.length) return { hit: false, label: null };
+  // prochaine passée/à venir la plus proche de now
+  const next = inWin
+    .map((e) => ({ e, m: Number(e.heure_ny.split(':')[0]) * 60 + Number(e.heure_ny.split(':')[1]) }))
+    .sort((a, b) => Math.abs(a.m - min) - Math.abs(b.m - min))[0];
+  return { hit: true, label: `${next.e.label} ${next.e.heure_ny} ET` };
+}
+
+const NY_TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
+
+/**
+ * Prochaine publication du jour (toutes heures ET) + état de garde ±2 min
+ * (restriction news compte financé, spec §6.4).
+ */
+export function newsGuard(
+  events: NasdaqEvent[] | undefined,
+  now: Date
+): { label: string; timeEt: string; minUntil: number; locked: boolean } | null {
+  const todayIso = now.toISOString().slice(0, 10);
+  const min = etMinLocal(now);
+  let best: { label: string; timeEt: string; minUntil: number } | null = null;
+  for (const e of events ?? []) {
+    if (e.date !== todayIso) continue;
+    const m = e.heure_ny.match(NY_TIME_RE);
+    if (!m) continue;
+    const em = Number(m[1]) * 60 + Number(m[2]);
+    const until = em - min;
+    if (until < -2) continue; // passée (+2 min de garde)
+    if (!best || until < best.minUntil) best = { label: e.label, timeEt: e.heure_ny, minUntil: until };
+  }
+  if (!best) return null;
+  return { ...best, locked: best.minUntil <= 2 };
+}
+
+export interface InstrumentPreset {
+  id: string;
+  label: string;
+  usdPerPoint: number;
+}
+
+export const INSTRUMENTS: InstrumentPreset[] = [
+  { id: 'nq', label: 'NQ (20 $/pt)', usdPerPoint: 20 },
+  { id: 'mnq', label: 'MNQ (2 $/pt)', usdPerPoint: 2 },
+];
+
+export interface PositionCalc {
+  distPts: number;
+  size: number; // contrats, arrondi vers le bas (protocole)
+  lossUsd: number;
+  rtCostR: number; // coût aller-retour 2 pts exprimé en R — LE chiffre qui a tué le backtest
+  target1R: number;
+  target2R: number;
+}
+
+/** Calculateur §6.3. Entrée/stop = théoriques par défaut, surchargeables. */
+export function positionSize(opts: {
+  capitalUsd: number;
+  riskPct: number;
+  usdPerPoint: number;
+  entry: number;
+  stop: number;
+}): PositionCalc | null {
+  const dist = Math.abs(opts.entry - opts.stop);
+  if (!(dist > 0) || !(opts.capitalUsd > 0) || !(opts.usdPerPoint > 0)) return null;
+  const riskUsd = (opts.capitalUsd * opts.riskPct) / 100;
+  const size = Math.floor(riskUsd / (dist * opts.usdPerPoint));
+  return {
+    distPts: dist,
+    size,
+    lossUsd: size * dist * opts.usdPerPoint,
+    rtCostR: 2 / dist,
+    target1R: opts.entry + (opts.entry >= opts.stop ? dist : -dist),
+    target2R: opts.entry + (opts.entry >= opts.stop ? 2 * dist : -2 * dist),
+  };
+}
+
 export interface NasdaqNightDay {
   as_of: string;
   def: string;

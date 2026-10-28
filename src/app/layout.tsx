@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${jetbrains.variable} ${inter.variable} ${plexSerif.variable}`}>
+    <html lang="en" className={`dark ${jetbrains.variable} ${inter.variable} ${plexSerif.variable}`}>
       <body className="font-[var(--font-body)] antialiased">
         <Nav />
         {children}

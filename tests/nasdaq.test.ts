@@ -6,10 +6,14 @@ import {
   breakLabel,
   breakMarker,
   chartLevels,
+  checklist,
   feedSlow,
   horloges,
   isStale,
   lookupBucket,
+  macroInWindow,
+  newsGuard,
+  positionSize,
   sampleBadge,
   sessionPhaseLocal,
   similarKeys,
@@ -286,5 +290,76 @@ describe('graphique V3 (§5)', () => {
     expect(new Date(jul * 1000).toISOString().slice(11, 16)).toBe('10:45'); // EDT = UTC-4
     const dec = etShiftSec(Math.floor(Date.parse('2026-12-15T14:45:00Z') / 1000));
     expect(new Date(dec * 1000).toISOString().slice(11, 16)).toBe('09:45'); // EST = UTC-5
+  });
+});
+
+describe('plan de trade V3 (§6)', () => {
+  const nowNoon = new Date('2026-07-15T16:00:00Z'); // 12:00 ET
+  const ev = (date: string, heure_ny: string, label = 'ISM'): NasdaqEvent => ({
+    date, type: 'macro', label, heure_ny, heure_paris: heure_ny, source: 'test',
+  });
+
+  const base = {
+    delayS: 5,
+    rangeFrozenMin: 12 * 60,
+    rangeOverEm: 0.32,
+    breakState: 'haute',
+    theoDir: 'haute',
+    trendV: 1,
+    macroInWindow: false,
+  };
+
+  it('checklist : tout vert dans un scénario conforme', () => {
+    const items = checklist(base);
+    expect(items.filter((i) => i.state === 'ok')).toHaveLength(6); // flux,figé,taille,cassure,direction,macro
+    expect(items.filter((i) => i.state === 'wait')).toHaveLength(2); // trade du jour + limites (sans journal)
+    expect(items.find((i) => i.id === 'macro')?.state).toBe('ok');
+  });
+
+  it('checklist : ko sur flux lent, range trop large, direction contraire', () => {
+    const items = checklist({ ...base, delayS: 90, rangeOverEm: 0.62, theoDir: 'haute', trendV: -1 });
+    expect(items.find((i) => i.id === 'flux')?.state).toBe('ko');
+    expect(items.find((i) => i.id === 'taille')?.state).toBe('ko');
+    expect(items.find((i) => i.id === 'direction')?.state).toBe('ko');
+  });
+
+  it('checklist : range en formation + pas de cassure = wait, jamais ok inventé', () => {
+    const items = checklist({ ...base, rangeFrozenMin: 9 * 60 + 31, breakState: 'aucune', theoDir: undefined });
+    expect(items.find((i) => i.id === 'range_fige')?.state).toBe('wait');
+    expect(items.find((i) => i.id === 'cassure')?.state).toBe('wait');
+    expect(items.find((i) => i.id === 'direction')?.state).toBe('wait');
+  });
+
+  it('positionSize : floor, coût A/R en R, objectifs 1R/2R (long)', () => {
+    const c = positionSize({ capitalUsd: 25000, riskPct: 0.5, usdPerPoint: 20, entry: 110, stop: 106 })!;
+    expect(c.distPts).toBe(4);
+    expect(c.size).toBe(Math.floor(125 / (4 * 20))); // 1 contrat
+    expect(c.lossUsd).toBe(80);
+    expect(c.rtCostR).toBeCloseTo(0.5); // 2 pts / 4 pts
+    expect(c.target1R).toBe(114);
+    expect(c.target2R).toBe(118);
+  });
+
+  it('positionSize : short (stop au-dessus) + entrées invalides', () => {
+    const c = positionSize({ capitalUsd: 10000, riskPct: 1, usdPerPoint: 2, entry: 100, stop: 102 })!;
+    expect(c.target1R).toBe(98);
+    expect(c.target2R).toBe(96);
+    expect(positionSize({ capitalUsd: 0, riskPct: 1, usdPerPoint: 20, entry: 1, stop: 2 })).toBeNull();
+    expect(positionSize({ capitalUsd: 1000, riskPct: 1, usdPerPoint: 20, entry: 5, stop: 5 })).toBeNull();
+  });
+
+  it('macroInWindow : fenêtre 09:30-11:00 ET seulement', () => {
+    const events = [ev('2026-07-15', '10:00'), ev('2026-07-15', '14:00'), ev('2026-07-16', '10:00')];
+    expect(macroInWindow(events, nowNoon).hit).toBe(true);
+    expect(macroInWindow([ev('2026-07-15', '14:00')], nowNoon).hit).toBe(false);
+  });
+
+  it('newsGuard : prochaine publication, verrou ±2 min, ignorer « après clôture »', () => {
+    const events = [ev('2026-07-15', 'après clôture', 'Earnings'), ev('2026-07-15', '12:05', 'FOMC')];
+    expect(newsGuard(events, nowNoon)).toMatchObject({ label: 'FOMC', timeEt: '12:05', minUntil: 5, locked: false });
+    const ev2 = [ev('2026-07-15', '11:59')];
+    expect(newsGuard(ev2, nowNoon)).toMatchObject({ locked: true });
+    expect(newsGuard([ev('2026-07-15', '11:57')], nowNoon)).toBeNull(); // passée (+2 min)
+    expect(newsGuard(undefined, nowNoon)).toBeNull();
   });
 });
