@@ -45,6 +45,9 @@ export interface NasdaqSessionNow {
 export interface NasdaqTrendH1 {
   v: number; // 1 haussière, -1 baissière, 0 neutre
   as_of: string;
+  ma20?: number;
+  ma50?: number;
+  dist_pct?: number;
 }
 
 export interface NasdaqStatus {
@@ -116,6 +119,148 @@ export interface NasdaqSessionCal {
   as_of: string;
   note: string;
   next_sessions: NasdaqNextSession[];
+}
+
+// --- Graphique (spec V3 §5) ---------------------------------------------------
+
+export interface NasdaqBars {
+  as_of: string;
+  bars?: Record<string, number[]>;
+  today_vwap?: number[];
+  prev_day?: { date: string; h: number; l: number; c: number } | null;
+  premarket?: { h: number; l: number; n_bars: number } | null;
+}
+
+export type Tf = 'M1' | 'M5' | 'M15';
+
+export interface Candle {
+  time: number; // epoch s décalée pour affichage heure ET
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+/** Décalage epoch → epoch « heure ET affichée comme UTC » (DST-safe par jour). */
+export function etShiftSec(tsSec: number): number {
+  const d = new Date(tsSec * 1000);
+  const asEt = new Date(
+    d.toLocaleString('en-US', { timeZone: 'America/New_York' })
+  ).getTime();
+  return tsSec + Math.round((d.getTime() - asEt) / 1000);
+}
+
+const TF_MIN: Record<Tf, number> = { M1: 1, M5: 5, M15: 15 };
+
+/** M1 colonnaire → bougies agrégées (tf), jour ou veille. */
+export function aggBars(b: NasdaqBars | undefined, tf: Tf, day: 'today' | 'prev'): Candle[] {
+  const t = b?.bars?.[`${day}_ts`];
+  const o = b?.bars?.[`${day}_o`];
+  const h = b?.bars?.[`${day}_h`];
+  const l = b?.bars?.[`${day}_l`];
+  const c = b?.bars?.[`${day}_c`];
+  if (!t || !o || !h || !l || !c) return [];
+  const n = TF_MIN[tf];
+  const out: Candle[] = [];
+  for (let i = 0; i < t.length; i += n) {
+    const end = Math.min(i + n, t.length);
+    out.push({
+      time: etShiftSec(t[end - 1]) as Candle['time'],
+      open: o[i],
+      high: Math.max(...h.slice(i, end)),
+      low: Math.min(...l.slice(i, end)),
+      close: c[end - 1],
+    });
+  }
+  return out;
+}
+
+/** Série VWAP (jour) alignée sur les M1. */
+export function vwapSeries(b: NasdaqBars | undefined): { time: number; value: number }[] {
+  const t = b?.bars?.today_ts;
+  const v = b?.today_vwap;
+  if (!t || !v || t.length !== v.length) return [];
+  return t.map((ts, i) => ({ time: etShiftSec(ts), value: v[i] }));
+}
+
+export interface PriceLine {
+  price: number;
+  color: string;
+  title: string;
+  style: 'solid' | 'dashed' | 'dotted';
+  width?: 1 | 2;
+}
+
+/**
+ * Niveaux §5 : range, cassures (hi/lo du range), VWAP hors-ligne non (série),
+ * ouverture, veille (C/H/L), pré-marché (H/L), bandes EM ±0,5/±1, entrée/stop
+ * théoriques. zéro « signal » : que des faits (spec §12).
+ */
+export function chartLevels(opts: {
+  bars: NasdaqBars | undefined;
+  status: NasdaqStatus | undefined;
+  emPts: number | undefined;
+}): PriceLine[] {
+  const { bars, status, emPts } = opts;
+  const out: PriceLine[] = [];
+  const todayOpen = bars?.bars?.today_o?.[0];
+  if (todayOpen && emPts && emPts > 0) {
+    for (const k of [0.5, 1]) {
+      for (const s of [1, -1]) {
+        out.push({
+          price: todayOpen + s * k * emPts,
+          color: 'rgba(120,120,140,0.35)',
+          title: `EM ${s > 0 ? '+' : '−'}${k}`,
+          style: 'dotted',
+        });
+      }
+    }
+  }
+  if (todayOpen) out.push({ price: todayOpen, color: 'rgba(59,130,246,0.7)', title: 'Open', style: 'solid' });
+  const r = status?.range;
+  if (r) {
+    out.push({ price: r.hi, color: 'rgba(245,158,11,0.8)', title: 'Range H', style: 'dashed' });
+    out.push({ price: r.lo, color: 'rgba(245,158,11,0.8)', title: 'Range L', style: 'dashed' });
+    out.push({ price: r.mid, color: 'rgba(140,140,140,0.5)', title: 'Mid', style: 'dotted' });
+  }
+  const pd = bars?.prev_day;
+  if (pd) {
+    out.push({ price: pd.c, color: 'rgba(140,140,140,0.6)', title: 'Clôture V', style: 'solid' });
+    out.push({ price: pd.h, color: 'rgba(140,140,140,0.4)', title: 'H V', style: 'dashed' });
+    out.push({ price: pd.l, color: 'rgba(140,140,140,0.4)', title: 'B V', style: 'dashed' });
+  }
+  const pm = bars?.premarket;
+  if (pm) {
+    out.push({ price: pm.h, color: 'rgba(140,140,140,0.4)', title: 'PM H', style: 'dotted' });
+    out.push({ price: pm.l, color: 'rgba(140,140,140,0.4)', title: 'PM B', style: 'dotted' });
+  }
+  const theo = status?.theo;
+  if (theo) {
+    out.push({ price: theo.entry, color: 'rgba(59,130,246,0.9)', title: `Entrée ${theo.dir}`, style: 'solid', width: 2 });
+    out.push({ price: theo.stop, color: 'rgba(239,68,68,0.9)', title: 'Stop', style: 'solid', width: 2 });
+  }
+  return out;
+}
+
+/** Marqueur cassure (clôture M5 hors range) à l'heure ET donnée. */
+export function breakMarker(
+  brk: NasdaqStatus['break'],
+  todayIso: string
+): { time: number; position: 'belowBar' | 'aboveBar'; color: string; shape: 'arrowUp' | 'arrowDown'; text: string } | null {
+  if (!brk || brk.state === 'aucune' || !brk.time_et) return null;
+  const [hh, mm] = brk.time_et.split(':').map(Number);
+  const ts = Math.round(
+    Date.parse(`${todayIso}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00`) / 1000
+  );
+  if (Number.isNaN(ts)) return null;
+  const up = brk.state === 'haute';
+  return {
+    time: etShiftSec(ts) as number,
+    position: up ? 'belowBar' : 'aboveBar',
+    color: up ? 'rgba(22,163,74,1)' : 'rgba(220,38,38,1)',
+    shape: up ? 'arrowUp' : 'arrowDown',
+    text: `Cassure ${up ? 'haute' : 'basse'}`,
+  };
 }
 
 export interface NasdaqNightDay {

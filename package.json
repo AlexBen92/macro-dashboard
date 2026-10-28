@@ -20,6 +20,7 @@
     "date-fns": "^4.4.0",
     "decimal.js": "^10.6.0",
     "framer-motion": "^12.35.1",
+    "lightweight-charts": "^4.2.3",
     "lucide-react": "^1.17.0",
     "mathjs": "^15.2.0",
     "ml-matrix": "^6.12.2",

@@ -23,6 +23,7 @@ const FILES = [
   ['nasdaq_events', 'events'],
   ['nasdaq_strategies', 'strategies'],
   ['nasdaq_session', 'session'],
+  ['nasdaq_bars', 'bars'],
 ] as const;
 
 export const dynamic = 'force-dynamic';
@@ -54,7 +55,7 @@ export async function GET() {
   const data: Record<string, unknown> = {};
   const stale: Record<string, boolean> = {
     status: true, context: true, stats: true,
-    night_day: true, events: true, strategies: true, session: true,
+    night_day: true, events: true, strategies: true, session: true, bars: true,
   };
   for (const [name, kind] of FILES) {
     const obj = loadLocal(name) ?? (await loadRemote(name));

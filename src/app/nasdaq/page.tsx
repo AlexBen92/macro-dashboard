@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import OrbChart from '@/components/nasdaq/OrbChart';
 import SessionBar from '@/components/nasdaq/SessionBar';
 import { WarnIcon } from '@/components/nasdaq/icons';
 import {
@@ -14,6 +15,7 @@ import {
   staleSinceMin,
   strategyTone,
   upcomingEvents,
+  type NasdaqBars,
   type NasdaqEvents,
   type NasdaqEvent,
   type NasdaqContext,
@@ -32,6 +34,7 @@ interface Payload {
   events?: NasdaqEvents;
   strategies?: NasdaqStrategies;
   session?: NasdaqSessionCal;
+  bars?: NasdaqBars;
   stale?: Record<string, boolean>;
 }
 
@@ -145,7 +148,7 @@ export default function NasdaqPage() {
     return () => clearInterval(t);
   }, [load]);
 
-  const { status, context, stats, night_day, events, strategies, session: sessionCal, stale } = data ?? {};
+  const { status, context, stats, night_day, events, strategies, session: sessionCal, bars, stale } = data ?? {};
   const score = context?.score;
   const classe = status?.range?.classe;
   const ag = stats?.aggregats;
@@ -186,6 +189,18 @@ export default function NasdaqPage() {
           Erreur API : {err}
         </div>
       ) : null}
+
+      <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        {bars?.bars?.today_c?.length ? (
+          <OrbChart bars={bars} status={status} emPts={context?.em_pts ?? undefined} trend={status?.trend_h1} />
+        ) : (
+          <p className="text-sm text-neutral-500">
+            Barres intraday indisponibles — collecteur decision/tick écrit nasdaq_bars.json
+            pendant la séance (15-60 s), dernières données : {bars?.as_of ?? 'jamais'}
+            {bars?.as_of ? ` · périmé depuis ${staleSinceMin(bars.as_of)} min` : ''}.
+          </p>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card title="Range du jour (09:30-09:45 ET)" badge={sampleBadge(ag?.n_days)}>
