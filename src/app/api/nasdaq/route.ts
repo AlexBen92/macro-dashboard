@@ -19,6 +19,9 @@ const FILES = [
   ['nasdaq_orb_status', 'status'],
   ['nasdaq_context', 'context'],
   ['nasdaq_orb_stats', 'stats'],
+  ['nasdaq_night_day', 'night_day'],
+  ['nasdaq_events', 'events'],
+  ['nasdaq_strategies', 'strategies'],
 ] as const;
 
 export const dynamic = 'force-dynamic';
@@ -48,12 +51,17 @@ async function loadRemote(name: string): Promise<Record<string, unknown> | null>
 
 export async function GET() {
   const data: Record<string, unknown> = {};
-  const stale: Record<string, boolean> = { status: true, context: true, stats: true };
+  const stale: Record<string, boolean> = {
+    status: true, context: true, stats: true,
+    night_day: true, events: true, strategies: true,
+  };
   for (const [name, kind] of FILES) {
     const obj = loadLocal(name) ?? (await loadRemote(name));
     if (!obj) continue;
     data[kind] = obj;
-    stale[kind] = isStale(obj['as_of'] as string | undefined, kind);
+    stale[kind] = isStale(obj['as_of'] as string | undefined,
+      kind === 'status' ? 'status' : kind === 'context' ? 'context'
+        : kind === 'stats' ? 'stats' : 'panels');
   }
   const res = NextResponse.json({ ...data, stale });
   res.headers.set('Cache-Control', 'no-store');

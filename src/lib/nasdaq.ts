@@ -66,6 +66,46 @@ export interface NasdaqStats {
   genere?: string;
 }
 
+export interface NasdaqNightDay {
+  as_of: string;
+  def: string;
+  cumuls: {
+    last_day: string;
+    windows: Record<string, { n: number; nuit_pct: number; jour_pct: number; bh_pct: number }>;
+  };
+}
+
+export interface NasdaqEvent {
+  date: string;
+  type: string;
+  label: string;
+  heure_ny: string;
+  heure_paris: string;
+  source: string;
+}
+
+export interface NasdaqEvents {
+  as_of: string;
+  note: string;
+  events: NasdaqEvent[];
+}
+
+export interface NasdaqStrategy {
+  id: string;
+  famille?: string;
+  statut: string;
+  essais: number;
+  verdict: string | null;
+  maj?: string;
+  note?: string;
+}
+
+export interface NasdaqStrategies {
+  as_of: string;
+  note: string;
+  strategies: NasdaqStrategy[];
+}
+
 /** État cassure affichable : aucune / haute / basse / double. */
 export function breakLabel(b: NasdaqStatus['break']): string {
   if (!b) return '—';
@@ -76,12 +116,17 @@ export function breakLabel(b: NasdaqStatus['break']): string {
 }
 
 /** Fraîcheur : seuil en minutes selon le type d'export. */
-export function staleThresholdMin(kind: 'status' | 'context' | 'stats'): number {
+export function staleThresholdMin(
+  kind: 'status' | 'context' | 'stats' | 'panels'
+): number {
   if (kind === 'status') return 15; // tick toutes les 2 min pendant RTH
-  return 26 * 60; // premarket / stats = quotidiens
+  return 26 * 60; // premarket / stats / panneaux = quotidiens
 }
 
-export function isStale(asOf: string | undefined, kind: 'status' | 'context' | 'stats'): boolean {
+export function isStale(
+  asOf: string | undefined,
+  kind: 'status' | 'context' | 'stats' | 'panels'
+): boolean {
   if (!asOf) return true;
   const ms = Date.parse(asOf.endsWith('Z') ? asOf : `${asOf}Z`);
   if (Number.isNaN(ms)) return true;
@@ -92,4 +137,19 @@ export function isStale(asOf: string | undefined, kind: 'status' | 'context' | '
 export function sampleBadge(n: number | undefined): string | null {
   if (n === undefined || n < 30) return `échantillon faible (${n ?? 0} j < 30)`;
   return null;
+}
+
+/** Événements à venir (date >= aujourd'hui), triés, `limit` premiers. */
+export function upcomingEvents(events: NasdaqEvent[] | undefined, limit = 8): NasdaqEvent[] {
+  if (!events) return [];
+  const today = new Date().toISOString().slice(0, 10);
+  return events.filter((e) => e.date >= today).slice(0, limit);
+}
+
+/** Couleur de statut stratégie : NO-GO rouge, non testée neutre, autre ambre. */
+export function strategyTone(statut: string): 'no-go' | 'untested' | 'other' {
+  const s = statut.toLowerCase();
+  if (s.includes('no-go') || s.includes('rejet')) return 'no-go';
+  if (s.includes('non testée')) return 'untested';
+  return 'other';
 }

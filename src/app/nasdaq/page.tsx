@@ -7,15 +7,24 @@ import {
   breakLabel,
   isStale,
   sampleBadge,
+  strategyTone,
+  upcomingEvents,
+  type NasdaqEvents,
+  type NasdaqEvent,
   type NasdaqContext,
+  type NasdaqNightDay,
   type NasdaqStats,
   type NasdaqStatus,
+  type NasdaqStrategies,
 } from '@/lib/nasdaq';
 
 interface Payload {
   status?: NasdaqStatus;
   context?: NasdaqContext;
   stats?: NasdaqStats;
+  night_day?: NasdaqNightDay;
+  events?: NasdaqEvents;
+  strategies?: NasdaqStrategies;
   stale?: Record<string, boolean>;
 }
 
@@ -53,6 +62,51 @@ function Card({
   );
 }
 
+function EventRow({ e }: { e: NasdaqEvent }) {
+  const jour = e.date.slice(8, 10) + '/' + e.date.slice(5, 7);
+  const estimé = e.source === 'estimé';
+  return (
+    <li className="flex items-baseline justify-between gap-2 text-sm">
+      <span>
+        <span className="font-mono text-xs">{jour}</span> · {e.label}
+        {estimé ? (
+          <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+            estimé
+          </span>
+        ) : null}
+      </span>
+      <span className="whitespace-nowrap text-xs text-neutral-500">
+        {e.heure_paris === 'après clôture' ? 'après clôture' : `${e.heure_paris} Paris`}
+      </span>
+    </li>
+  );
+}
+
+function StrategyRow({ s }: { s: NonNullable<NasdaqStrategies['strategies']>[number] }) {
+  const tone = strategyTone(s.statut);
+  const cls =
+    tone === 'no-go'
+      ? 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
+      : tone === 'untested'
+        ? 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400'
+        : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
+  return (
+    <li className="flex items-baseline justify-between gap-2 text-sm">
+      <span className="min-w-0">
+        {s.famille ?? s.id}{' '}
+        <span className={`rounded px-1 text-[10px] ${cls}`}>{s.statut}</span>
+        {s.note ? (
+          <span className="block text-xs text-neutral-500">{s.note}</span>
+        ) : null}
+      </span>
+      <span className="whitespace-nowrap text-xs text-neutral-500">
+        {s.essais} essai{s.essais > 1 ? 's' : ''}
+        {s.verdict ? ` · ${s.verdict.slice(0, 10)}` : ''}
+      </span>
+    </li>
+  );
+}
+
 export default function NasdaqPage() {
   const [data, setData] = useState<Payload | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -74,10 +128,11 @@ export default function NasdaqPage() {
     return () => clearInterval(t);
   }, [load]);
 
-  const { status, context, stats, stale } = data ?? {};
+  const { status, context, stats, night_day, events, strategies, stale } = data ?? {};
   const score = context?.score;
   const classe = status?.range?.classe;
   const ag = stats?.aggregats;
+  const nextEv = upcomingEvents(events?.events, 8);
 
   return (
     <main className="mx-auto max-w-6xl space-y-4 p-4">
@@ -235,6 +290,80 @@ export default function NasdaqPage() {
             Source : Yahoo NQ=F M1 (rétention ~28 j) — pas d&apos;inférence avant données
             2010+ (Databento/FirstRate).
           </p>
+        </Card>
+
+        <Card title="Nuit vs journée (cumul net, 2 pts A/R par jambe)">
+          {night_day ? (
+            <>
+              <ul className="space-y-1 text-sm">
+                {Object.entries(night_day.cumuls.windows).map(([n, w]) => (
+                  <li key={n} className="flex justify-between">
+                    <span>{n} j (n={w.n})</span>
+                    <span>
+                      nuit{' '}
+                      <b className={w.nuit_pct >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        {w.nuit_pct >= 0 ? '+' : ''}
+                        {w.nuit_pct.toFixed(1)} %
+                      </b>{' '}
+                      · jour{' '}
+                      <b className={w.jour_pct >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        {w.jour_pct >= 0 ? '+' : ''}
+                        {w.jour_pct.toFixed(1)} %
+                      </b>{' '}
+                      · B&amp;H {w.bh_pct >= 0 ? '+' : ''}
+                      {w.bh_pct.toFixed(1)} %
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-neutral-500">
+                Nuit = 18:00→09:30 ET, jour = 09:30→15:55, B&amp;H clôture→clôture
+                (NQ continu ajusté, jusqu&apos;au {night_day.cumuls.last_day}). Descriptif
+                — test 2.2 : NO-GO (prime de nuit &lt; coûts).
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-500">Données indisponibles</p>
+          )}
+          {stale?.night_day ? (
+            <p className="mt-2 text-xs text-red-600">⚠️ cumuls périmés</p>
+          ) : null}
+        </Card>
+
+        <Card title="Calendrier d'événements (45 j)">
+          {nextEv.length ? (
+            <>
+              <ul className="space-y-1">
+                {nextEv.map((e, i) => (
+                  <EventRow key={`${e.date}-${e.type}-${i}`} e={e} />
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-neutral-500">{events?.note}</p>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-500">Aucun événement à venir listé</p>
+          )}
+          {stale?.events ? (
+            <p className="mt-2 text-xs text-red-600">⚠️ calendrier périmé</p>
+          ) : null}
+        </Card>
+
+        <Card title="État des stratégies Nasdaq">
+          {strategies?.strategies?.length ? (
+            <>
+              <ul className="space-y-1.5">
+                {strategies.strategies.map((s) => (
+                  <StrategyRow key={s.id} s={s} />
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-neutral-500">{strategies.note}</p>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-500">Données indisponibles</p>
+          )}
+          {stale?.strategies ? (
+            <p className="mt-2 text-xs text-red-600">⚠️ registre périmé</p>
+          ) : null}
         </Card>
       </div>
 
