@@ -6,7 +6,7 @@ import OrbChart from '@/components/nasdaq/OrbChart';
 import SessionBar from '@/components/nasdaq/SessionBar';
 import TradeJournal from '@/components/nasdaq/TradeJournal';
 import TradePlan from '@/components/nasdaq/TradePlan';
-import { WarnIcon } from '@/components/nasdaq/icons';
+import { ChevronIcon, WarnIcon } from '@/components/nasdaq/icons';
 import {
   BADGE_UNVALIDATED,
   breakLabel,
@@ -53,22 +53,51 @@ function Num({ v, unit = '' }: { v: number | null | undefined; unit?: string }) 
 function Card({
   title,
   badge,
+  keyStat,
+  collapsible,
+  className,
   children,
 }: {
   title: string;
   badge?: string | null;
+  keyStat?: string;
+  collapsible?: boolean;
+  className?: string;
   children: React.ReactNode;
 }) {
-  return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold">{title}</h3>
-        {badge ? (
-          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-            {badge}
-          </span>
-        ) : null}
+  const base =
+    'rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900';
+  const head = (
+    <>
+      <h3 className="text-sm font-semibold">{title}</h3>
+      {badge ? (
+        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+          {badge}
+        </span>
+      ) : null}
+      {keyStat ? (
+        <span className="ml-auto shrink-0 font-mono text-xs tabular-nums text-neutral-500">
+          {keyStat}
+        </span>
+      ) : null}
+    </>
+  );
+  if (collapsible) {
+    return (
+      <div className={`${base} ${className ?? ''}`}>
+        <details open className="group">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2">
+            <span className="flex min-w-0 items-center gap-2">{head}</span>
+            <ChevronIcon className="h-4 w-4 shrink-0 text-neutral-400 group-open:rotate-180" />
+          </summary>
+          <div className="mt-2">{children}</div>
+        </details>
       </div>
+    );
+  }
+  return (
+    <div className={`${base} ${className ?? ''}`}>
+      <div className="mb-2 flex items-center justify-between gap-2">{head}</div>
       {children}
     </div>
   );
@@ -167,7 +196,7 @@ export default function NasdaqPage() {
   );
 
   return (
-    <main className="mx-auto max-w-6xl space-y-4 p-4">
+    <main className="mx-auto max-w-6xl space-y-4 p-4 pb-20 md:pb-4">
       <SessionBar
         status={status}
         sessionCal={sessionCal}
@@ -192,32 +221,61 @@ export default function NasdaqPage() {
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
-        {bars?.bars?.today_c?.length ? (
-          <OrbChart bars={bars} status={status} emPts={context?.em_pts ?? undefined} trend={status?.trend_h1} />
-        ) : (
-          <p className="text-sm text-neutral-500">
-            Barres intraday indisponibles — collecteur decision/tick écrit nasdaq_bars.json
-            pendant la séance (15-60 s), dernières données : {bars?.as_of ?? 'jamais'}
-            {bars?.as_of ? ` · périmé depuis ${staleSinceMin(bars.as_of)} min` : ''}.
-          </p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card title="Plan de trade ORB 15 min (protocole pré-enregistré)" badge="edge non validé">
+      {/* Hero §3 — desktop : graphique (2/3) | plan + volatilité. Mobile : plan → chart → vol. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card
+          title="Plan de trade ORB 15 min (protocole pré-enregistré)"
+          badge="edge non validé"
+          className="lg:order-2"
+        >
           <TradePlan status={status} events={events?.events} />
         </Card>
 
-        <Card title="Journal de trades + comparateur hasard" badge="privé (token)">
-          <TradeJournal
-            theoEntry={status?.theo?.entry}
-            theoStop={status?.theo?.stop}
-            theoDir={status?.theo?.dir}
-          />
+        <Card title="Graphique de séance (NQ=F, heures ET)" className="lg:order-1 lg:col-span-2">
+          {bars?.bars?.today_c?.length ? (
+            <OrbChart bars={bars} status={status} emPts={context?.em_pts ?? undefined} trend={status?.trend_h1} />
+          ) : (
+            <p className="text-sm text-neutral-500">
+              Barres intraday indisponibles — collecteur decision/tick écrit nasdaq_bars.json
+              pendant la séance (15-60 s), dernières données : {bars?.as_of ?? 'jamais'}
+              {bars?.as_of ? ` · périmé depuis ${staleSinceMin(bars.as_of)} min` : ''}.
+            </p>
+          )}
         </Card>
 
-        <Card title="Range du jour (09:30-09:45 ET)" badge={sampleBadge(ag?.n_days)}>
+        <Card
+          title="Volatilité implicite (VXN, FRED VXNCLS)"
+          keyStat={context?.vxn ? `${context.vxn.level} · P${context.vxn.pct_1y}` : undefined}
+          className="lg:order-3 lg:col-start-3"
+        >
+          {context?.vxn ? (
+            <ul className="space-y-1 text-sm">
+              <li>
+                VXN : <Num v={context.vxn.level} /> ({context.vxn.date}) · percentile 1 an :{' '}
+                <Num v={context.vxn.pct_1y} unit=" %" />
+              </li>
+              <li>
+                Expected move jour : <Num v={context.em_pts} unit=" pts" /> (open × VXN/√252)
+              </li>
+              <li>
+                Multiplicateur confiance : <Num v={context.vol_mult} />
+              </li>
+            </ul>
+          ) : (
+            <p className="text-sm text-neutral-500">—</p>
+          )}
+        </Card>
+      </div>
+
+      {/* Contexte §3 — repliables, chiffre clé visible replié */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+        <Card
+          title="Range du jour (09:30-09:45 ET)"
+          badge={sampleBadge(ag?.n_days)}
+          collapsible
+          keyStat={status?.range ? `${status.range.pts} pts · ${status.range.classe}` : undefined}
+        >
           {status?.range ? (
             <ul className="space-y-1 text-sm">
               <li>
@@ -239,7 +297,11 @@ export default function NasdaqPage() {
           ) : null}
         </Card>
 
-        <Card title="État de cassure (clôture M5 hors range)">
+        <Card
+          title="État de cassure (clôture M5 hors range)"
+          collapsible
+          keyStat={status?.break ? breakLabel(status.break) : undefined}
+        >
           <p className="text-sm">
             {breakLabel(status?.break ?? null)}
             {status?.break?.px ? (
@@ -266,26 +328,7 @@ export default function NasdaqPage() {
           )}
         </Card>
 
-        <Card title="Volatilité (VXN, FRED VXNCLS)">
-          {context?.vxn ? (
-            <ul className="space-y-1 text-sm">
-              <li>
-                VXN : <Num v={context.vxn.level} /> ({context.vxn.date}) · percentile 1 an :{' '}
-                <Num v={context.vxn.pct_1y} unit=" %" />
-              </li>
-              <li>
-                Expected move jour : <Num v={context.em_pts} unit=" pts" /> (open × VXN/√252)
-              </li>
-              <li>
-                Multiplicateur confiance : <Num v={context.vol_mult} />
-              </li>
-            </ul>
-          ) : (
-            <p className="text-sm text-neutral-500">—</p>
-          )}
-        </Card>
-
-        <Card title="Score de contexte (§5, poids fixes)" badge="breadth/macro absents">
+        <Card title="Score de contexte (§5, poids fixes)" badge="breadth/macro absents" collapsible keyStat={score !== undefined ? String(score) : undefined}>
           <div className="flex items-center gap-3">
             <div className="text-3xl font-bold">{score !== undefined ? score : '—'}</div>
             <div className="flex-1">
@@ -311,7 +354,12 @@ export default function NasdaqPage() {
           </ul>
         </Card>
 
-        <Card title="Corrélations glissantes ^NDX (20/60 j)" badge="display only">
+        <Card
+          title="Corrélations glissantes ^NDX (20/60 j)"
+          badge="display only"
+          collapsible
+          keyStat={context?.corr ? `${Object.keys(context.corr.correlations).length} paires` : undefined}
+        >
           {context?.corr ? (
             <ul className="space-y-1 text-sm">
               {Object.entries(context.corr.correlations).map(([k, v]) => (
@@ -334,7 +382,109 @@ export default function NasdaqPage() {
           )}
         </Card>
 
-        <Card title="Jours semblables (Databento 2010-2026)" badge={sampleBadge(ag?.n_days)}>
+<Card
+          title="Nuit vs journée (cumul net, 2 pts A/R par jambe)"
+          collapsible
+          keyStat={night_day?.cumuls?.last_day ? `maj ${night_day.cumuls.last_day}` : undefined}
+        >
+          {night_day ? (
+            <>
+              <ul className="space-y-1 text-sm">
+                {Object.entries(night_day.cumuls.windows).map(([n, w]) => (
+                  <li key={n} className="flex justify-between">
+                    <span>{n} j (n={w.n})</span>
+                    <span>
+                      nuit{' '}
+                      <b className={w.nuit_pct >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        {w.nuit_pct >= 0 ? '+' : ''}
+                        {w.nuit_pct.toFixed(1)} %
+                      </b>{' '}
+                      · jour{' '}
+                      <b className={w.jour_pct >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        {w.jour_pct >= 0 ? '+' : ''}
+                        {w.jour_pct.toFixed(1)} %
+                      </b>{' '}
+                      · B&amp;H {w.bh_pct >= 0 ? '+' : ''}
+                      {w.bh_pct.toFixed(1)} %
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-neutral-500">
+                Nuit = 18:00→09:30 ET, jour = 09:30→15:55, B&amp;H clôture→clôture
+                (NQ continu ajusté, jusqu&apos;au {night_day.cumuls.last_day}). Descriptif
+                — test 2.2 : NO-GO (prime de nuit &lt; coûts).
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-500">Données indisponibles</p>
+          )}
+          {stale?.night_day ? (
+            <StaleNote label="cumuls" asOf={night_day?.as_of} />
+          ) : null}
+        </Card>
+
+        <Card
+          title="Calendrier d'événements (45 j)"
+          collapsible
+          keyStat={nextEv.length ? `${nextEv.length} à venir` : '0'}
+        >
+          {nextEv.length ? (
+            <>
+              <ul className="space-y-1">
+                {nextEv.map((e, i) => (
+                  <EventRow key={`${e.date}-${e.type}-${i}`} e={e} />
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-neutral-500">{events?.note}</p>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-500">Aucun événement à venir listé</p>
+          )}
+          {stale?.events ? (
+            <StaleNote label="calendrier" asOf={events?.as_of} />
+          ) : null}
+        </Card>
+
+        <Card
+          title="État des stratégies Nasdaq"
+          collapsible
+          keyStat={strategies?.strategies?.length ? `${strategies.strategies.length} familles` : undefined}
+        >
+          {strategies?.strategies?.length ? (
+            <>
+              <ul className="space-y-1.5">
+                {strategies.strategies.map((s) => (
+                  <StrategyRow key={s.id} s={s} />
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-neutral-500">{strategies.note}</p>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-500">Données indisponibles</p>
+          )}
+          {stale?.strategies ? (
+            <StaleNote label="registre" asOf={strategies?.as_of} />
+          ) : null}
+        </Card>
+      </div>
+
+      {/* Journal §10 — mobile : en dernier */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Card title="Journal de trades + comparateur hasard" badge="privé (token)">
+          <TradeJournal
+            theoEntry={status?.theo?.entry}
+            theoStop={status?.theo?.stop}
+            theoDir={status?.theo?.dir}
+          />
+        </Card>
+
+        <Card
+          title="Jours semblables (Databento 2010-2026)"
+          badge={sampleBadge(ag?.n_days)}
+          collapsible
+          keyStat={sim?.bucket.exp_net_R !== undefined ? `${sim.bucket.exp_net_R} R` : undefined}
+        >
           {ag ? (
             <ul className="space-y-1 text-sm">
               <li>
@@ -398,79 +548,6 @@ export default function NasdaqPage() {
           </p>
         </Card>
 
-        <Card title="Nuit vs journée (cumul net, 2 pts A/R par jambe)">
-          {night_day ? (
-            <>
-              <ul className="space-y-1 text-sm">
-                {Object.entries(night_day.cumuls.windows).map(([n, w]) => (
-                  <li key={n} className="flex justify-between">
-                    <span>{n} j (n={w.n})</span>
-                    <span>
-                      nuit{' '}
-                      <b className={w.nuit_pct >= 0 ? 'text-green-600' : 'text-red-600'}>
-                        {w.nuit_pct >= 0 ? '+' : ''}
-                        {w.nuit_pct.toFixed(1)} %
-                      </b>{' '}
-                      · jour{' '}
-                      <b className={w.jour_pct >= 0 ? 'text-green-600' : 'text-red-600'}>
-                        {w.jour_pct >= 0 ? '+' : ''}
-                        {w.jour_pct.toFixed(1)} %
-                      </b>{' '}
-                      · B&amp;H {w.bh_pct >= 0 ? '+' : ''}
-                      {w.bh_pct.toFixed(1)} %
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-2 text-xs text-neutral-500">
-                Nuit = 18:00→09:30 ET, jour = 09:30→15:55, B&amp;H clôture→clôture
-                (NQ continu ajusté, jusqu&apos;au {night_day.cumuls.last_day}). Descriptif
-                — test 2.2 : NO-GO (prime de nuit &lt; coûts).
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-neutral-500">Données indisponibles</p>
-          )}
-          {stale?.night_day ? (
-            <StaleNote label="cumuls" asOf={night_day?.as_of} />
-          ) : null}
-        </Card>
-
-        <Card title="Calendrier d'événements (45 j)">
-          {nextEv.length ? (
-            <>
-              <ul className="space-y-1">
-                {nextEv.map((e, i) => (
-                  <EventRow key={`${e.date}-${e.type}-${i}`} e={e} />
-                ))}
-              </ul>
-              <p className="mt-2 text-xs text-neutral-500">{events?.note}</p>
-            </>
-          ) : (
-            <p className="text-sm text-neutral-500">Aucun événement à venir listé</p>
-          )}
-          {stale?.events ? (
-            <StaleNote label="calendrier" asOf={events?.as_of} />
-          ) : null}
-        </Card>
-
-        <Card title="État des stratégies Nasdaq">
-          {strategies?.strategies?.length ? (
-            <>
-              <ul className="space-y-1.5">
-                {strategies.strategies.map((s) => (
-                  <StrategyRow key={s.id} s={s} />
-                ))}
-              </ul>
-              <p className="mt-2 text-xs text-neutral-500">{strategies.note}</p>
-            </>
-          ) : (
-            <p className="text-sm text-neutral-500">Données indisponibles</p>
-          )}
-          {stale?.strategies ? (
-            <StaleNote label="registre" asOf={strategies?.as_of} />
-          ) : null}
-        </Card>
       </div>
 
       <p className="text-xs text-neutral-500">

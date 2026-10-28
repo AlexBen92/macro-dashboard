@@ -81,35 +81,59 @@ export default function SessionBar({
       : tone === 'alert'
         ? 'rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-800 dark:bg-red-900/40 dark:text-red-300'
         : 'rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400';
+  const brk = status?.break;
+  const signal = brk && brk.state !== 'aucune' ? brk.state : null;
 
   return (
-    <div className="sticky top-0 z-30 -mx-4 mb-4 border-b border-neutral-200 bg-white/95 px-4 py-2 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/95">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-        <span className="font-mono tabular-nums" suppressHydrationWarning>
+    <div
+      className={[
+        'z-40 border-neutral-200 bg-white/95 backdrop-blur dark:border-neutral-800 dark:bg-neutral-900/95',
+        'fixed inset-x-0 bottom-0 border-t px-3 py-1.5 md:static md:border-t-0 md:border-b md:px-4 md:py-2 md:sticky md:top-0 md:-mx-4 md:mb-4',
+      ].join(' ')}
+    >
+      <div className="flex items-center gap-x-3 gap-y-1 overflow-x-auto whitespace-nowrap text-xs md:flex-wrap md:whitespace-normal md:text-sm">
+        <span className="hidden font-mono tabular-nums md:inline" suppressHydrationWarning>
           NY {h?.ny ?? '—:—'} · Paris {h?.paris ?? '—:—'}
           {h && h.ecartH !== 6 ? (
             <span className={badgeCls('warn')}> écart {h.ecartH} h</span>
           ) : null}
         </span>
+        <span className="font-mono tabular-nums md:hidden" suppressHydrationWarning>
+          NY {h?.ny ?? '—:—'}
+        </span>
         <span className="font-semibold" suppressHydrationWarning>
           {phase ? PHASE_LABEL[phase.phase] ?? phase.phase : '—'}
         </span>
         {countdown ? (
-          <span className="font-mono text-xs tabular-nums text-neutral-500" suppressHydrationWarning>
+          <span className="font-mono text-[10px] tabular-nums text-neutral-500 md:text-xs" suppressHydrationWarning>
             {countdown}
           </span>
         ) : null}
+        {signal ? (
+          <span
+            className={
+              signal === 'haute'
+                ? 'rounded bg-green-100 px-1.5 py-0.5 text-[10px] text-green-800 dark:bg-green-900/40 dark:text-green-300'
+                : 'rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-800 dark:bg-red-900/40 dark:text-red-300'
+            }
+          >
+            cassure {signal}
+          </span>
+        ) : null}
         <span className={badgeCls(feedSlow(delay, nyTime) ? 'warn' : 'ok')}>
-          flux {status?.feed?.source ?? 'yahoo'}
-          {delay !== null ? ` · retard ${delay} s` : ' · retard —'}
-          {feedSlow(delay, nyTime) ? ' — ne pas trader sur ce prix' : ''}
+          flux {status?.feed?.source ?? 'yahoo'} · retard {delay !== null ? `${delay} s` : '—'}
+          {feedSlow(delay, nyTime) ? ' — ne pas trader' : ''}
         </span>
         {macroToday.length ? (
-          <span className={badgeCls('warn')}>
+          <span className={`hidden md:inline ${badgeCls('warn')}`}>
             macro : {macroToday.map((e) => e.label).slice(0, 2).join(', ')}
           </span>
         ) : null}
-        {goBadge ? <span className={badgeCls('alert')}>{goBadge}</span> : null}
+        {goBadge ? (
+          <span className={`hidden md:inline ${badgeCls('alert')}`}>{goBadge}</span>
+        ) : (
+          <span className={`md:hidden ${badgeCls('alert')}`}>NO-GO</span>
+        )}
       </div>
     </div>
   );
