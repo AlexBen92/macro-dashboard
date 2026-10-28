@@ -18,6 +18,7 @@ import {
   upcomingEvents,
   vxnTercile,
   vwapSeries,
+  etShiftSec,
   weekdayLabel,
   type NasdaqBars,
   type NasdaqEvent,
@@ -276,8 +277,14 @@ describe('graphique V3 (§5)', () => {
     const up = breakMarker({ state: 'haute', time_et: '09:52', px: 111 }, '2026-07-15');
     expect(up?.shape).toBe('arrowUp');
     expect(up?.position).toBe('belowBar');
-    // 09:52 ET (EDT = UTC-4) = 13:52 UTC ; affiché ET via etShiftSec → heure inchangée en UTC after shift
     expect(breakMarker({ state: 'aucune', time_et: null, px: null }, '2026-07-15')).toBeNull();
     expect(breakMarker(null, '2026-07-15')).toBeNull();
+  });
+
+  it('etShiftSec : epoch 14:45Z affiché 10:45 en été comme en hiver (EDT puis EST)', () => {
+    const jul = etShiftSec(Math.floor(Date.parse('2026-07-15T14:45:00Z') / 1000));
+    expect(new Date(jul * 1000).toISOString().slice(11, 16)).toBe('10:45'); // EDT = UTC-4
+    const dec = etShiftSec(Math.floor(Date.parse('2026-12-15T14:45:00Z') / 1000));
+    expect(new Date(dec * 1000).toISOString().slice(11, 16)).toBe('09:45'); // EST = UTC-5
   });
 });

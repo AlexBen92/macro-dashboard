@@ -141,13 +141,17 @@ export interface Candle {
   close: number;
 }
 
-/** Décalage epoch → epoch « heure ET affichée comme UTC » (DST-safe par jour). */
+/** Décalage epoch → epoch « heure ET affichée comme UTC » (DST-safe, tz-agnostic). */
 export function etShiftSec(tsSec: number): number {
   const d = new Date(tsSec * 1000);
-  const asEt = new Date(
-    d.toLocaleString('en-US', { timeZone: 'America/New_York' })
-  ).getTime();
-  return tsSec + Math.round((d.getTime() - asEt) / 1000);
+  const s = d.toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    timeZoneName: 'longOffset',
+  });
+  const m = s.match(/GMT([+-]\d{2}):(\d{2})/);
+  if (!m) return tsSec;
+  const offMin = Number(m[1]) * 60 + (m[1].startsWith('-') ? -Number(m[2]) : Number(m[2]));
+  return tsSec + offMin * 60;
 }
 
 const TF_MIN: Record<Tf, number> = { M1: 1, M5: 5, M15: 15 };
