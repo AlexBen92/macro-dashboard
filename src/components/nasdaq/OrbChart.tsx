@@ -154,7 +154,7 @@ export default function OrbChart({
               · {trend.as_of}
             </span>
           ) : null}
-        </h3>
+        </div>
         <div className="flex gap-1">
           {TFS.map((t) => (
             <button
