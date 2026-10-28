@@ -70,9 +70,9 @@ export default function SessionBar({
     const next = nextBoundary(halfDay).find((b) => b.min * 60 > cur);
     if (!next) return null;
     const rest = next.min * 60 - cur;
-    const hh = Math.floor(rest / 3600);
-    const mm = Math.floor((rest % 3600) / 60);
-    return `${next.label} dans ${hh > 0 ? `${hh} h ` : ''}${String(mm).padStart(2, '0')} min`;
+    const hRest = Math.floor(rest / 3600);
+    const mRest = Math.floor((rest % 3600) / 60);
+    return `${next.label} dans ${hRest > 0 ? `${hRest} h ` : ''}${String(mRest).padStart(2, '0')} min`;
   })();
 
   const badgeCls = (tone: 'ok' | 'warn' | 'alert') =>
