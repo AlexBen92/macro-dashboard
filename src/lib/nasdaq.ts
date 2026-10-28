@@ -6,7 +6,7 @@
  */
 
 export const BADGE_UNVALIDATED =
-  'Outil de lecture — edge non validé (backtest BLOCKED_DATA)';
+  'Outil de lecture — hypothèse ORB §2 rejetée en dev+WF (2026-10-28, NO-GO)';
 
 export interface NasdaqRange {
   hi: number;

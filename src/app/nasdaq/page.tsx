@@ -83,8 +83,9 @@ export default function NasdaqPage() {
     <main className="mx-auto max-w-6xl space-y-4 p-4">
       {/* §6.3 badge honnêteté permanent */}
       <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
-        ⚠️ {BADGE_UNVALIDATED} · Backtest NQ 2010+ en attente de données (Databento /
-        FirstRate). Descriptif = {ag?.n_days ?? 0} jours Yahoo (rétention ~28 j).
+        ⚠️ {BADGE_UNVALIDATED} · Backtest NQ 2010+ Databento : NO-GO (t=−4.3 dev,
+        WF bruit, OOS non ouvert). Descriptif = {ag?.n_days ?? 0} jours
+        (Databento M1 2010-06→2026-10).
       </div>
       {err ? (
         <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">

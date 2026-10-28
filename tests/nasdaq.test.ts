@@ -40,8 +40,9 @@ describe('nasdaq labels + badges honnêteté', () => {
     );
   });
 
-  it('badge permanent = edge non validé', () => {
-    expect(BADGE_UNVALIDATED).toContain('edge non validé');
+  it('badge permanent = hypothèse ORB rejetée (NO-GO)', () => {
+    expect(BADGE_UNVALIDATED).toContain('rejetée');
+    expect(BADGE_UNVALIDATED).toContain('NO-GO');
   });
 
   it('badge échantillon faible < 30 j', () => {
