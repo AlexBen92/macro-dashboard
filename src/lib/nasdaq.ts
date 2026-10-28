@@ -427,6 +427,121 @@ export const INSTRUMENTS: InstrumentPreset[] = [
   { id: 'mnq', label: 'MNQ (2 $/pt)', usdPerPoint: 2 },
 ];
 
+// --- Journal de trades (spec V3 §10) ------------------------------------------
+
+export interface JournalTrade {
+  id: string;
+  date: string;
+  sens: 'long' | 'short';
+  entree: number;
+  stop: number;
+  sortie: number;
+  taille: number;
+  usd_per_point: number;
+  frais_usd: number;
+  slippage_entree_pts?: number;
+  conforme: boolean;
+  note?: string;
+  created_at?: string;
+}
+
+/** Référence hasard — results/dev_2010_2019.json (1000 tirages, mêmes règles). */
+export const RANDOM_REF = {
+  nDraws: 1000,
+  meanR: -0.150425,
+  devR: -0.158216,
+  p95TotalR: -244.578,
+  maxTotalR: -201.102,
+  nDevTrades: 1544,
+} as const;
+
+export interface TradeR {
+  distPts: number;
+  pnlPts: number;
+  rBrut: number;
+  rNet: number;
+  pnlUsd: number;
+}
+
+/**
+ * R d'un trade réel. rNet déduit les frais réels (converts en pts) et le
+ * slippage d'entrée saisi (pts, positif = défavorable) — spec §10.2.
+ */
+export function calcTradeR(t: JournalTrade): TradeR | null {
+  const dist = Math.abs(t.entree - t.stop);
+  if (!(dist > 0)) return null;
+  const dir = t.sens === 'long' ? 1 : -1;
+  const pnlPts = (t.sortie - t.entree) * dir;
+  const mult = t.usd_per_point * t.taille;
+  const costPts = mult > 0 ? t.frais_usd / mult : 0;
+  const slip = Math.abs(t.slippage_entree_pts ?? 0);
+  return {
+    distPts: dist,
+    pnlPts,
+    rBrut: pnlPts / dist,
+    rNet: (pnlPts - costPts - slip) / dist,
+    pnlUsd: pnlPts * mult - t.frais_usd,
+  };
+}
+
+export interface JournalStats {
+  n: number;
+  nConforme: number;
+  rNetTotal: number;
+  rNetMoyen: number;
+  rBrutMoyen: number;
+  curve: number[]; // R nets cumulés, ordre chronologique
+  maxDD_R: number;
+  lossStreak: number; // série de pertes courante (fin de série)
+  offSharePct: number;
+  offRMean: number | null;
+  slipMeanPts: number | null;
+  todayPnlUsd: number;
+}
+
+export function journalStats(
+  trades: JournalTrade[],
+  todayIso: string
+): JournalStats {
+  const rows = trades
+    .map((t) => ({ t, r: calcTradeR(t) }))
+    .filter((x): x is { t: JournalTrade; r: TradeR } => x.r !== null)
+    .sort((a, b) =>
+      (a.t.date + (a.t.created_at ?? '')).localeCompare(b.t.date + (b.t.created_at ?? ''))
+    );
+  const n = rows.length;
+  let cum = 0;
+  let peak = 0;
+  let maxDD = 0;
+  let streak = 0;
+  const curve: number[] = [];
+  for (const { r } of rows) {
+    cum += r.rNet;
+    curve.push(cum);
+    peak = Math.max(peak, cum);
+    maxDD = Math.max(maxDD, peak - cum);
+    streak = r.rNet < 0 ? streak + 1 : 0;
+  }
+  const off = rows.filter((x) => !x.t.conforme);
+  const slips = rows.map((x) => Math.abs(x.t.slippage_entree_pts ?? 0)).filter((s) => s > 0);
+  return {
+    n,
+    nConforme: n - off.length,
+    rNetTotal: cum,
+    rNetMoyen: n ? cum / n : 0,
+    rBrutMoyen: n ? rows.reduce((s, x) => s + x.r.rBrut, 0) / n : 0,
+    curve,
+    maxDD_R: maxDD,
+    lossStreak: streak,
+    offSharePct: n ? (100 * off.length) / n : 0,
+    offRMean: off.length ? off.reduce((s, x) => s + x.r.rNet, 0) / off.length : null,
+    slipMeanPts: slips.length ? slips.reduce((s, v) => s + v, 0) / slips.length : null,
+    todayPnlUsd: rows
+      .filter((x) => x.t.date === todayIso)
+      .reduce((s, x) => s + x.r.pnlUsd, 0),
+  };
+}
+
 export interface PositionCalc {
   distPts: number;
   size: number; // contrats, arrondi vers le bas (protocole)

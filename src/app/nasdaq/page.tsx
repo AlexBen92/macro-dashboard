@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import OrbChart from '@/components/nasdaq/OrbChart';
 import SessionBar from '@/components/nasdaq/SessionBar';
+import TradeJournal from '@/components/nasdaq/TradeJournal';
 import TradePlan from '@/components/nasdaq/TradePlan';
 import { WarnIcon } from '@/components/nasdaq/icons';
 import {
@@ -206,6 +207,14 @@ export default function NasdaqPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card title="Plan de trade ORB 15 min (protocole pré-enregistré)" badge="edge non validé">
           <TradePlan status={status} events={events?.events} />
+        </Card>
+
+        <Card title="Journal de trades + comparateur hasard" badge="privé (token)">
+          <TradeJournal
+            theoEntry={status?.theo?.entry}
+            theoStop={status?.theo?.stop}
+            theoDir={status?.theo?.dir}
+          />
         </Card>
 
         <Card title="Range du jour (09:30-09:45 ET)" badge={sampleBadge(ag?.n_days)}>

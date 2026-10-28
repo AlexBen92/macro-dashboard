@@ -5,11 +5,13 @@ import {
   aggBars,
   breakLabel,
   breakMarker,
+  calcTradeR,
   chartLevels,
   checklist,
   feedSlow,
   horloges,
   isStale,
+  journalStats,
   lookupBucket,
   macroInWindow,
   newsGuard,
@@ -24,6 +26,7 @@ import {
   vwapSeries,
   etShiftSec,
   weekdayLabel,
+  type JournalTrade,
   type NasdaqBars,
   type NasdaqEvent,
   type NasdaqSessionCal,
@@ -361,5 +364,51 @@ describe('plan de trade V3 (§6)', () => {
     expect(newsGuard(ev2, nowNoon)).toMatchObject({ locked: true });
     expect(newsGuard([ev('2026-07-15', '11:57')], nowNoon)).toBeNull(); // passée (+2 min)
     expect(newsGuard(undefined, nowNoon)).toBeNull();
+  });
+});
+
+describe('journal V3 (§10)', () => {
+  const t = (o: Partial<JournalTrade>): JournalTrade => ({
+    id: 'x', date: '2026-07-15', sens: 'long', entree: 100, stop: 96,
+    sortie: 104, taille: 1, usd_per_point: 20, frais_usd: 4, conforme: true, ...o,
+  });
+
+  it('calcTradeR : long gagnant, frais convertis en pts', () => {
+    const r = calcTradeR(t({}))!;
+    expect(r.distPts).toBe(4);
+    expect(r.pnlPts).toBe(4);
+    expect(r.rBrut).toBeCloseTo(1.0);
+    expect(r.rNet).toBeCloseTo(0.95); // 4 - 4/(20*1) = 3.8 / 4
+    expect(r.pnlUsd).toBe(76);
+  });
+
+  it('calcTradeR : short + slippage défavorable + stop=entrée -> null', () => {
+    const r = calcTradeR(t({ sens: 'short', entree: 100, sortie: 94, slippage_entree_pts: 0.5 }))!;
+    expect(r.rNet).toBeCloseTo((6 - 0.2 - 0.5) / 4);
+    expect(calcTradeR(t({ stop: 100 }))).toBeNull();
+  });
+
+  it('journalStats : cumul, DD, série de pertes, hors protocole', () => {
+    const trades = [
+      t({ id: '1', date: '2026-07-14' }),                                   // +0.95R
+      t({ id: '2', date: '2026-07-14', sortie: 97, conforme: false }),      // +0.45R... attends: (97-100)... long: (97-100)= -3+? non: entree100 sortie97 = -3 pts -> rNet (-3-0.2)/4 = -0.8
+      t({ id: '3', date: '2026-07-15', sortie: 98, slippage_entree_pts: 1 }), // (-2-0.2-1)/4 = -0.8
+    ];
+    const s = journalStats(trades, '2026-07-15');
+    expect(s.n).toBe(3);
+    expect(s.rNetTotal).toBeCloseTo(0.95 - 0.8 - 0.8);
+    expect(s.maxDD_R).toBeCloseTo(1.6);
+    expect(s.lossStreak).toBe(2);
+    expect(s.offSharePct).toBeCloseTo(100 / 3);
+    expect(s.offRMean).toBeCloseTo(-0.8);
+    expect(s.todayPnlUsd).toBeCloseTo(-2 * 20 - 4);
+  });
+
+  it('journalStats : vide -> zéros, pas de NaN', () => {
+    const s = journalStats([], '2026-07-15');
+    expect(s.n).toBe(0);
+    expect(s.rNetMoyen).toBe(0);
+    expect(s.curve).toEqual([]);
+    expect(s.offRMean).toBeNull();
   });
 });
