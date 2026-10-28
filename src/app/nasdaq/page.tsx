@@ -2,17 +2,23 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import SessionBar from '@/components/nasdaq/SessionBar';
+import { WarnIcon } from '@/components/nasdaq/icons';
 import {
   BADGE_UNVALIDATED,
   breakLabel,
   isStale,
+  lookupBucket,
   sampleBadge,
+  similarKeys,
+  staleSinceMin,
   strategyTone,
   upcomingEvents,
   type NasdaqEvents,
   type NasdaqEvent,
   type NasdaqContext,
   type NasdaqNightDay,
+  type NasdaqSessionCal,
   type NasdaqStats,
   type NasdaqStatus,
   type NasdaqStrategies,
@@ -25,6 +31,7 @@ interface Payload {
   night_day?: NasdaqNightDay;
   events?: NasdaqEvents;
   strategies?: NasdaqStrategies;
+  session?: NasdaqSessionCal;
   stale?: Record<string, boolean>;
 }
 
@@ -59,6 +66,16 @@ function Card({
       </div>
       {children}
     </div>
+  );
+}
+
+function StaleNote({ label, asOf }: { label: string; asOf?: string }) {
+  const m = staleSinceMin(asOf);
+  return (
+    <p className="mt-2 flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
+      <WarnIcon className="h-3 w-3" />
+      {label} périmé{m !== null ? ` depuis ${m} min` : ''}
+    </p>
   );
 }
 
@@ -128,19 +145,41 @@ export default function NasdaqPage() {
     return () => clearInterval(t);
   }, [load]);
 
-  const { status, context, stats, night_day, events, strategies, stale } = data ?? {};
+  const { status, context, stats, night_day, events, strategies, session: sessionCal, stale } = data ?? {};
   const score = context?.score;
   const classe = status?.range?.classe;
   const ag = stats?.aggregats;
   const nextEv = upcomingEvents(events?.events, 8);
+  const sim = lookupBucket(
+    ag,
+    similarKeys({
+      vxnLevel: context?.vxn?.level,
+      cuts: ag?.vxn_tercile_cuts,
+      classe,
+      trend: status?.trend_h1?.v,
+      now: new Date(),
+    })
+  );
 
   return (
     <main className="mx-auto max-w-6xl space-y-4 p-4">
+      <SessionBar
+        status={status}
+        sessionCal={sessionCal}
+        events={events?.events}
+        goBadge="Edge ORB non validé — NO-GO 2026-10-28"
+      />
       {/* §6.3 badge honnêteté permanent */}
       <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
-        ⚠️ {BADGE_UNVALIDATED} · Backtest NQ 2010+ Databento : NO-GO (t=−4.3 dev,
-        WF bruit, OOS non ouvert). Descriptif = {ag?.n_days ?? 0} jours
-        (Databento M1 2010-06→2026-10).
+        <span className="flex items-start gap-1">
+          <WarnIcon className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            {BADGE_UNVALIDATED} · Backtest NQ 2010+ Databento : espérance dev
+            2010-2019 <b>−0,158 R/trade</b> (t=−4,3) vs hasard <b>−0,150 R</b> ;
+            walk-forward 2020-2023 = bruit ; OOS jamais ouvert. Descriptif ={' '}
+            {ag?.n_days ?? 0} jours (Databento M1 2010-06→2026-10).
+          </span>
+        </span>
       </div>
       {err ? (
         <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
@@ -167,7 +206,7 @@ export default function NasdaqPage() {
             <p className="text-sm text-neutral-500">Données indisponibles</p>
           )}
           {stale?.status ? (
-            <p className="mt-2 text-xs text-red-600">⚠️ status périmé</p>
+            <StaleNote label="status" asOf={status?.as_of} />
           ) : null}
         </Card>
 
@@ -251,7 +290,7 @@ export default function NasdaqPage() {
                   <span>{k}</span>
                   <span>
                     {v.c20} / {v.c60}
-                    {v.c20 * v.c60 < 0 ? ' ⚠️ signe' : ''}
+                    {v.c20 * v.c60 < 0 ? ' · signe inversé' : ''}
                   </span>
                 </li>
               ))}
@@ -266,12 +305,13 @@ export default function NasdaqPage() {
           )}
         </Card>
 
-        <Card title="Jours semblables (descriptif 28 j)" badge={sampleBadge(ag?.n_days)}>
+        <Card title="Jours semblables (Databento 2010-2026)" badge={sampleBadge(ag?.n_days)}>
           {ag ? (
             <ul className="space-y-1 text-sm">
               <li>
                 Break : <Num v={ag.break_pct} unit=" %" /> · doubles :{' '}
-                <Num v={ag.double_break_pct} unit=" %" /> ({ag.n_days} j)
+                <Num v={ag.double_break_pct} unit=" %" /> ({ag.n_days} j
+                {ag.periode ? `, ${ag.periode[0]}→${ag.periode[1]}` : ''})
               </li>
               {Object.entries(ag.par_classe).map(([k, v]) => {
                 const c = v as Record<string, number | null>;
@@ -282,13 +322,50 @@ export default function NasdaqPage() {
                   </li>
                 );
               })}
+              {sim ? (
+                <li className="mt-2 border-t border-neutral-200 pt-2 dark:border-neutral-800">
+                  <b>
+                    Aujourd&apos;hui ({sim.granularite === 'complete' ? 'classe incluse' : 'classe absente — range non figé'})
+                  </b>
+                  <ul className="mt-1 space-y-0.5 text-xs text-neutral-600 dark:text-neutral-400">
+                    <li className="font-mono text-[10px]">{sim.key}</li>
+                    <li>
+                      n={sim.bucket.n} · trades={sim.bucket.n_trades} · continuation{' '}
+                      <Num v={sim.bucket.continuation_pct} unit=" %" />
+                    </li>
+                    <li>
+                      MFE <Num v={sim.bucket.mfe_median_pts} /> / MAE{' '}
+                      <Num v={sim.bucket.mae_median_pts} /> pts
+                    </li>
+                    <li>
+                      Espérance nette:{' '}
+                      <b
+                        className={
+                          (sim.bucket.exp_net_R ?? 0) > 0
+                            ? 'text-green-600'
+                            : 'text-red-600'
+                        }
+                      >
+                        <Num v={sim.bucket.exp_net_R} unit=" R" />
+                      </b>{' '}
+                      · hasard global (dev 2010-2019) :{' '}
+                      <Num v={ag.random_ref_R} unit=" R" />
+                    </li>
+                  </ul>
+                </li>
+              ) : null}
             </ul>
           ) : (
-            <p className="text-sm text-neutral-500">—</p>
+            <p className="text-sm text-neutral-500">
+              Données indisponibles — généré par orb-close 16:15 ET (range_stats 2010-2026)
+            </p>
           )}
           <p className="mt-2 text-xs text-neutral-500">
-            Source : Yahoo NQ=F M1 (rétention ~28 j) — pas d&apos;inférence avant données
-            2010+ (Databento/FirstRate).
+            Clés : tercile VXN ({ag?.vxn_tercile_cuts
+              ? `P33 ${ag.vxn_tercile_cuts.p33} / P66 ${ag.vxn_tercile_cuts.p66}`
+              : '—'}
+            ) · classe de range · tendance H1 MA20/50 · jour de semaine. Espérance = R nets
+            du moteur backtest (2 pts A/R). Descriptif, pas une promesse.
           </p>
         </Card>
 
@@ -326,7 +403,7 @@ export default function NasdaqPage() {
             <p className="text-sm text-neutral-500">Données indisponibles</p>
           )}
           {stale?.night_day ? (
-            <p className="mt-2 text-xs text-red-600">⚠️ cumuls périmés</p>
+            <StaleNote label="cumuls" asOf={night_day?.as_of} />
           ) : null}
         </Card>
 
@@ -344,7 +421,7 @@ export default function NasdaqPage() {
             <p className="text-sm text-neutral-500">Aucun événement à venir listé</p>
           )}
           {stale?.events ? (
-            <p className="mt-2 text-xs text-red-600">⚠️ calendrier périmé</p>
+            <StaleNote label="calendrier" asOf={events?.as_of} />
           ) : null}
         </Card>
 
@@ -362,14 +439,15 @@ export default function NasdaqPage() {
             <p className="text-sm text-neutral-500">Données indisponibles</p>
           )}
           {stale?.strategies ? (
-            <p className="mt-2 text-xs text-red-600">⚠️ registre périmé</p>
+            <StaleNote label="registre" asOf={strategies?.as_of} />
           ) : null}
         </Card>
       </div>
 
       <p className="text-xs text-neutral-500">
         as_of : {status?.as_of_et ?? '—'} · phases collecteurs : premarket 09:25 / range 09:45 /
-        tick 2 min / close 16:15 ET (timers systemd, fériés US exclus) · horloge source UTC.
+        décision 15 s (09:25-10:30 ET) / tick 60 s ensuite / close 16:15 ET / VXN FRED 19:15 ET
+        (timers systemd, fériés US exclus) · horloge source UTC.
       </p>
     </main>
   );

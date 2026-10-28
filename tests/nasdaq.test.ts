@@ -3,11 +3,21 @@ import { describe, expect, it } from 'vitest';
 import {
   BADGE_UNVALIDATED,
   breakLabel,
+  feedSlow,
+  horloges,
   isStale,
+  lookupBucket,
   sampleBadge,
+  sessionPhaseLocal,
+  similarKeys,
+  staleSinceMin,
   strategyTone,
   upcomingEvents,
+  vxnTercile,
+  weekdayLabel,
   type NasdaqEvent,
+  type NasdaqSessionCal,
+  type NasdaqStats,
 } from '@/lib/nasdaq';
 
 describe('nasdaq staleness (loi L10)', () => {
@@ -76,5 +86,126 @@ describe('nasdaq labels + badges honnêteté', () => {
     expect(strategyTone('NO-GO')).toBe('no-go');
     expect(strategyTone('non testée')).toBe('untested');
     expect(strategyTone('en validation')).toBe('other');
+  });
+});
+
+describe('session bar V3 (§4)', () => {
+  const cal: NasdaqSessionCal = {
+    as_of: '2026-10-28T20:30:00',
+    note: 'test',
+    next_sessions: [
+      {
+        date: '2026-10-29',
+        open_utc: '2026-10-29T13:30:00Z',
+        close_utc: '2026-10-29T20:00:00Z',
+        half_day: false,
+      },
+      {
+        date: '2026-10-30',
+        open_utc: '2026-10-30T13:30:00Z',
+        close_utc: '2026-10-30T20:00:00Z',
+        half_day: false,
+      },
+    ],
+  };
+
+  it('fermé la nuit → prochaine ouverture', () => {
+    const r = sessionPhaseLocal(new Date('2026-10-28T22:00:00Z'), cal);
+    expect(r.phase).toBe('closed');
+    expect(r.nextOpen).toBe('2026-10-29T13:30:00Z');
+  });
+
+  it('phases intraday', () => {
+    expect(
+      sessionPhaseLocal(new Date('2026-10-29T13:20:00Z'), cal).phase
+    ).toBe('pre_open');
+    expect(
+      sessionPhaseLocal(new Date('2026-10-29T13:27:00Z'), cal).phase
+    ).toBe('premarket');
+    expect(
+      sessionPhaseLocal(new Date('2026-10-29T13:40:00Z'), cal).phase
+    ).toBe('range_forming');
+    expect(
+      sessionPhaseLocal(new Date('2026-10-29T15:00:00Z'), cal).phase
+    ).toBe('surveillance');
+    expect(
+      sessionPhaseLocal(new Date('2026-10-29T19:57:00Z'), cal).phase
+    ).toBe('session_end');
+  });
+
+  it('horloges : écart 6 h hors décalage', () => {
+    const h = horloges(new Date('2026-11-10T15:00:00Z')); // les deux en heure d'hiver
+    expect(h.ecartH).toBe(6);
+    expect(h.ny).toMatch(/^\d{2}:\d{2}$/);
+    expect(h.paris).toMatch(/^\d{2}:\d{2}$/);
+  });
+
+  it('feedSlow : >30 s seulement en fenêtre 09:30-10:30 ET', () => {
+    expect(feedSlow(60, '09:35')).toBe(true);
+    expect(feedSlow(60, '11:00')).toBe(false);
+    expect(feedSlow(10, '09:35')).toBe(false);
+    expect(feedSlow(null, '09:35')).toBe(false);
+  });
+
+  it('staleSinceMin', () => {
+    const iso = new Date(Date.now() - 5 * 60_000).toISOString();
+    expect(staleSinceMin(iso)).toBeGreaterThanOrEqual(4);
+    expect(staleSinceMin(undefined)).toBeNull();
+    expect(staleSinceMin('not-a-date')).toBeNull();
+  });
+});
+
+describe('jours semblables V3 (§9)', () => {
+  const ag: NasdaqStats['aggregats'] = {
+    n_days: 4106,
+    break_pct: 99.7,
+    double_break_pct: 40.5,
+    par_classe: {},
+    semblables: {
+      'T2|normal|haussiere|mer': {
+        n: 210, n_trades: 96, continuation_pct: 55.4,
+        mfe_median_pts: 23, mae_median_pts: 21.5, exp_net_R: -0.12,
+      },
+    },
+    semblables_st: {
+      'T2|haussiere|mer': { n: 300, n_trades: 140, continuation_pct: 54, mfe_median_pts: 24, mae_median_pts: 22 },
+    },
+    vxn_tercile_cuts: { p33: 16.5, p66: 22.1 },
+    random_ref_R: -0.150425,
+  };
+
+  const keys = similarKeys({
+    vxnLevel: 20,
+    cuts: { p33: 16.5, p66: 22.1 },
+    classe: 'normal',
+    trend: 1,
+    now: new Date('2026-10-28T14:00:00Z'), // mercredi
+  });
+
+  it('tercile + weekday', () => {
+    expect(vxnTercile(10, { p33: 16.5, p66: 22.1 })).toBe('T1');
+    expect(vxnTercile(20, { p33: 16.5, p66: 22.1 })).toBe('T2');
+    expect(vxnTercile(30, { p33: 16.5, p66: 22.1 })).toBe('T3');
+    expect(weekdayLabel(new Date('2026-10-28T14:00:00Z'))).toBe('mer');
+  });
+
+  it('classe dispo → bucket complet, espérance affichée même négative', () => {
+    const r = lookupBucket(ag, keys);
+    expect(r?.granularite).toBe('complete');
+    expect(r?.bucket.exp_net_R).toBe(-0.12);
+  });
+
+  it('bucket complet absent → repli sans classe', () => {
+    const r = lookupBucket({ ...ag, semblables: {} }, keys);
+    expect(r?.granularite).toBe('sans_classe');
+    expect(r?.bucket.n).toBe(300);
+  });
+
+  it('données manquantes → null (jamais de bucket improvisé)', () => {
+    expect(lookupBucket(undefined, keys)).toBeNull();
+    expect(lookupBucket(ag, null)).toBeNull();
+    expect(
+      similarKeys({ vxnLevel: undefined, cuts: undefined, classe: undefined, trend: undefined, now: new Date() })
+    ).toBeNull();
   });
 });
