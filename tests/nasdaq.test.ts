@@ -8,6 +8,7 @@ import {
   calcTradeR,
   chartLevels,
   checklist,
+  eventsTodayLabels,
   feedSlow,
   horloges,
   isStale,
@@ -16,6 +17,7 @@ import {
   macroInWindow,
   newsGuard,
   positionSize,
+  rangePctileLabel,
   sampleBadge,
   sessionPhaseLocal,
   similarKeys,
@@ -410,5 +412,28 @@ describe('journal V3 (§10)', () => {
     expect(s.rNetMoyen).toBe(0);
     expect(s.curve).toEqual([]);
     expect(s.offRMean).toBeNull();
+  });
+});
+
+describe('volatilité implicite V3 (§7)', () => {
+  const pcts = { p25: 0.22, p50: 0.31, p75: 0.45, p95: 0.72 };
+
+  it('rangePctileLabel : buckets P25/P75/P95 du spec', () => {
+    expect(rangePctileLabel(0.15, pcts)).toBe('étroit < P25');
+    expect(rangePctileLabel(0.32, pcts)).toBe('normal P25-P75');
+    expect(rangePctileLabel(0.60, pcts)).toBe('large P75-P95');
+    expect(rangePctileLabel(0.80, pcts)).toBe('extrême > P95');
+    expect(rangePctileLabel(undefined, pcts)).toBe('—');
+    expect(rangePctileLabel(0.3, undefined)).toBe('—');
+  });
+
+  it('eventsTodayLabels : événements du jour seulement', () => {
+    const events: NasdaqEvent[] = [
+      { date: '2026-07-15', type: 'fomc', label: 'FOMC', heure_ny: '14:00', heure_paris: '20:00', source: 'annoncé' },
+      { date: '2026-07-16', type: 'opex', label: 'Opex', heure_ny: '09:30', heure_paris: '15:30', source: 'calculé' },
+    ];
+    expect(eventsTodayLabels(events, new Date('2026-07-15T14:00:00Z'))).toEqual(['FOMC']);
+    expect(eventsTodayLabels(events, new Date('2026-07-16T14:00:00Z'))).toEqual(['Opex']);
+    expect(eventsTodayLabels(undefined, new Date())).toEqual([]);
   });
 });

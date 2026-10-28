@@ -50,6 +50,17 @@ export interface NasdaqTrendH1 {
   dist_pct?: number;
 }
 
+export interface NasdaqIvLive {
+  open: number;
+  last: number;
+  hi: number;
+  lo: number;
+  budget_range_pct: number;
+  budget_move_pct: number;
+  realized_vol_ann_pct?: number;
+  realized_vs_vxn?: number;
+}
+
 export interface NasdaqStatus {
   as_of: string;
   as_of_et: string;
@@ -64,6 +75,7 @@ export interface NasdaqStatus {
   feed?: NasdaqFeed;
   session?: NasdaqSessionNow;
   trend_h1?: NasdaqTrendH1;
+  iv_live?: NasdaqIvLive;
 }
 
 export interface NasdaqContext {
@@ -74,7 +86,18 @@ export interface NasdaqContext {
     correlations: Record<string, { c20: number; c60: number }>;
     changement_signe: string[];
   };
-  vxn: { level: number; date: string; pct_1y: number };
+  vxn: {
+    level: number;
+    date: string;
+    pct_1y: number;
+    chg_1d?: number | null;
+    chg_5d?: number | null;
+    min_52w?: number | null;
+    max_52w?: number | null;
+    vix?: number | null;
+    ratio_vxn_vix?: number | null;
+    ratio_mean_1y?: number | null;
+  };
   em_pts: number | null;
   as_of: string;
   badge: string;
@@ -103,6 +126,7 @@ export interface NasdaqStats {
     semblables_st?: Record<string, NasdaqBucket>;
     vxn_tercile_cuts?: { p33: number; p66: number };
     random_ref_R?: number;
+    range_over_em_pcts?: { p25: number; p50: number; p75: number; p95: number };
   };
   badge?: string;
   genere?: string;
@@ -827,4 +851,24 @@ export function lookupBucket(
   if (ag.semblables_st?.[kp])
     return { bucket: ag.semblables_st[kp], key: kp, granularite: 'sans_classe' };
   return null;
+}
+
+// --- Volatilité implicite (spec V3 §7) ----------------------------------------
+
+/** Classe du range 15 min vs distribution Databento (P25/P50/P75/P95). */
+export function rangePctileLabel(
+  v: number | null | undefined,
+  p: { p25: number; p50: number; p75: number; p95: number } | undefined
+): string {
+  if (v === null || v === undefined || !p) return '—';
+  if (v < p.p25) return 'étroit < P25';
+  if (v <= p.p75) return 'normal P25-P75';
+  if (v <= p.p95) return 'large P75-P95';
+  return 'extrême > P95';
+}
+
+/** Labels des événements du jour (flag « EM incomplet » §7.1). */
+export function eventsTodayLabels(events: NasdaqEvent[] | undefined, now: Date): string[] {
+  const iso = now.toISOString().slice(0, 10);
+  return (events ?? []).filter((e) => e.date === iso).map((e) => e.label);
 }

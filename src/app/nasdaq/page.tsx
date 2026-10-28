@@ -10,8 +10,10 @@ import { ChevronIcon, WarnIcon } from '@/components/nasdaq/icons';
 import {
   BADGE_UNVALIDATED,
   breakLabel,
+  eventsTodayLabels,
   isStale,
   lookupBucket,
+  rangePctileLabel,
   sampleBadge,
   similarKeys,
   staleSinceMin,
@@ -47,6 +49,27 @@ function Num({ v, unit = '' }: { v: number | null | undefined; unit?: string }) 
       {v.toLocaleString('fr-FR')}
       {unit}
     </span>
+  );
+}
+
+/** Jauge budget de vol (§7.1) — repères 50 % et 100 %, ambre ≥ 50, rouge ≥ 100. */
+function Gauge({ label, pct }: { label: string; pct: number }) {
+  const tone = pct >= 100 ? 'bg-red-500' : pct >= 50 ? 'bg-amber-500' : 'bg-blue-500';
+  return (
+    <div>
+      <div className="flex justify-between gap-2 text-xs">
+        <span>{label}</span>
+        <span className="font-mono tabular-nums">{pct.toFixed(0)} %</span>
+      </div>
+      <div className="relative h-2 w-full rounded bg-neutral-200 dark:bg-neutral-800">
+        <div
+          className={`h-2 rounded ${tone}`}
+          style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+        />
+        <div className="absolute left-1/2 top-0 h-2 w-px bg-neutral-500/60" />
+        <div className="absolute right-0 top-0 h-2 w-px bg-neutral-500/60" />
+      </div>
+    </div>
   );
 }
 
@@ -184,6 +207,7 @@ export default function NasdaqPage() {
   const classe = status?.range?.classe;
   const ag = stats?.aggregats;
   const nextEv = upcomingEvents(events?.events, 8);
+  const evToday = eventsTodayLabels(events?.events, new Date());
   const sim = lookupBucket(
     ag,
     similarKeys({
@@ -249,18 +273,61 @@ export default function NasdaqPage() {
           className="lg:order-3 lg:col-start-3"
         >
           {context?.vxn ? (
-            <ul className="space-y-1 text-sm">
-              <li>
-                VXN : <Num v={context.vxn.level} /> ({context.vxn.date}) · percentile 1 an :{' '}
-                <Num v={context.vxn.pct_1y} unit=" %" />
-              </li>
-              <li>
-                Expected move jour : <Num v={context.em_pts} unit=" pts" /> (open × VXN/√252)
-              </li>
-              <li>
-                Multiplicateur confiance : <Num v={context.vol_mult} />
-              </li>
-            </ul>
+            <div className="space-y-2 text-sm">
+              <ul className="space-y-1">
+                <li>
+                  VXN <b><Num v={context.vxn.level} /></b> ({context.vxn.date}) · Δ1j{' '}
+                  <Num v={context.vxn.chg_1d ?? null} /> · Δ5j <Num v={context.vxn.chg_5d ?? null} /> ·
+                  P1an <Num v={context.vxn.pct_1y} unit=" %" />
+                </li>
+                <li>
+                  52 sem : <Num v={context.vxn.min_52w ?? null} /> –{' '}
+                  <Num v={context.vxn.max_52w ?? null} /> · VXN/VIX{' '}
+                  <Num v={context.vxn.ratio_vxn_vix ?? null} /> (moy 1 an{' '}
+                  <Num v={context.vxn.ratio_mean_1y ?? null} />)
+                </li>
+                <li>
+                  EM jour : <b><Num v={context.em_pts} unit=" pts" /></b> ·{' '}
+                  <Num
+                    v={
+                      context.em_pts && status?.iv_live?.open
+                        ? (100 * context.em_pts) / status.iv_live.open
+                        : null
+                    }
+                    unit=" %"
+                  />{' '}
+                  · ≈ <Num v={context.em_pts ? context.em_pts * 20 : null} unit=" $/NQ" />
+                </li>
+                <li>
+                  Vol réalisée (M5 annualisée) : <Num v={status?.iv_live?.realized_vol_ann_pct ?? null} unit=" %" />{' '}
+                  · réalisé/VXN <Num v={status?.iv_live?.realized_vs_vxn ?? null} />
+                </li>
+                <li>
+                  Range 15/EM : <Num v={status?.range?.pct_em ?? null} /> ({classe}) —{' '}
+                  {rangePctileLabel(status?.range?.pct_em, ag?.range_over_em_pcts)}
+                </li>
+              </ul>
+              {status?.iv_live ? (
+                <div className="space-y-1.5">
+                  <Gauge label="Budget vol : (H−L)/EM" pct={status.iv_live.budget_range_pct} />
+                  <Gauge label="Budget vol : |dernier−open|/EM" pct={status.iv_live.budget_move_pct} />
+                </div>
+              ) : (
+                <p className="text-xs text-neutral-500">
+                  Budget de vol : disponible pendant la séance (collecteur decision/tick).
+                </p>
+              )}
+              {evToday.length ? (
+                <p className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+                  <WarnIcon className="mr-1 inline h-3 w-3" />
+                  EM VXN probablement sous-estimé : {evToday.join(', ')} aujourd&apos;hui.
+                </p>
+              ) : null}
+              <p className="text-xs text-neutral-500">
+                EM 0DTE/straddle, skew 25Δ, GEX : non disponible — chaîne d&apos;options et
+                donnée dealers payantes (IB/OPRA), pas de proxy improvisé.
+              </p>
+            </div>
           ) : (
             <p className="text-sm text-neutral-500">—</p>
           )}
